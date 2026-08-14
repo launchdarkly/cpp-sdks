@@ -17,6 +17,7 @@ add_executable(server-tests
         src/entity_manager.cpp
         src/client_entity.cpp
         src/contract_test_hook.cpp
+        src/contract_test_big_segment_store.cpp
         )
 
 target_link_libraries(server-tests PRIVATE

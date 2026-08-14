@@ -27,9 +27,31 @@ bool EvaluationReason::InExperiment() const {
     return in_experiment_;
 }
 
+enum EvaluationReason::BigSegmentsStatus
+EvaluationReason::BigSegmentsStatus() const {
+    return big_segments_status_;
+}
+
 std::optional<std::string> EvaluationReason::BigSegmentStatus() const {
     return big_segment_status_;
 }
+
+EvaluationReason::EvaluationReason(
+    enum Kind kind,
+    std::optional<enum ErrorKind> error_kind,
+    std::optional<std::size_t> rule_index,
+    std::optional<std::string> rule_id,
+    std::optional<std::string> prerequisite_key,
+    bool in_experiment,
+    enum BigSegmentsStatus big_segments_status)
+    : kind_(kind),
+      error_kind_(error_kind),
+      rule_index_(rule_index),
+      rule_id_(std::move(rule_id)),
+      prerequisite_key_(std::move(prerequisite_key)),
+      in_experiment_(in_experiment),
+      big_segments_status_(big_segments_status),
+      big_segment_status_(std::nullopt) {}
 
 EvaluationReason::EvaluationReason(
     enum Kind kind,
@@ -45,44 +67,69 @@ EvaluationReason::EvaluationReason(
       rule_id_(std::move(rule_id)),
       prerequisite_key_(std::move(prerequisite_key)),
       in_experiment_(in_experiment),
+      big_segments_status_(BigSegmentsStatus::kNone),
       big_segment_status_(std::move(big_segment_status)) {}
 
 EvaluationReason::EvaluationReason(enum ErrorKind error_kind)
     : EvaluationReason(Kind::kError,
                        error_kind,
-                       std::nullopt,
-                       std::nullopt,
-                       std::nullopt,
-                       false,
-                       std::nullopt) {}
+                       /* rule_index= */ std::nullopt,
+                       /* rule_id= */ std::nullopt,
+                       /* prerequisite_key= */ std::nullopt,
+                       /* in_experiment= */ false,
+                       BigSegmentsStatus::kNone) {}
 
 EvaluationReason EvaluationReason::Off() {
-    return {Kind::kOff,   std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt, false,        std::nullopt};
+    return {Kind::kOff,
+            /* error_kind= */ std::nullopt,
+            /* rule_index= */ std::nullopt,
+            /* rule_id= */ std::nullopt,
+            /* prerequisite_key= */ std::nullopt,
+            /* in_experiment= */ false,
+            BigSegmentsStatus::kNone};
 }
 
 EvaluationReason EvaluationReason::PrerequisiteFailed(
     std::string prerequisite_key) {
-    return {
-        Kind::kPrerequisiteFailed,   std::nullopt, std::nullopt, std::nullopt,
-        std::move(prerequisite_key), false,        std::nullopt};
+    return {Kind::kPrerequisiteFailed,
+            /* error_kind= */ std::nullopt,
+            /* rule_index= */ std::nullopt,
+            /* rule_id= */ std::nullopt,
+            std::move(prerequisite_key),
+            /* in_experiment= */ false,
+            BigSegmentsStatus::kNone};
 }
 
 EvaluationReason EvaluationReason::TargetMatch() {
-    return {Kind::kTargetMatch, std::nullopt, std::nullopt, std::nullopt,
-            std::nullopt,       false,        std::nullopt};
+    return {Kind::kTargetMatch,
+            /* error_kind= */ std::nullopt,
+            /* rule_index= */ std::nullopt,
+            /* rule_id= */ std::nullopt,
+            /* prerequisite_key= */ std::nullopt,
+            /* in_experiment= */ false,
+            BigSegmentsStatus::kNone};
 }
 
 EvaluationReason EvaluationReason::Fallthrough(bool in_experiment) {
-    return {Kind::kFallthrough, std::nullopt,  std::nullopt, std::nullopt,
-            std::nullopt,       in_experiment, std::nullopt};
+    return {Kind::kFallthrough,
+            /* error_kind= */ std::nullopt,
+            /* rule_index= */ std::nullopt,
+            /* rule_id= */ std::nullopt,
+            /* prerequisite_key= */ std::nullopt,
+            in_experiment,
+            BigSegmentsStatus::kNone};
 }
 
 EvaluationReason EvaluationReason::RuleMatch(std::size_t rule_index,
                                              std::optional<std::string> rule_id,
                                              bool in_experiment) {
-    return {Kind::kRuleMatch, std::nullopt,  rule_index,  std::move(rule_id),
-            std::nullopt,     in_experiment, std::nullopt};
+    return {Kind::kRuleMatch,
+            /* error_kind= */ std::nullopt,
+            rule_index,
+            std::move(rule_id),
+            /* prerequisite_key= */ std::nullopt,
+            in_experiment,
+            BigSegmentsStatus::kNone};
 }
 
 EvaluationReason EvaluationReason::MalformedFlag() {
@@ -105,8 +152,9 @@ std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
         out << " prerequisiteKey: " << reason.prerequisite_key_.value();
     }
     out << " inExperiment: " << reason.in_experiment_;
-    if (reason.big_segment_status_.has_value()) {
-        out << " bigSegmentStatus: " << reason.big_segment_status_.value();
+    if (reason.big_segments_status_ !=
+        EvaluationReason::BigSegmentsStatus::kNone) {
+        out << " bigSegmentsStatus: " << reason.big_segments_status_;
     }
     out << "}";
     return out;
@@ -115,7 +163,8 @@ std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
 bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs) {
     return lhs.Kind() == rhs.Kind() && lhs.ErrorKind() == rhs.ErrorKind() &&
            lhs.InExperiment() == rhs.InExperiment() &&
-           lhs.BigSegmentStatus() == rhs.BigSegmentStatus() &&
+           lhs.BigSegmentsStatus() == rhs.BigSegmentsStatus() &&
+           lhs.big_segment_status_ == rhs.big_segment_status_ &&
            lhs.PrerequisiteKey() == rhs.PrerequisiteKey() &&
            lhs.RuleId() == rhs.RuleId() && lhs.RuleIndex() == rhs.RuleIndex();
 }
@@ -144,6 +193,29 @@ std::ostream& operator<<(std::ostream& out,
             break;
         case EvaluationReason::Kind::kError:
             out << "ERROR";
+            break;
+    }
+    return out;
+}
+
+std::ostream& operator<<(
+    std::ostream& out,
+    enum EvaluationReason::BigSegmentsStatus const& status) {
+    switch (status) {
+        case EvaluationReason::BigSegmentsStatus::kNone:
+            out << "NONE";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kHealthy:
+            out << "HEALTHY";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kStale:
+            out << "STALE";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kNotConfigured:
+            out << "NOT_CONFIGURED";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kStoreError:
+            out << "STORE_ERROR";
             break;
     }
     return out;

@@ -226,6 +226,28 @@ LDServerConfigBuilder_DataSystem_LazyLoad(
 }
 
 LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_FDv2(LDServerConfigBuilder b,
+                                      LDServerFDv2Builder fdv2_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(fdv2_builder);
+
+    auto* fb = reinterpret_cast<DataSystemBuilder::FDv2*>(fdv2_builder);
+    TO_BUILDER(b)->DataSystem().Method(*fb);
+    LDServerFDv2Builder_Free(fdv2_builder);
+}
+
+LD_EXPORT(void)
+LDServerConfigBuilder_BigSegments(LDServerConfigBuilder b,
+                                  LDServerBigSegmentsBuilder big_segments) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(big_segments);
+
+    auto* bsb = reinterpret_cast<BigSegmentsBuilder*>(big_segments);
+    TO_BUILDER(b)->BigSegments(std::move(*bsb));
+    LDServerBigSegmentsBuilder_Free(big_segments);
+}
+
+LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b,
                                          bool const enabled) {
     LD_ASSERT_NOT_NULL(b);

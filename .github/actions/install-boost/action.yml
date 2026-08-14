@@ -22,7 +22,7 @@ runs:
   steps:
     - name: Install boost using action
       if: runner.os == 'Linux'
-      uses: MarkusJx/install-boost@v2.4.4
+      uses: MarkusJx/install-boost@3039450bb3dd2e8630d1cf10ec39cb1da3054bbd # v2.4.4
       id: boost-action
       with:
         boost_version: 1.81.0

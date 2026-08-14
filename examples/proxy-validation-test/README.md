@@ -40,8 +40,6 @@ export LD_MOBILE_KEY="your-mobile-key-here"
 docker compose up --build
 ```
 
-**Note:** The Dockerfile uses Ubuntu 24.04 to ensure Boost 1.81+ is available.
-
 ## Supported Proxy Types
 
 The SDK (via CURL) supports:

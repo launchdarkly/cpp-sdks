@@ -12,6 +12,8 @@
 #include <launchdarkly/server_side/config/builders/data_system/data_system_builder.hpp>
 #include <launchdarkly/server_side/config/builders/data_system/lazy_load_builder.hpp>
 
+#include <launchdarkly/server_side/config/builders/big_segments_builder.hpp>
+
 namespace launchdarkly::server_side::config::builders {
 
 using SDK = launchdarkly::config::shared::ServerSDK;

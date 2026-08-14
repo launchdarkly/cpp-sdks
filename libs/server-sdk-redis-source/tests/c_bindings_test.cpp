@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/server_side/bindings/c/integrations/redis/redis_big_segment_store.h>
 #include <launchdarkly/server_side/bindings/c/integrations/redis/redis_source.h>
 
 #include <launchdarkly/bindings/c/context_builder.h>
@@ -9,6 +10,10 @@
 #include <launchdarkly/data_model/flag.hpp>
 
 #include "prefixed_redis_client.hpp"
+
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
 
 using namespace launchdarkly::data_model;
 
@@ -91,8 +96,8 @@ TEST(RedisBindings, CanUseInSDKLazyLoadDataSource) {
 
     std::unordered_map<std::string, launchdarkly::Value> values;
     LDValue_ObjectIter iter;
-    for (iter = LDValue_ObjectIter_New(all);
-         !LDValue_ObjectIter_End(iter); LDValue_ObjectIter_Next(iter)) {
+    for (iter = LDValue_ObjectIter_New(all); !LDValue_ObjectIter_End(iter);
+         LDValue_ObjectIter_Next(iter)) {
         char const* key = LDValue_ObjectIter_Key(iter);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         auto value_ref = reinterpret_cast<launchdarkly::Value const* const>(
@@ -110,5 +115,102 @@ TEST(RedisBindings, CanUseInSDKLazyLoadDataSource) {
     LDAllFlagsState_Free(state);
 
     LDContext_Free(context);
+    LDServerSDK_Free(sdk);
+}
+
+TEST(RedisBindings, BigSegmentsStorePointerIsStoredOnSuccessfulCreation) {
+    LDServerBigSegmentsRedisResult result;
+    ASSERT_TRUE(LDServerBigSegmentsRedisStore_New("tcp://localhost:1234", "foo",
+                                                  &result));
+    ASSERT_NE(result.store, nullptr);
+    LDServerBigSegmentsRedisStore_Free(result.store);
+}
+
+TEST(RedisBindings, BigSegmentsErrorMessageIsPropagatedOnFailure) {
+    LDServerBigSegmentsRedisResult result;
+    ASSERT_FALSE(
+        LDServerBigSegmentsRedisStore_New("totally not a URI", "foo", &result));
+    ASSERT_STRNE(result.error_message, "");
+}
+
+TEST(RedisBindings, BigSegmentsStorePointerIsNullptrOnFailure) {
+    LDServerBigSegmentsRedisResult result;
+    ASSERT_FALSE(
+        LDServerBigSegmentsRedisStore_New("totally not a URI", "foo", &result));
+    ASSERT_EQ(result.store, nullptr);
+}
+
+// This is an end-to-end test that uses an actual Redis instance with
+// provisioned Big Segments metadata. The store is passed into the SDK's Big
+// Segments configuration, and the SDK's Big Segment store status listener is
+// used to verify that the store is reachable and reports available.
+TEST(RedisBindings, CanUseInSDKBigSegmentsConfig) {
+    sw::redis::Redis redis("tcp://localhost:6379");
+    redis.flushdb();
+
+    // Set the store's sync timestamp so the poll reports available.
+    auto const now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
+    redis.set("testprefix:big_segments_synchronized_on",
+              std::to_string(now_ms));
+
+    LDServerBigSegmentsRedisResult result;
+    ASSERT_TRUE(LDServerBigSegmentsRedisStore_New("tcp://localhost:6379",
+                                                  "testprefix", &result));
+
+    LDServerBigSegmentsBuilder bs_builder = LDServerBigSegmentsBuilder_New(
+        reinterpret_cast<LDServerBigSegmentStorePtr>(result.store));
+    LDServerBigSegmentsBuilder_StatusPollIntervalMs(bs_builder, 50);
+
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_BigSegments(cfg_builder, bs_builder);
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    std::mutex mu;
+    std::condition_variable cv;
+    bool available = false;
+
+    struct ListenerCtx {
+        std::mutex* mu;
+        std::condition_variable* cv;
+        bool* available;
+    };
+    ListenerCtx ctx{&mu, &cv, &available};
+
+    struct LDServerBigSegmentStoreStatusListener listener{};
+    LDServerBigSegmentStoreStatusListener_Init(&listener);
+    listener.UserData = &ctx;
+    listener.StatusChanged =
+        +[](LDServerBigSegmentStoreStatus s, void* user_data) {
+            auto* c = static_cast<ListenerCtx*>(user_data);
+            {
+                std::lock_guard<std::mutex> lk(*c->mu);
+                *c->available = LDServerBigSegmentStoreStatus_Available(s);
+            }
+            c->cv->notify_all();
+        };
+
+    LDListenerConnection connection =
+        LDServerSDK_BigSegmentStoreStatus_OnStatusChange(sdk, listener);
+    ASSERT_NE(connection, nullptr);
+
+    LDServerSDK_Start(sdk, LD_NONBLOCKING, nullptr);
+
+    {
+        std::unique_lock<std::mutex> lk(mu);
+        cv.wait_for(lk, std::chrono::seconds(3), [&] { return available; });
+    }
+
+    EXPECT_TRUE(available);
+
+    LDListenerConnection_Disconnect(connection);
+    LDListenerConnection_Free(connection);
     LDServerSDK_Free(sdk);
 }

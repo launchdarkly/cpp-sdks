@@ -1,7 +1,10 @@
 #pragma once
 
-#include "../../data_interfaces/destination/idestination.hpp"
+#include "../../data_interfaces/destination/itransactional_destination.hpp"
+#include "../../data_interfaces/item_change.hpp"
 #include "../../data_interfaces/store/istore.hpp"
+
+#include <launchdarkly/data_model/change_set.hpp>
 
 #include <memory>
 #include <mutex>
@@ -11,7 +14,7 @@
 namespace launchdarkly::server_side::data_components {
 
 class MemoryStore final : public data_interfaces::IStore,
-                          public data_interfaces::IDestination {
+                          public data_interfaces::ITransactionalDestination {
    public:
     [[nodiscard]] std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
@@ -43,6 +46,9 @@ class MemoryStore final : public data_interfaces::IStore,
     bool RemoveFlag(std::string const& key);
 
     bool RemoveSegment(std::string const& key);
+
+    void Apply(data_model::ChangeSet<data_interfaces::ChangeSetData> changeSet)
+        override;
 
     MemoryStore() = default;
     ~MemoryStore() override = default;

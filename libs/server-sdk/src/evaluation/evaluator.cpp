@@ -20,8 +20,26 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target);
 
-Evaluator::Evaluator(Logger& logger, data_interfaces::IStore const& source)
-    : logger_(logger), source_(source) {}
+namespace {
+EvaluationDetail<Value> WithBigSegmentsStatus(EvaluationDetail<Value> detail,
+                                              enum EvaluationReason::BigSegmentsStatus status) {
+    auto const& maybe_reason = detail.Reason();
+    if (!maybe_reason) {
+        return detail;
+    }
+    EvaluationReason const& reason = *maybe_reason;
+    EvaluationReason updated(
+        reason.Kind(), reason.ErrorKind(), reason.RuleIndex(), reason.RuleId(),
+        reason.PrerequisiteKey(), reason.InExperiment(), status);
+    return EvaluationDetail<Value>(detail.Value(), detail.VariationIndex(),
+                                   std::move(updated));
+}
+}  // namespace
+
+Evaluator::Evaluator(Logger& logger,
+                     data_interfaces::IStore const& source,
+                     data_components::BigSegmentStoreWrapper* big_segment_store)
+    : logger_(logger), source_(source), big_segment_store_(big_segment_store) {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     data_model::Flag const& flag,
@@ -33,8 +51,13 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
     launchdarkly::Context const& context,
     EventScope const& event_scope) {
-    EvaluationStack stack;
-    return Evaluate(std::nullopt, flag, context, stack, event_scope);
+    EvaluationStack stack{big_segment_store_};
+    auto detail = Evaluate(std::nullopt, flag, context, stack, event_scope);
+    auto status = stack.BigSegmentsStatus();
+    if (status != EvaluationReason::BigSegmentsStatus::kNone) {
+        return WithBigSegmentsStatus(std::move(detail), status);
+    }
+    return detail;
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(

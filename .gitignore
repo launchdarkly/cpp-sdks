@@ -42,6 +42,7 @@ build-dynamic
 build-static-debug
 build-dynamic-debug
 cmake-build-*
+.cache
 
 # For Macs..
 .DS_Store

@@ -23,7 +23,9 @@
 #include <memory>
 #include <optional>
 #include <shared_mutex>
+#include <string>
 #include <thread>
+#include <unordered_set>
 
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
@@ -93,7 +95,8 @@ class ClientImpl : public IClient {
     [[nodiscard]] EvaluationDetail<T> VariationInternal(FlagKey const& key,
                                                         Value default_value,
                                                         bool check_type,
-                                                        bool detailed);
+                                                        bool detailed,
+                                                        std::unordered_set<std::string>* visited = nullptr);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);

@@ -58,10 +58,6 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     bool Initialized() const override;
 
-    [[nodiscard]] bool CanEvaluateWhenNotInitialized() const override {
-        return true;
-    }
-
     // Public for usage in tests.
     struct Kinds {
         static integrations::FlagKind const Flag;
@@ -71,7 +67,6 @@ class LazyLoad final : public data_interfaces::IDataSystem {
    private:
     void RefreshAllFlags() const;
     void RefreshAllSegments() const;
-    void RefreshInitState() const;
     void RefreshFlag(std::string const& key) const;
     void RefreshSegment(std::string const& key) const;
 
@@ -190,14 +185,12 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     mutable data_components::ExpirationTracker tracker_;
     TimeFn time_;
-    mutable std::optional<bool> initialized_;
 
     ClockType::duration fresh_duration_;
 
     struct Keys {
         static inline std::string const kAllFlags = "allFlags";
         static inline std::string const kAllSegments = "allSegments";
-        static inline std::string const kInitialized = "initialized";
     };
 };
 }  // namespace launchdarkly::server_side::data_systems

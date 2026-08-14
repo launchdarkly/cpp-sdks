@@ -2,12 +2,14 @@
 
 #include <data_components/change_notifier/change_notifier.hpp>
 #include <data_components/memory_store/memory_store.hpp>
+#include <data_interfaces/item_change.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
 
 using launchdarkly::Value;
 
 using namespace launchdarkly::data_model;
 using namespace launchdarkly::server_side::data_components;
+using namespace launchdarkly::server_side::data_interfaces;
 
 TEST(ChangeNotifierTest, DoesNotInitializeStoreUntilInit) {
     MemoryStore store;
@@ -421,4 +423,200 @@ TEST(ChangeNotifierTest, NoEventOnDiscardedUpsert) {
     updater.Upsert("flagA", FlagDescriptor(flag_a_2));
 
     EXPECT_EQ(false, got_event);
+}
+
+TEST(ChangeNotifierTest, ApplyFullReplacesStore) {
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    Flag flag_b;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
+
+    MemoryStore store;
+    ChangeNotifier updater(store, store);
+
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
+    });
+
+    // Apply a Full changeset containing only flagB.
+    updater.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kFull,
+        ChangeSetData{ItemChange{"flagB", FlagDescriptor(flag_b)}},
+        Selector{},
+    });
+
+    // flagA was wiped by the Full changeset; flagB is now present.
+    EXPECT_FALSE(store.GetFlag("flagA"));
+    auto fetched = store.GetFlag("flagB");
+    ASSERT_TRUE(fetched);
+    EXPECT_EQ(1, fetched->version);
+}
+
+TEST(ChangeNotifierTest, ApplyPartialPreservesStore) {
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    Flag flag_b;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
+
+    MemoryStore store;
+    ChangeNotifier updater(store, store);
+
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
+    });
+
+    // Apply a Partial changeset containing only flagB.
+    updater.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kPartial,
+        ChangeSetData{ItemChange{"flagB", FlagDescriptor(flag_b)}},
+        Selector{},
+    });
+
+    // Both flags are present: flagA was preserved, flagB was added.
+    EXPECT_TRUE(store.GetFlag("flagA"));
+    EXPECT_TRUE(store.GetFlag("flagB"));
+}
+
+TEST(ChangeNotifierTest, ApplyNoneIsNoOp) {
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    MemoryStore store;
+    ChangeNotifier updater(store, store);
+
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
+    });
+
+    std::atomic<bool> got_event(false);
+    updater.OnFlagChange(
+        [&got_event](std::shared_ptr<std::set<std::string>> changeset) {
+            got_event = true;
+        });
+
+    // Apply a kNone changeset.
+    updater.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kNone,
+        ChangeSetData{},
+        Selector{},
+    });
+
+    // Store is untouched and no change event was emitted.
+    EXPECT_TRUE(store.GetFlag("flagA"));
+    EXPECT_FALSE(got_event);
+}
+
+TEST(ChangeNotifierTest, ApplyFullProducesChangeEvents) {
+    Flag flag_a_v1;
+    flag_a_v1.key = "flagA";
+    flag_a_v1.version = 1;
+
+    Flag flag_b_v1;
+    flag_b_v1.key = "flagB";
+    flag_b_v1.version = 1;
+
+    MemoryStore store;
+    ChangeNotifier updater(store, store);
+
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a_v1)},
+            {"flagB", FlagDescriptor(flag_b_v1)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
+    });
+
+    Flag flag_a_v2;
+    flag_a_v2.key = "flagA";
+    flag_a_v2.version = 2;
+
+    Flag flag_c;
+    flag_c.key = "flagC";
+    flag_c.version = 1;
+
+    std::atomic<bool> got_event(false);
+    updater.OnFlagChange(
+        [&got_event](std::shared_ptr<std::set<std::string>> changeset) {
+            got_event = true;
+            auto expected = std::set<std::string>{"flagA", "flagB", "flagC"};
+            std::vector<std::string> diff;
+            std::set_difference(expected.begin(), expected.end(),
+                                changeset->begin(), changeset->end(),
+                                std::inserter(diff, diff.begin()));
+            EXPECT_EQ(0, diff.size());
+        });
+
+    // Apply a Full changeset that bumps flagA, drops flagB, and adds flagC.
+    updater.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kFull,
+        ChangeSetData{
+            ItemChange{"flagA", FlagDescriptor(flag_a_v2)},
+            ItemChange{"flagC", FlagDescriptor(flag_c)},
+        },
+        Selector{},
+    });
+
+    // A change event was emitted (with flagA, flagB, flagC per the listener).
+    EXPECT_TRUE(got_event);
+}
+
+TEST(ChangeNotifierTest, ApplyPartialSegmentChangePropagatesToDependentFlag) {
+    // flagA depends on segmentA; updating segmentA should fire a change
+    // event including flagA.
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+    Clause clause;
+    clause.op = Clause::Op::kSegmentMatch;
+    clause.values = std::vector<Value>{"segmentA"};
+    Flag::Rule rule;
+    rule.clauses.push_back(clause);
+    flag_a.rules.push_back(rule);
+
+    Segment segment_a_v1;
+    segment_a_v1.key = "segmentA";
+    segment_a_v1.version = 1;
+
+    MemoryStore store;
+    ChangeNotifier updater(store, store);
+
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>{
+            {"segmentA", SegmentDescriptor(segment_a_v1)}},
+    });
+
+    Segment segment_a_v2;
+    segment_a_v2.key = "segmentA";
+    segment_a_v2.version = 2;
+
+    std::atomic<bool> got_event(false);
+    updater.OnFlagChange(
+        [&got_event](std::shared_ptr<std::set<std::string>> changeset) {
+            got_event = true;
+            EXPECT_TRUE(changeset->count("flagA"));
+        });
+
+    // Apply a Partial changeset bumping segmentA's version.
+    updater.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kPartial,
+        ChangeSetData{ItemChange{"segmentA", SegmentDescriptor(segment_a_v2)}},
+        Selector{},
+    });
+
+    // Change event fired; flagA appears because it depends on segmentA.
+    EXPECT_TRUE(got_event);
 }

@@ -113,11 +113,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTags,
                                                 applicationId,
                                                 applicationVersion);
 
-enum class HookStage {
-    BeforeEvaluation,
-    AfterEvaluation,
-    AfterTrack
-};
+enum class HookStage { BeforeEvaluation, AfterEvaluation, AfterTrack };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(HookStage,
                              {{HookStage::BeforeEvaluation, "beforeEvaluation"},
@@ -127,7 +123,10 @@ NLOHMANN_JSON_SERIALIZE_ENUM(HookStage,
 struct ConfigHookInstance {
     std::string name;
     std::string callbackUri;
-    std::optional<std::unordered_map<std::string, std::unordered_map<std::string, nlohmann::json>>> data;
+    std::optional<
+        std::unordered_map<std::string,
+                           std::unordered_map<std::string, nlohmann::json>>>
+        data;
     std::optional<std::unordered_map<std::string, std::string>> errors;
 };
 
@@ -178,12 +177,58 @@ struct ConfigPersistentDataStore {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPersistentDataStore,
                                                 store,
                                                 cache);
+
+struct ConfigDataSynchronizerParams {
+    std::optional<ConfigStreamingParams> streaming;
+    std::optional<ConfigPollingParams> polling;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSynchronizerParams,
+                                                streaming,
+                                                polling);
+
+struct ConfigDataInitializerParams {
+    std::optional<ConfigPollingParams> polling;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataInitializerParams,
+                                                polling);
+
+struct ConfigDataSystemParams {
+    std::optional<std::vector<ConfigDataInitializerParams>> initializers;
+    std::optional<std::vector<ConfigDataSynchronizerParams>> synchronizers;
+    std::optional<ConfigPollingParams> fdv1Fallback;
+    std::optional<std::string> payloadFilter;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemParams,
+                                                initializers,
+                                                synchronizers,
+                                                fdv1Fallback,
+                                                payloadFilter);
+
+struct ConfigBigSegmentsParams {
+    std::string callbackUri;
+    std::optional<uint32_t> userCacheSize;
+    std::optional<uint64_t> userCacheTimeMs;
+    std::optional<uint64_t> statusPollIntervalMs;
+    std::optional<uint64_t> staleAfterMs;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigBigSegmentsParams,
+                                                callbackUri,
+                                                userCacheSize,
+                                                userCacheTimeMs,
+                                                statusPollIntervalMs,
+                                                staleAfterMs);
+
 struct ConfigParams {
     std::string credential;
     std::optional<uint32_t> startWaitTimeMs;
     std::optional<bool> initCanFail;
     std::optional<ConfigStreamingParams> streaming;
     std::optional<ConfigPollingParams> polling;
+    std::optional<ConfigDataSystemParams> dataSystem;
     std::optional<ConfigEventParams> events;
     std::optional<ConfigServiceEndpointsParams> serviceEndpoints;
     std::optional<ConfigClientSideParams> clientSide;
@@ -193,6 +238,7 @@ struct ConfigParams {
     std::optional<ConfigHooksParams> hooks;
     std::optional<ConfigWrapper> wrapper;
     std::optional<ConfigPersistentDataStore> persistentDataStore;
+    std::optional<ConfigBigSegmentsParams> bigSegments;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
@@ -201,6 +247,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 initCanFail,
                                                 streaming,
                                                 polling,
+                                                dataSystem,
                                                 events,
                                                 serviceEndpoints,
                                                 clientSide,
@@ -209,7 +256,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 proxy,
                                                 hooks,
                                                 wrapper,
-                                                persistentDataStore);
+                                                persistentDataStore,
+                                                bigSegments);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
@@ -358,6 +406,15 @@ struct IdentifyEventParams {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(IdentifyEventParams, context);
 
+struct BigSegmentStoreStatusResponse {
+    bool available;
+    bool stale;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BigSegmentStoreStatusResponse,
+                                                available,
+                                                stale);
+
 enum class Command {
     Unknown = -1,
     EvaluateFlag,
@@ -366,7 +423,8 @@ enum class Command {
     CustomEvent,
     FlushEvents,
     ContextBuild,
-    ContextConvert
+    ContextConvert,
+    GetBigSegmentStoreStatus
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(Command,
@@ -377,7 +435,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(Command,
                               {Command::CustomEvent, "customEvent"},
                               {Command::FlushEvents, "flushEvents"},
                               {Command::ContextBuild, "contextBuild"},
-                              {Command::ContextConvert, "contextConvert"}});
+                              {Command::ContextConvert, "contextConvert"},
+                              {Command::GetBigSegmentStoreStatus,
+                               "getBigSegmentStoreStatus"}});
 
 struct CommandParams {
     Command command;

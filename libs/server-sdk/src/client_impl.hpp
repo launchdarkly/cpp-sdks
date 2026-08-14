@@ -1,5 +1,7 @@
 #pragma once
 
+#include "data_components/big_segments/big_segment_store_status_provider.hpp"
+#include "data_components/big_segments/big_segment_store_wrapper.hpp"
 #include "data_components/status_notifications/data_source_status_manager.hpp"
 #include "data_interfaces/system/idata_system.hpp"
 #include "evaluation/evaluator.hpp"
@@ -98,10 +100,11 @@ class ClientImpl : public IClient {
                                 FlagKey const& key,
                                 std::string default_value) override;
 
-    std::string StringVariation(Context const& ctx,
-                                FlagKey const& key,
-                                std::string default_value,
-                                hooks::HookContext const& hook_context) override;
+    std::string StringVariation(
+        Context const& ctx,
+        FlagKey const& key,
+        std::string default_value,
+        hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<std::string> StringVariationDetail(
         Context const& ctx,
@@ -173,6 +176,8 @@ class ClientImpl : public IClient {
         hooks::HookContext const& hook_context) override;
 
     IDataSourceStatusProvider& DataSourceStatus() override;
+
+    IBigSegmentStoreStatusProvider& BigSegmentStoreStatus() override;
 
     ~ClientImpl();
 
@@ -253,6 +258,12 @@ class ClientImpl : public IClient {
     std::unique_ptr<data_interfaces::IDataSystem> data_system_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
+
+    // Null when Big Segments are not configured. Declared before evaluator_ so
+    // its pointer can be handed to the evaluator, and before
+    // big_segment_status_provider_ which shares ownership.
+    std::shared_ptr<data_components::BigSegmentStoreWrapper> big_segment_store_;
+    data_components::BigSegmentStoreStatusProvider big_segment_status_provider_;
 
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;

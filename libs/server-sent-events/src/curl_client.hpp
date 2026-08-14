@@ -2,8 +2,8 @@
 
 #ifdef LD_CURL_NETWORKING
 
-#include <launchdarkly/sse/client.hpp>
 #include <launchdarkly/network/curl_multi_manager.hpp>
+#include <launchdarkly/sse/client.hpp>
 #include "backoff.hpp"
 #include "parser.hpp"
 
@@ -38,43 +38,43 @@ using launchdarkly::network::CurlMultiManager;
 class CurlClient final : public Client,
                          public std::enable_shared_from_this<CurlClient> {
     /**
-    * Structure containing callbacks between the CURL interactions and the
-    * IO executor. Callbacks are set while a connection is being established,
-    * instead of at construction time, to allow the use of weak_from_self.
-    * The weak_from_self method cannot be used during the constructor.
-    */
+     * Structure containing callbacks between the CURL interactions and the
+     * IO executor. Callbacks are set while a connection is being established,
+     * instead of at construction time, to allow the use of weak_from_self.
+     * The weak_from_self method cannot be used during the constructor.
+     */
     struct Callbacks {
         std::function<void(std::string)> do_backoff;
         std::function<void(Event)> on_receive;
         std::function<void(Error)> on_error;
         std::function<void()> reset_backoff;
         std::function<void(std::string)> log_message;
+        std::function<void(http::response_header<>)> on_response;
 
-        Callbacks(
-            std::function<void(std::string)> do_backoff,
-            std::function<void(Event)> on_receive,
-            std::function<void(Error)> on_error,
-            std::function<void()> reset_backoff,
-            std::function<void(std::string)> log_message
-            ) :
-            do_backoff(std::move(do_backoff)),
-            on_receive(std::move(on_receive)),
-            on_error(std::move(on_error)),
-            reset_backoff(std::move(reset_backoff)),
-            log_message(std::move(log_message)) {
-        }
+        Callbacks(std::function<void(std::string)> do_backoff,
+                  std::function<void(Event)> on_receive,
+                  std::function<void(Error)> on_error,
+                  std::function<void()> reset_backoff,
+                  std::function<void(std::string)> log_message,
+                  std::function<void(http::response_header<>)> on_response)
+            : do_backoff(std::move(do_backoff)),
+              on_receive(std::move(on_receive)),
+              on_error(std::move(on_error)),
+              reset_backoff(std::move(reset_backoff)),
+              log_message(std::move(log_message)),
+              on_response(std::move(on_response)) {}
     };
 
     /**
-    * The request context represents the state required by the executing CURL
-    * request. Not directly including the shared data in the CurlClient allows
-    * for easy separation of its lifetime from that of the CURL client. This
-    * facilitates destruction of the CurlClient being used to stop in-progress
-    * requests.
-    *
-    * The CURL client can be destructed and pending tasks will still
-    * have a valid RequestContext and will detect the shutdown.
-    */
+     * The request context represents the state required by the executing CURL
+     * request. Not directly including the shared data in the CurlClient allows
+     * for easy separation of its lifetime from that of the CURL client. This
+     * facilitates destruction of the CurlClient being used to stop in-progress
+     * requests.
+     *
+     * The CURL client can be destructed and pending tasks will still
+     * have a valid RequestContext and will detect the shutdown.
+     */
     class RequestContext {
         // Only items used by both the curl thread and the executor/main
         // thread need to be mutex protected.
@@ -84,7 +84,7 @@ class CurlClient final : public Client,
         // End mutex protected items.
         std::optional<Callbacks> callbacks_;
 
-    public:
+       public:
         // SSE parser using common parser from parser.hpp
         using ParserBody = detail::EventBody<std::function<void(Event)>>;
         std::unique_ptr<ParserBody::value_type> parser_body;
@@ -97,16 +97,31 @@ class CurlClient final : public Client,
         std::chrono::steady_clock::time_point last_progress_time;
         curl_off_t last_download_amount;
 
-        const http::request<http::string_body> req;
-        const std::string url;
-        const std::optional<std::chrono::milliseconds> connect_timeout;
-        const std::optional<std::chrono::milliseconds> read_timeout;
-        const std::optional<std::chrono::milliseconds> write_timeout;
-        const std::optional<std::string> custom_ca_file;
-        const std::optional<std::string> proxy_url;
-        const bool skip_verify_peer;
+        // Accumulator for the current response's headers; reset on each new
+        // status line, emitted on the empty terminator line.
+        http::response_header<> current_response;
 
-        void backoff(const std::string& message) {
+        // True while accumulating headers between an `HTTP/` status line and
+        // the empty terminator. Gates `HeaderCallback` against chunked
+        // trailers (which arrive without a fresh status line) and against
+        // interior `HTTP/` lines that would otherwise wipe accumulated state.
+        bool reading_headers = false;
+
+        // Mutated on the strand in do_run() before each transfer, and read by
+        // libcurl via raw pointers (CURLOPT_URL, CURLOPT_POSTFIELDS) for the
+        // duration of the transfer. Safe because the next do_run() only fires
+        // after the previous transfer's completion callback, so reads and
+        // writes never overlap.
+        http::request<http::string_body> req;
+        std::string url;
+        std::optional<std::chrono::milliseconds> const connect_timeout;
+        std::optional<std::chrono::milliseconds> const read_timeout;
+        std::optional<std::chrono::milliseconds> const write_timeout;
+        std::optional<std::string> const custom_ca_file;
+        std::optional<std::string> const proxy_url;
+        bool const skip_verify_peer;
+
+        void backoff(std::string const& message) {
             std::lock_guard lock(mutex_);
             if (shutting_down_) {
                 return;
@@ -116,7 +131,7 @@ class CurlClient final : public Client,
             }
         }
 
-        void error(const Error& error) {
+        void error(Error const& error) {
             std::lock_guard lock(mutex_);
             if (shutting_down_) {
                 return;
@@ -126,7 +141,7 @@ class CurlClient final : public Client,
             }
         }
 
-        void receive(const Event& event) {
+        void receive(Event const& event) {
             std::lock_guard lock(mutex_);
             if (shutting_down_) {
                 return;
@@ -146,7 +161,7 @@ class CurlClient final : public Client,
             }
         }
 
-        void log_message(const std::string& message) {
+        void log_message(std::string const& message) {
             std::lock_guard lock(mutex_);
             if (shutting_down_) {
                 return;
@@ -156,14 +171,22 @@ class CurlClient final : public Client,
             }
         }
 
+        void response(http::response_header<> headers) {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            if (callbacks_) {
+                callbacks_->on_response(std::move(headers));
+            }
+        }
+
         void set_callbacks(Callbacks callbacks) {
             std::lock_guard lock(mutex_);
             callbacks_ = std::move(callbacks);
         }
 
-        bool is_shutting_down() {
-            return shutting_down_;
-        }
+        bool is_shutting_down() { return shutting_down_; }
 
         void set_curl_socket(curl_socket_t curl_socket) {
             std::lock_guard lock(mutex_);
@@ -197,7 +220,6 @@ class CurlClient final : public Client,
             }
         }
 
-
         RequestContext(std::string url,
                        http::request<http::string_body> req,
                        std::optional<std::chrono::milliseconds> connect_timeout,
@@ -205,28 +227,28 @@ class CurlClient final : public Client,
                        std::optional<std::chrono::milliseconds> write_timeout,
                        std::optional<std::string> custom_ca_file,
                        std::optional<std::string> proxy_url,
-                       bool skip_verify_peer
-            ) : shutting_down_(false),
-                curl_socket_(CURL_SOCKET_BAD),
-                last_download_amount(0),
-                req(std::move(req)),
-                url(std::move(url)),
-                connect_timeout(connect_timeout),
-                read_timeout(read_timeout),
-                write_timeout(write_timeout),
-                custom_ca_file(std::move(custom_ca_file)),
-                proxy_url(std::move(proxy_url)),
-                skip_verify_peer(skip_verify_peer) {
-        }
+                       bool skip_verify_peer)
+            : shutting_down_(false),
+              curl_socket_(CURL_SOCKET_BAD),
+              last_download_amount(0),
+              req(std::move(req)),
+              url(std::move(url)),
+              connect_timeout(connect_timeout),
+              read_timeout(read_timeout),
+              write_timeout(write_timeout),
+              custom_ca_file(std::move(custom_ca_file)),
+              proxy_url(std::move(proxy_url)),
+              skip_verify_peer(skip_verify_peer) {}
 
         void init_parser() {
             parser_body = std::make_unique<typename ParserBody::value_type>();
-            parser_reader = std::make_unique<typename ParserBody::reader>(*parser_body);
+            parser_reader =
+                std::make_unique<typename ParserBody::reader>(*parser_body);
             parser_reader->init();
         }
     };
 
-public:
+   public:
     CurlClient(boost::asio::any_io_executor executor,
                http::request<http::string_body> req,
                std::string host,
@@ -238,6 +260,8 @@ public:
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
                Builder::ErrorCallback errors,
+               Builder::ConnectionHook connection_hook,
+               Builder::ResponseHook response_hook,
                bool skip_verify_peer,
                std::optional<std::string> custom_ca_file,
                bool use_https,
@@ -249,32 +273,32 @@ public:
     void async_shutdown(std::function<void()> completion) override;
     void async_restart(std::string const& reason) override;
 
-private:
+   private:
     void do_run();
-    void do_shutdown(const std::function<void()>& completion);
+    void do_shutdown(std::function<void()> const& completion);
     void async_backoff(std::string const& reason);
     void on_backoff(boost::system::error_code const& ec);
     static void PerformRequestWithMulti(
         std::shared_ptr<CurlMultiManager> multi_manager,
         std::shared_ptr<RequestContext> context);
 
-    static size_t WriteCallback(const char* data,
+    static size_t WriteCallback(char const* data,
                                 size_t size,
                                 size_t nmemb,
                                 void* userp);
-    static size_t HeaderCallback(const char* buffer,
+    static size_t HeaderCallback(char const* buffer,
                                  size_t size,
                                  size_t nitems,
                                  void* userdata);
-    static curl_socket_t OpenSocketCallback(void* clientp,
-                                            curlsocktype purpose,
-                                            const struct curl_sockaddr*
-                                            address);
+    static curl_socket_t OpenSocketCallback(
+        void* clientp,
+        curlsocktype purpose,
+        const struct curl_sockaddr* address);
 
     void log_message(std::string const& message);
     void report_error(Error error);
 
-    std::string build_url(const http::request<http::string_body>& req) const;
+    std::string build_url(http::request<http::string_body> const& req) const;
     static bool SetupCurlOptions(CURL* curl,
                                  curl_slist** headers,
                                  RequestContext& context);
@@ -293,6 +317,8 @@ private:
     Builder::EventReceiver event_receiver_;
     Builder::LogCallback logger_;
     Builder::ErrorCallback errors_;
+    Builder::ConnectionHook connection_hook_;
+    Builder::ResponseHook response_hook_;
 
     bool use_https_;
     boost::asio::steady_timer backoff_timer_;
@@ -300,6 +326,6 @@ private:
 
     Backoff backoff_;
 };
-} // namespace launchdarkly::sse
+}  // namespace launchdarkly::sse
 
 #endif  // LD_CURL_NETWORKING

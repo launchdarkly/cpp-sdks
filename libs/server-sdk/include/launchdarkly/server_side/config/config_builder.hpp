@@ -5,6 +5,7 @@
 #include <launchdarkly/server_side/hooks/hook.hpp>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace launchdarkly::server_side {
@@ -49,6 +50,16 @@ class ConfigBuilder {
      * @return Reference to a DataSystemBuilder.
      */
     config::builders::DataSystemBuilder& DataSystem();
+
+    /**
+     * Configures the SDK's Big Segments behavior. Pass a BigSegmentsBuilder
+     * constructed with the Big Segments store to use. If never called, Big
+     * Segments are not enabled and flags referencing them evaluate as if the
+     * context were not a member.
+     * @param builder A configured BigSegmentsBuilder.
+     * @return Reference to this.
+     */
+    ConfigBuilder& BigSegments(config::builders::BigSegmentsBuilder builder);
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
@@ -99,6 +110,7 @@ class ConfigBuilder {
     config::builders::AppInfoBuilder app_info_builder_;
     config::builders::EventsBuilder events_builder_;
     config::builders::DataSystemBuilder data_system_builder_;
+    std::optional<config::builders::BigSegmentsBuilder> big_segments_builder_;
     config::builders::HttpPropertiesBuilder http_properties_builder_;
     config::builders::LoggingBuilder logging_config_builder_;
     std::vector<std::shared_ptr<hooks::Hook>> hooks_;

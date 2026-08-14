@@ -283,70 +283,80 @@ TEST_F(LazyLoadTest, AllSegmentsRefreshesIndividualSegment) {
     ASSERT_EQ(segment2->version, 2);
 }
 
-TEST_F(LazyLoadTest, InitializeNotQueriedRepeatedly) {
+TEST_F(LazyLoadTest, InitializedAlwaysReturnsTrue) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
-
     data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
+    // In lazy load (daemon) mode, Initialized() always returns true
+    // regardless of whether $inited is set in the store. This is
+    // consistent with Go/Java/.NET SDKs.
     for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_FALSE(lazy_load.Initialized());
+        ASSERT_TRUE(lazy_load.Initialized());
     }
 }
 
-TEST_F(LazyLoadTest, InitializeCalledOnceThenNeverAgainAfterReturningTrue) {
+TEST_F(LazyLoadTest, InitializeSetsValidImmediately) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
     EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
 
-    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
+    data_systems::LazyLoad lazy_load(logger, config, status_manager);
 
-    for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_TRUE(lazy_load.Initialized());
-    }
+    // After Initialize(), status should be kValid immediately.
+    lazy_load.Initialize();
+
+    // The data source status manager should have transitioned to kValid.
+    auto status = status_manager.Status();
+    ASSERT_EQ(status.State(), DataSourceState::kValid);
 }
 
-TEST_F(LazyLoadTest, InitializeCalledAgainAfterTTL) {
-    using TimePoint = data_systems::LazyLoad::ClockType::time_point;
-    constexpr auto refresh_ttl = std::chrono::seconds(10);
-
-    built::LazyLoadConfig const config{
-        built::LazyLoadConfig::EvictionPolicy::Disabled, refresh_ttl,
-        mock_reader};
-
-    {
-        InSequence s;
-        EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
-        EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
-    }
-
-    TimePoint now{std::chrono::seconds(0)};
-    data_systems::LazyLoad const lazy_load(logger, config, status_manager,
-                                           [&]() { return now; });
-
-    for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_FALSE(lazy_load.Initialized());
-        now += std::chrono::seconds(1);
-    }
-
-    for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_TRUE(lazy_load.Initialized());
-    }
-}
-
-TEST_F(LazyLoadTest, CanEvaluateWhenNotInitialized) {
+TEST_F(LazyLoadTest, InitializeSetsValidEvenWhenStoreNotInitialized) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
+    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
 
-    // LazyLoad can always serve evaluations on demand, even if not
-    // initialized (i.e. $inited key not found in store).
-    ASSERT_TRUE(lazy_load.CanEvaluateWhenNotInitialized());
+    data_systems::LazyLoad lazy_load(logger, config, status_manager);
+
+    // Even when the store doesn't have $inited, status should be kValid.
+    lazy_load.Initialize();
+
+    auto status = status_manager.Status();
+    ASSERT_EQ(status.State(), DataSourceState::kValid);
+}
+
+TEST_F(LazyLoadTest, InitializeLogsWarningWhenStoreNotInitialized) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
+
+    data_systems::LazyLoad lazy_load(logger, config, status_manager);
+    lazy_load.Initialize();
+
+    // A warning should be logged about $inited not being found.
+    ASSERT_TRUE(spy_logger_backend->Contains(
+        0, LogLevel::kWarn, "$inited"));
+}
+
+TEST_F(LazyLoadTest, InitializeDoesNotLogWarningWhenStoreIsInitialized) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
+
+    data_systems::LazyLoad lazy_load(logger, config, status_manager);
+    lazy_load.Initialize();
+
+    // No warning should be logged when the store has $inited.
+    ASSERT_FALSE(spy_logger_backend->Contains(
+        0, LogLevel::kWarn, "$inited"));
 }

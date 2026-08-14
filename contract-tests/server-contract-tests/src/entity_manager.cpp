@@ -1,8 +1,10 @@
 #include "entity_manager.hpp"
+#include "contract_test_big_segment_store.hpp"
 #include "contract_test_hook.hpp"
 
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
+#include <launchdarkly/server_side/config/builders/big_segments_builder.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
 #include <boost/json.hpp>
@@ -13,6 +15,167 @@
 
 using launchdarkly::LogLevel;
 using namespace launchdarkly::server_side;
+
+namespace {
+
+config::builders::DataSystemBuilder::FDv2 BuildFDv2(
+    ConfigDataSystemParams const& cfg,
+    config::builders::EndpointsBuilder* endpoints) {
+    auto fdv2 = config::builders::DataSystemBuilder::FDv2::Custom();
+
+    if (cfg.synchronizers) {
+        for (auto const& sync : *cfg.synchronizers) {
+            if (sync.streaming) {
+                auto s = decltype(fdv2)::Streaming();
+                if (sync.streaming->baseUri) {
+                    s.BaseUrl(*sync.streaming->baseUri);
+                }
+                if (sync.streaming->initialRetryDelayMs) {
+                    s.InitialReconnectDelay(std::chrono::milliseconds(
+                        *sync.streaming->initialRetryDelayMs));
+                }
+                fdv2.Synchronizer(std::move(s));
+            } else if (sync.polling) {
+                auto p = decltype(fdv2)::Polling();
+                if (sync.polling->baseUri) {
+                    p.BaseUrl(*sync.polling->baseUri);
+                }
+                if (sync.polling->pollIntervalMs) {
+                    p.PollInterval(
+                        std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::milliseconds(
+                                *sync.polling->pollIntervalMs)));
+                }
+                fdv2.Synchronizer(std::move(p));
+            }
+        }
+    }
+
+    if (cfg.initializers) {
+        for (auto const& init : *cfg.initializers) {
+            if (init.polling) {
+                auto p = decltype(fdv2)::Polling();
+                if (init.polling->baseUri) {
+                    p.BaseUrl(*init.polling->baseUri);
+                }
+                if (init.polling->pollIntervalMs) {
+                    p.PollInterval(
+                        std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::milliseconds(
+                                *init.polling->pollIntervalMs)));
+                }
+                fdv2.Initializer(std::move(p));
+            }
+        }
+    }
+
+    using FDv2Builder = config::builders::DataSystemBuilder::FDv2;
+    if (cfg.fdv1Fallback) {
+        if (cfg.fdv1Fallback->baseUri) {
+            endpoints->PollingBaseUrl(*cfg.fdv1Fallback->baseUri);
+        } else if (cfg.synchronizers && !cfg.synchronizers->empty()) {
+            // No explicit baseUri: derive from the synchronizers list, matching
+            // the no-fdv1Fallback branch below.
+            ConfigDataSynchronizerParams const* selected = nullptr;
+            for (auto const& sync : *cfg.synchronizers) {
+                if (sync.polling) {
+                    selected = &sync;
+                    break;
+                }
+            }
+            if (!selected) {
+                selected = &cfg.synchronizers->front();
+            }
+            if (selected->polling && selected->polling->baseUri) {
+                endpoints->PollingBaseUrl(*selected->polling->baseUri);
+            } else if (selected->streaming && selected->streaming->baseUri) {
+                endpoints->PollingBaseUrl(*selected->streaming->baseUri);
+            }
+        }
+        FDv2Builder::FDv1Polling p;
+        if (cfg.fdv1Fallback->pollIntervalMs) {
+            p.PollInterval(std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::milliseconds(*cfg.fdv1Fallback->pollIntervalMs)));
+        }
+        fdv2.FDv1Fallback(std::move(p));
+    } else if (cfg.synchronizers && !cfg.synchronizers->empty()) {
+        // Derive an FDv1 fallback from the synchronizers list: prefer the
+        // first polling sync, otherwise reuse the first synchronizer's
+        // baseUri. The fallback is always polling. The fallback reads its
+        // URL from the global ServiceEndpoints, so set the polling endpoint
+        // to the selected baseUri.
+        ConfigDataSynchronizerParams const* selected = nullptr;
+        for (auto const& sync : *cfg.synchronizers) {
+            if (sync.polling) {
+                selected = &sync;
+                break;
+            }
+        }
+        if (!selected) {
+            selected = &cfg.synchronizers->front();
+        }
+        FDv2Builder::FDv1Polling p;
+        if (selected->polling) {
+            if (selected->polling->baseUri) {
+                endpoints->PollingBaseUrl(*selected->polling->baseUri);
+            }
+            if (selected->polling->pollIntervalMs) {
+                p.PollInterval(std::chrono::duration_cast<std::chrono::seconds>(
+                    std::chrono::milliseconds(
+                        *selected->polling->pollIntervalMs)));
+            }
+        } else if (selected->streaming && selected->streaming->baseUri) {
+            endpoints->PollingBaseUrl(*selected->streaming->baseUri);
+        }
+        fdv2.FDv1Fallback(std::move(p));
+    }
+
+    return fdv2;
+}
+
+config::builders::DataSystemBuilder::BackgroundSync BuildBackgroundSync(
+    ConfigParams const& in,
+    config::builders::EndpointsBuilder* endpoints) {
+    auto datasystem = config::builders::DataSystemBuilder::BackgroundSync();
+
+    if (in.streaming) {
+        if (in.streaming->baseUri) {
+            endpoints->StreamingBaseUrl(*in.streaming->baseUri);
+        }
+        auto streaming = decltype(datasystem)::Streaming();
+        if (in.streaming->initialRetryDelayMs) {
+            streaming.InitialReconnectDelay(
+                std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
+        }
+        if (in.streaming->filter) {
+            streaming.Filter(*in.streaming->filter);
+        }
+        datasystem.Synchronizer(std::move(streaming));
+    }
+
+    if (in.polling) {
+        if (in.polling->baseUri) {
+            endpoints->PollingBaseUrl(*in.polling->baseUri);
+        }
+        if (!in.streaming) {
+            auto method = decltype(datasystem)::Polling();
+            if (in.polling->pollIntervalMs) {
+                method.PollInterval(
+                    std::chrono::duration_cast<std::chrono::seconds>(
+                        std::chrono::milliseconds(
+                            *in.polling->pollIntervalMs)));
+            }
+            if (in.polling->filter) {
+                method.Filter(*in.polling->filter);
+            }
+            datasystem.Synchronizer(std::move(method));
+        }
+    }
+
+    return datasystem;
+}
+
+}  // namespace
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor,
                              launchdarkly::Logger& logger)
@@ -51,43 +214,13 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.EventsBaseUrl(*in.serviceEndpoints->events);
         }
     }
-    auto datasystem = config::builders::DataSystemBuilder::BackgroundSync();
 
-    if (in.streaming) {
-        if (in.streaming->baseUri) {
-            endpoints.StreamingBaseUrl(*in.streaming->baseUri);
-        }
-        auto streaming = decltype(datasystem)::Streaming();
-        if (in.streaming->initialRetryDelayMs) {
-            streaming.InitialReconnectDelay(
-                std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
-        }
-        if (in.streaming->filter) {
-            streaming.Filter(*in.streaming->filter);
-        }
-        datasystem.Synchronizer(std::move(streaming));
+    if (in.dataSystem) {
+        config_builder.DataSystem().Method(
+            BuildFDv2(*in.dataSystem, &endpoints));
+    } else {
+        config_builder.DataSystem().Method(BuildBackgroundSync(in, &endpoints));
     }
-
-    if (in.polling) {
-        if (in.polling->baseUri) {
-            endpoints.PollingBaseUrl(*in.polling->baseUri);
-        }
-        if (!in.streaming) {
-            auto method = decltype(datasystem)::Polling();
-            if (in.polling->pollIntervalMs) {
-                method.PollInterval(
-                    std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::milliseconds(
-                            *in.polling->pollIntervalMs)));
-            }
-            if (in.polling->filter) {
-                method.Filter(*in.polling->filter);
-            }
-            datasystem.Synchronizer(std::move(method));
-        }
-    }
-
-    config_builder.DataSystem().Method(std::move(datasystem));
 
     auto& event_config = config_builder.Events();
 
@@ -144,7 +277,8 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     if (in.hooks) {
         for (auto const& hook_config : in.hooks->hooks) {
-            auto hook = std::make_shared<ContractTestHook>(executor_, hook_config);
+            auto hook =
+                std::make_shared<ContractTestHook>(executor_, hook_config);
             config_builder.Hooks(hook);
         }
     }
@@ -207,6 +341,28 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 #endif
+
+    if (in.bigSegments) {
+        auto store = std::make_shared<ContractTestBigSegmentStore>(
+            in.bigSegments->callbackUri);
+        auto big_segments = config::builders::BigSegmentsBuilder(store);
+        if (in.bigSegments->userCacheSize) {
+            big_segments.ContextCacheSize(*in.bigSegments->userCacheSize);
+        }
+        if (in.bigSegments->userCacheTimeMs) {
+            big_segments.ContextCacheTime(
+                std::chrono::milliseconds(*in.bigSegments->userCacheTimeMs));
+        }
+        if (in.bigSegments->statusPollIntervalMs) {
+            big_segments.StatusPollInterval(std::chrono::milliseconds(
+                *in.bigSegments->statusPollIntervalMs));
+        }
+        if (in.bigSegments->staleAfterMs) {
+            big_segments.StaleAfter(
+                std::chrono::milliseconds(*in.bigSegments->staleAfterMs));
+        }
+        config_builder.BigSegments(std::move(big_segments));
+    }
 
     auto config = config_builder.Build();
     if (!config) {

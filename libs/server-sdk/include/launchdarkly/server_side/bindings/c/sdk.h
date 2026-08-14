@@ -937,6 +937,110 @@ LDServerSDK_DataSourceStatus_Status(LDServerSDK sdk);
 LD_EXPORT(void)
 LDServerDataSourceStatus_Free(LDServerDataSourceStatus status);
 
+typedef struct _LDServerBigSegmentStoreStatus* LDServerBigSegmentStoreStatus;
+
+/**
+ * True if the most recent Big Segment store query or metadata poll succeeded.
+ * If false, Big Segment membership cannot currently be evaluated reliably.
+ *
+ * @param status The Big Segment store status. Must not be NULL.
+ */
+LD_EXPORT(bool)
+LDServerBigSegmentStoreStatus_Available(LDServerBigSegmentStoreStatus status);
+
+/**
+ * True if the Big Segment store's data has not been updated within the
+ * configured stale-after threshold. The data may still be queried; it is
+ * just older than desired.
+ *
+ * @param status The Big Segment store status. Must not be NULL.
+ */
+LD_EXPORT(bool)
+LDServerBigSegmentStoreStatus_Stale(LDServerBigSegmentStoreStatus status);
+
+/**
+ * Frees the Big Segment store status.
+ * @param status The Big Segment store status to free.
+ */
+LD_EXPORT(void)
+LDServerBigSegmentStoreStatus_Free(LDServerBigSegmentStoreStatus status);
+
+typedef void (*ServerBigSegmentStoreStatusCallbackFn)(
+    LDServerBigSegmentStoreStatus status,
+    void* user_data);
+
+/**
+ * Defines a Big Segment store status listener which may be used to listen
+ * for changes to the Big Segment store status.
+ * The struct should be initialized using
+ * LDServerBigSegmentStoreStatusListener_Init before use.
+ */
+struct LDServerBigSegmentStoreStatusListener {
+    /**
+     * Callback function which is invoked for Big Segment store status
+     * changes.
+     *
+     * The provided pointers are only valid for the duration of the function
+     * call (excluding UserData, whose lifetime is controlled by the caller).
+     *
+     * @param status The updated Big Segment store status.
+     */
+    ServerBigSegmentStoreStatusCallbackFn StatusChanged;
+
+    /**
+     * UserData is forwarded into callback functions.
+     */
+    void* UserData;
+};
+
+/**
+ * Initializes a Big Segment store status change listener. Must be called
+ * before passing the listener to
+ * LDServerSDK_BigSegmentStoreStatus_OnStatusChange.
+ *
+ * If the StatusChanged member of the listener struct is not set (NULL),
+ * then the function will not register a listener. In that case the return
+ * value will be NULL.
+ *
+ * Create the struct, initialize the struct, set the StatusChanged handler
+ * and optionally UserData, and then pass the struct to
+ * LDServerSDK_BigSegmentStoreStatus_OnStatusChange.
+ *
+ * @param listener Listener to initialize.
+ */
+LD_EXPORT(void)
+LDServerBigSegmentStoreStatusListener_Init(
+    struct LDServerBigSegmentStoreStatusListener* listener);
+
+/**
+ * Listen for changes to the Big Segment store status.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param listener The listener, whose StatusChanged callback will be
+ * invoked when the Big Segment store status changes.
+ *
+ * @return A LDListenerConnection. The connection can be freed using
+ * LDListenerConnection_Free and the listener can be disconnected using
+ * LDListenerConnection_Disconnect. NULL is returned if the listener's
+ * StatusChanged member is NULL.
+ */
+LD_EXPORT(LDListenerConnection)
+LDServerSDK_BigSegmentStoreStatus_OnStatusChange(
+    LDServerSDK sdk,
+    struct LDServerBigSegmentStoreStatusListener listener);
+
+/**
+ * The current status of the Big Segment store.
+ *
+ * If no store is configured, the returned status reports unavailable and
+ * not stale.
+ *
+ * The caller must free the returned value using
+ * LDServerBigSegmentStoreStatus_Free.
+ */
+LD_EXPORT(LDServerBigSegmentStoreStatus)
+LDServerSDK_BigSegmentStoreStatus_Status(LDServerSDK sdk);
+
 #ifdef __cplusplus
 }
 #endif

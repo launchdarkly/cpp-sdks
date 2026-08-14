@@ -4,6 +4,7 @@
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/server_side/config/config.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
+#include <launchdarkly/server_side/integrations/big_segments/ibig_segment_store.hpp>
 
 #include <launchdarkly/bindings/c/context_builder.h>
 
@@ -12,6 +13,24 @@
 #include <boost/json/parse.hpp>
 
 #include <chrono>
+
+namespace {
+
+class NoopBigSegmentStore
+    : public launchdarkly::server_side::integrations::IBigSegmentStore {
+   public:
+    [[nodiscard]] GetMembershipResult GetMembership(
+        std::string const&) const noexcept override {
+        return launchdarkly::server_side::integrations::Membership::
+            FromSegmentRefs({}, {});
+    }
+
+    [[nodiscard]] GetMetadataResult GetMetadata() const noexcept override {
+        return std::nullopt;
+    }
+};
+
+}  // namespace
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
@@ -24,7 +43,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDServerSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.10.1");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.13.1");  // {x-release-please-version}
 
     LDServerSDK_Free(sdk);
 }
@@ -46,7 +65,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDServerSDK sdk = LDServerSDK_New(config);
 
-    struct LDServerDataSourceStatusListener listener {};
+    struct LDServerDataSourceStatusListener listener{};
     LDServerDataSourceStatusListener_Init(&listener);
 
     listener.UserData = const_cast<char*>("Potato");
@@ -336,4 +355,206 @@ TEST(ClientBindings, PollingPayloadFilters) {
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2DefaultBuilds) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Default();
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2CustomWithStreamingSynchronizer) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2StreamingBuilder streaming = LDServerFDv2StreamingBuilder_New();
+    LDServerFDv2StreamingBuilder_InitialReconnectDelayMs(streaming, 500);
+    LDServerFDv2StreamingBuilder_BaseURL(streaming,
+                                         "https://stream.example.com");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_Synchronizer_Streaming(fdv2, streaming);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2CustomWithPollingInitializerAndSynchronizer) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2PollingBuilder initializer = LDServerFDv2PollingBuilder_New();
+    LDServerFDv2PollingBuilder_IntervalS(initializer, 30);
+
+    LDServerFDv2PollingBuilder synchronizer = LDServerFDv2PollingBuilder_New();
+    LDServerFDv2PollingBuilder_BaseURL(synchronizer,
+                                       "https://poll.example.com");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_Initializer_Polling(fdv2, initializer);
+    LDServerFDv2Builder_Synchronizer_Polling(fdv2, synchronizer);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2FDv1FallbackStreamingReusesBackgroundSyncHandle) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourceStreamBuilder fdv1_streaming =
+        LDServerDataSourceStreamBuilder_New();
+    LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(fdv1_streaming,
+                                                            1000);
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_FDv1Fallback_Streaming(fdv2, fdv1_streaming);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2FDv1FallbackPollingReusesBackgroundSyncHandle) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourcePollBuilder fdv1_polling =
+        LDServerDataSourcePollBuilder_New();
+    LDServerDataSourcePollBuilder_IntervalS(fdv1_polling, 30);
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_FDv1Fallback_Polling(fdv2, fdv1_polling);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2DisableFDv1FallbackAndTimeouts) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Default();
+    LDServerFDv2Builder_DisableFDv1Fallback(fdv2);
+    LDServerFDv2Builder_FallbackTimeoutMs(fdv2, 60000);
+    LDServerFDv2Builder_RecoveryTimeoutMs(fdv2, 300000);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, BigSegmentsBuilderAttachesToConfig) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    auto* store = new NoopBigSegmentStore();
+    LDServerBigSegmentsBuilder bs_builder = LDServerBigSegmentsBuilder_New(
+        reinterpret_cast<LDServerBigSegmentStorePtr>(store));
+    LDServerBigSegmentsBuilder_ContextCacheSize(bs_builder, 500);
+    LDServerBigSegmentsBuilder_ContextCacheTimeMs(bs_builder, 10000);
+    LDServerBigSegmentsBuilder_StatusPollIntervalMs(bs_builder, 15000);
+    LDServerBigSegmentsBuilder_StaleAfterMs(bs_builder, 60000);
+
+    LDServerConfigBuilder_BigSegments(cfg_builder, bs_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, BigSegmentStoreStatusWithoutStoreReportsUnavailable) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    LDServerBigSegmentStoreStatus bs_status =
+        LDServerSDK_BigSegmentStoreStatus_Status(sdk);
+    EXPECT_FALSE(LDServerBigSegmentStoreStatus_Available(bs_status));
+    EXPECT_FALSE(LDServerBigSegmentStoreStatus_Stale(bs_status));
+
+    LDServerBigSegmentStoreStatus_Free(bs_status);
+    LDServerSDK_Free(sdk);
+}
+
+TEST(ClientBindings, BigSegmentStoreStatusListenerReturnsNullWithoutCallback) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    struct LDServerBigSegmentStoreStatusListener listener{};
+    LDServerBigSegmentStoreStatusListener_Init(&listener);
+
+    LDListenerConnection connection =
+        LDServerSDK_BigSegmentStoreStatus_OnStatusChange(sdk, listener);
+
+    EXPECT_EQ(nullptr, connection);
+
+    LDServerSDK_Free(sdk);
+}
+
+void BigSegmentStoreStatusListenerFunction(LDServerBigSegmentStoreStatus,
+                                           void* user_data) {
+    EXPECT_STREQ("cabbage", static_cast<char const*>(user_data));
+}
+
+TEST(ClientBindings, BigSegmentStoreStatusListenerRegistersWithCallback) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    struct LDServerBigSegmentStoreStatusListener listener{};
+    LDServerBigSegmentStoreStatusListener_Init(&listener);
+    listener.StatusChanged = BigSegmentStoreStatusListenerFunction;
+    listener.UserData = const_cast<char*>("cabbage");
+
+    LDListenerConnection connection =
+        LDServerSDK_BigSegmentStoreStatus_OnStatusChange(sdk, listener);
+
+    EXPECT_NE(nullptr, connection);
+
+    LDListenerConnection_Disconnect(connection);
+    LDListenerConnection_Free(connection);
+    LDServerSDK_Free(sdk);
 }

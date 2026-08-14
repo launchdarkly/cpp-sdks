@@ -21,8 +21,14 @@ class Evaluator {
      * threads in parallel, the given logger and IStore must be thread safe.
      * @param logger A logger for recording errors or warnings.
      * @param source The flag/segment source.
+     * @param big_segment_store Non-owning pointer to the Big Segment store
+     * wrapper, or nullptr if Big Segments are not configured. If non-null it
+     * must outlive the Evaluator and be safe to call from multiple threads.
      */
-    Evaluator(Logger& logger, data_interfaces::IStore const& source);
+    Evaluator(
+        Logger& logger,
+        data_interfaces::IStore const& source,
+        data_components::BigSegmentStoreWrapper* big_segment_store = nullptr);
 
     /**
      * Evaluates a flag for a given context.
@@ -69,5 +75,6 @@ class Evaluator {
 
     Logger& logger_;
     data_interfaces::IStore const& source_;
+    data_components::BigSegmentStoreWrapper* big_segment_store_;
 };
 }  // namespace launchdarkly::server_side::evaluation

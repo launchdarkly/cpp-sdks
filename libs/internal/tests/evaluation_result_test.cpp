@@ -32,7 +32,7 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
                            "\"ruleId\":\"RULE_ID\","
                            "\"prerequisiteKey\":\"PREREQ_KEY\","
                            "\"inExperiment\":true,"
-                           "\"bigSegmentStatus\":\"STORE_ERROR\""
+                           "\"bigSegmentsStatus\":\"STORE_ERROR\""
                            "}"
                            "}"));
 
@@ -56,14 +56,16 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
     EXPECT_EQ(12, val->Detail().Reason()->get().RuleIndex());
     EXPECT_EQ("RULE_ID", val->Detail().Reason()->get().RuleId());
     EXPECT_EQ("PREREQ_KEY", val->Detail().Reason()->get().PrerequisiteKey());
-    EXPECT_EQ("STORE_ERROR", val->Detail().Reason()->get().BigSegmentStatus());
+    EXPECT_EQ(EvaluationReason::BigSegmentsStatus::kStoreError,
+              val->Detail().Reason()->get().BigSegmentsStatus());
     EXPECT_TRUE(val->Detail().Reason()->get().InExperiment());
 }
 
 TEST(EvaluationResultTests, ToJsonAllFields) {
     EvaluationReason reason(EvaluationReason::Kind::kOff,
                             EvaluationReason::ErrorKind::kMalformedFlag, 12,
-                            "RULE_ID", "PREREQ_KEY", true, "STORE_ERROR");
+                            "RULE_ID", "PREREQ_KEY", true,
+                            EvaluationReason::BigSegmentsStatus::kStoreError);
     launchdarkly::EvaluationDetailInternal detail(
         Value(std::map<std::string, Value>{{"item", "a"}}), 84, reason);
     EvaluationResult result(12, 24, true, true,
@@ -79,7 +81,7 @@ TEST(EvaluationResultTests, ToJsonAllFields) {
         "{\"version\":12,\"flagVersion\":24,\"trackEvents\":true,"
         "\"trackReason\":true,\"debugEventsUntilDate\":1680555761,\"value\":{"
         "\"item\":\"a\"},\"variationIndex\":84,\"reason\":{\"kind\":\"OFF\","
-        "\"errorKind\":\"MALFORMED_FLAG\",\"bigSegmentStatus\":\"STORE_ERROR\","
+        "\"errorKind\":\"MALFORMED_FLAG\",\"bigSegmentsStatus\":\"STORE_ERROR\","
         "\"ruleId\":\"RULE_ID\",\"ruleIndex\":12,\"inExperiment\":true,"
         "\"prerequisiteKey\":\"PREREQ_KEY\"}}",
         res);

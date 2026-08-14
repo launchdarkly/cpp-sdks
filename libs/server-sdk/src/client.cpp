@@ -123,7 +123,7 @@ std::string Client::StringVariation(Context const& ctx,
                                     std::string default_value,
                                     hooks::HookContext const& hook_context) {
     return client->StringVariation(ctx, key, std::move(default_value),
-                                    hook_context);
+                                   hook_context);
 }
 
 EvaluationDetail<std::string> Client::StringVariationDetail(
@@ -166,8 +166,7 @@ EvaluationDetail<double> Client::DoubleVariationDetail(
     FlagKey const& key,
     double default_value,
     hooks::HookContext const& hook_context) {
-    return client->DoubleVariationDetail(ctx, key, default_value,
-                                         hook_context);
+    return client->DoubleVariationDetail(ctx, key, default_value, hook_context);
 }
 
 int Client::IntVariation(Context const& ctx,
@@ -228,6 +227,10 @@ EvaluationDetail<Value> Client::JsonVariationDetail(
 
 IDataSourceStatusProvider& Client::DataSourceStatus() {
     return client->DataSourceStatus();
+}
+
+IBigSegmentStoreStatusProvider& Client::BigSegmentStoreStatus() {
+    return client->BigSegmentStoreStatus();
 }
 
 char const* Client::Version() {
