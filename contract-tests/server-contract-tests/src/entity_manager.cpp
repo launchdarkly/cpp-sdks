@@ -13,10 +13,70 @@
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 #endif
 
+#ifdef LD_DYNAMODB_SUPPORT_ENABLED
+#include <launchdarkly/server_side/integrations/dynamodb/dynamodb_source.hpp>
+#endif
+
 using launchdarkly::LogLevel;
 using namespace launchdarkly::server_side;
 
+#if defined(LD_REDIS_SUPPORT_ENABLED) || defined(LD_DYNAMODB_SUPPORT_ENABLED)
+#define LD_PERSISTENT_STORE_ENABLED
+#endif
+
 namespace {
+
+#ifdef LD_PERSISTENT_STORE_ENABLED
+tl::expected<config::builders::LazyLoadBuilder::SourcePtr, std::string>
+MakePersistentStoreSource(ConfigPersistentStore const& store) {
+#ifdef LD_REDIS_SUPPORT_ENABLED
+    if (store.type == "redis") {
+        auto source = integrations::RedisDataSource::Create(
+            store.dsn, store.prefix.value_or("launchdarkly"));
+        if (!source) {
+            return tl::make_unexpected(source.error());
+        }
+        return std::move(*source);
+    }
+#endif
+#ifdef LD_DYNAMODB_SUPPORT_ENABLED
+    if (store.type == "dynamodb") {
+        // The test harness creates this table and provides its endpoint as the
+        // DSN. Credentials are required by the AWS SDK, but ignored by
+        // DynamoDB Local.
+        integrations::DynamoDBClientOptions options;
+        options.region = "us-east-1";
+        options.endpoint = store.dsn;
+        options.aws_access_key_id = "dummy";
+        options.aws_secret_access_key = "dummy";
+        options.aws_session_token = "dummy";
+
+        auto source = integrations::DynamoDBDataSource::Create(
+            "sdk-contract-tests", store.prefix.value_or(""),
+            std::move(options));
+        if (!source) {
+            return tl::make_unexpected(source.error());
+        }
+        return std::move(*source);
+    }
+#endif
+    return tl::make_unexpected("unsupported persistent store type: " +
+                               store.type);
+}
+
+void ApplyCacheConfig(config::builders::LazyLoadBuilder& lazy_load,
+                      ConfigPersistentCache const& cache) {
+    if (cache.mode == "off") {
+        lazy_load.CacheRefresh(std::chrono::seconds(0));
+    } else if (cache.mode == "ttl") {
+        if (cache.ttl) {
+            lazy_load.CacheRefresh(std::chrono::seconds(*cache.ttl));
+        }
+    } else if (cache.mode == "infinite") {
+        lazy_load.CacheRefresh(std::chrono::hours(24 * 365));
+    }
+}
+#endif
 
 config::builders::DataSystemBuilder::FDv2 BuildFDv2(
     ConfigDataSystemParams const& cfg,
@@ -292,53 +352,23 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 
-#ifdef LD_REDIS_SUPPORT_ENABLED
+#ifdef LD_PERSISTENT_STORE_ENABLED
     if (in.persistentDataStore) {
-        if (in.persistentDataStore->store.type == "redis") {
-            std::string prefix =
-                in.persistentDataStore->store.prefix.value_or("launchdarkly");
-
-            auto redis_result = launchdarkly::server_side::integrations::
-                RedisDataSource::Create(in.persistentDataStore->store.dsn,
-                                        prefix);
-
-            if (!redis_result) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << "entity_manager: couldn't create Redis data source: "
-                    << redis_result.error();
-                return std::nullopt;
-            }
-
-            auto lazy_load = config::builders::LazyLoadBuilder();
-            lazy_load.Source(std::move(*redis_result));
-
-            // Configure cache mode
-            // Default is 5 minutes, but contract tests may specify:
-            // - "off": disable caching (fetch from DB every time)
-            // - "ttl": custom TTL in seconds (test harness sends seconds)
-            // - "infinite": never expire cached items
-            if (in.persistentDataStore->cache.mode == "off") {
-                lazy_load.CacheRefresh(std::chrono::seconds(0));
-            } else if (in.persistentDataStore->cache.mode == "ttl") {
-                if (in.persistentDataStore->cache.ttl) {
-                    lazy_load.CacheRefresh(std::chrono::seconds(
-                        *in.persistentDataStore->cache.ttl));
-                }
-            } else if (in.persistentDataStore->cache.mode == "infinite") {
-                // Use a very large TTL to effectively never expire
-                lazy_load.CacheRefresh(std::chrono::hours(24 * 365));
-            }
-            // If no mode specified, the default 5-minute TTL is used
-
-            config_builder.DataSystem().Method(
-                config::builders::DataSystemBuilder::LazyLoad(
-                    std::move(lazy_load)));
-        } else {
+        auto source = MakePersistentStoreSource(in.persistentDataStore->store);
+        if (!source) {
             LD_LOG(logger_, LogLevel::kWarn)
-                << "entity_manager: unsupported persistent store type: "
-                << in.persistentDataStore->store.type;
+                << "entity_manager: couldn't create persistent store source: "
+                << source.error();
             return std::nullopt;
         }
+
+        auto lazy_load = config::builders::LazyLoadBuilder();
+        lazy_load.Source(std::move(*source));
+        ApplyCacheConfig(lazy_load, in.persistentDataStore->cache);
+
+        config_builder.DataSystem().Method(
+            config::builders::DataSystemBuilder::LazyLoad(
+                std::move(lazy_load)));
     }
 #endif
 

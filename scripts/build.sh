@@ -8,6 +8,7 @@
 # $2 ON/OFF which enables/disables building in a test configuration (unit tests + contract tests.)
 # $3 (optional) true/false to enable/disable CURL networking (LD_CURL_NETWORKING)
 # $4 (optional) true/false to enable/disable Redis support (LD_BUILD_REDIS_SUPPORT)
+# $5 (optional) true/false to enable/disable DynamoDB support (LD_BUILD_DYNAMODB_SUPPORT)
 
 function cleanup {
   cd ..
@@ -43,6 +44,13 @@ if [ "$4" == "true" ]; then
   build_redis="ON"
 elif [ "$4" == "false" ]; then
   build_redis="OFF"
+fi
+
+# Check for DynamoDB support option (override the automatic detection if explicitly passed)
+if [ "$5" == "true" ]; then
+  build_dynamodb="ON"
+elif [ "$5" == "false" ]; then
+  build_dynamodb="OFF"
 fi
 
 # Set build type to Debug when testing is enabled

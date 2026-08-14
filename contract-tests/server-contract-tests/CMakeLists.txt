@@ -34,4 +34,9 @@ if (LD_BUILD_REDIS_SUPPORT)
     target_compile_definitions(server-tests PRIVATE LD_REDIS_SUPPORT_ENABLED)
 endif ()
 
+if (LD_BUILD_DYNAMODB_SUPPORT)
+    target_link_libraries(server-tests PRIVATE launchdarkly::server_dynamodb_source)
+    target_compile_definitions(server-tests PRIVATE LD_DYNAMODB_SUPPORT_ENABLED)
+endif ()
+
 target_include_directories(server-tests PUBLIC include)

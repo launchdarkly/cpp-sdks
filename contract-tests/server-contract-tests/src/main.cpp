@@ -57,6 +57,9 @@ int main(int argc, char* argv[]) {
 #ifdef LD_REDIS_SUPPORT_ENABLED
         srv.add_capability("persistent-data-store-redis");
 #endif
+#ifdef LD_DYNAMODB_SUPPORT_ENABLED
+        srv.add_capability("persistent-data-store-dynamodb");
+#endif
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

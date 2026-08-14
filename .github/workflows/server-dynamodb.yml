@@ -14,6 +14,36 @@ on:
     - cron: '0 8 * * *'
 
 jobs:
+  contract-tests:
+    runs-on: ubuntu-22.04
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
+    env:
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: server-tests
+          run_tests: false
+          # AWS C++ SDK requires libcurl at link time on Linux/macOS.
+          install_curl: true
+          use_dynamodb: true
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.3.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@5adb11fd6953e1bc35d9cf1fc1b4374c464e3a8b
+        with:
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          enable_persistence_tests: true
+          extra_params: '--skip-from ./contract-tests/server-contract-tests/suppressions.txt'
+
   build-test-dynamodb:
     runs-on: ubuntu-22.04
     services:
