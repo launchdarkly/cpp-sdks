@@ -2,6 +2,7 @@
 
 #include <launchdarkly/network/http_requester.hpp>
 
+#include "../../../environment_id_header.hpp"
 #include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
@@ -132,11 +133,7 @@ void StreamingDataSource::StartAsync(
             if (!self || headers.result_int() != 200) {
                 return;
             }
-            if (auto const it = headers.find("X-LD-EnvID");
-                it != headers.end() && !it->value().empty()) {
-                self->sink_->SetEnvironmentId(
-                    std::string(it->value().data(), it->value().size()));
-            }
+            ReportEnvironmentId(*self->sink_, headers);
         });
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {

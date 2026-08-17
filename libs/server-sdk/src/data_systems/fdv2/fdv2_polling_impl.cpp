@@ -1,5 +1,6 @@
 #include "fdv2_polling_impl.hpp"
 #include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
+#include "../environment_id_header.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/network/http_error_messages.hpp>
@@ -12,7 +13,6 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-static char const* const kEnvironmentIdHeader = "X-LD-EnvID";
 static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
 static char const* const kFDv1FallbackTtlHeader = "X-LD-FD-Fallback-TTL";
 
@@ -52,15 +52,6 @@ ReadFDv1FallbackDirective(network::HttpResult::HeadersType const& headers) {
         }
     }
     return directive;
-}
-
-static std::optional<std::string> ReadEnvironmentId(
-    network::HttpResult::HeadersType const& headers) {
-    auto const it = headers.find(kEnvironmentIdHeader);
-    if (it == headers.end() || it->second.empty()) {
-        return std::nullopt;
-    }
-    return it->second;
 }
 
 network::HttpRequest MakeFDv2PollRequest(

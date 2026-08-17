@@ -10,6 +10,7 @@
 
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
+#include "../../../environment_id_header.hpp"
 #include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
 
 #include <boost/json.hpp>
@@ -103,10 +104,7 @@ void PollingDataSource::DoPoll() {
 
 void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     if (!res.IsError() && (res.Status() == 200 || res.Status() == 304)) {
-        if (auto const it = res.Headers().find("X-LD-EnvID");
-            it != res.Headers().end() && !it->second.empty()) {
-            sink_->SetEnvironmentId(it->second);
-        }
+        ReportEnvironmentId(*sink_, res.Headers());
     }
 
     auto header_etag = res.Headers().find("etag");

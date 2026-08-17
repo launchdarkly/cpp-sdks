@@ -1,5 +1,6 @@
 #include "streaming_synchronizer.hpp"
 #include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
+#include "../environment_id_header.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/async/timer.hpp>
@@ -187,11 +188,9 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
 void FDv2StreamingSynchronizer::State::OnResponse(
     HttpResponseHeader const& headers) {
     if (headers.result_int() == 200) {
-        if (auto const env_it = headers.find("X-LD-EnvID");
-            env_it != headers.end() && !env_it->value().empty()) {
+        if (auto environment_id = ReadEnvironmentId(headers)) {
             std::lock_guard lock(mutex_);
-            environment_id_ =
-                std::string(env_it->value().data(), env_it->value().size());
+            environment_id_ = *std::move(environment_id);
         }
     }
 
