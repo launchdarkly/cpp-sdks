@@ -47,7 +47,7 @@
         "contexts": { "introduced": "3.0" },
         "experimentation": { "introduced": "2.4" },
         "fdv2": { "introduced": "3.12" },
-        "fileDataSource": { "introduced": "2.6" },
+        "fileDataSource": { "introduced": "2.6", "removed": "3.0" },
         "hooks": { "introduced": "3.10" },
         "inlineContextCustomEvents": { "introduced": "3.9" },
         "offlineMode": { "introduced": "1.0" },
@@ -57,7 +57,7 @@
         "storingData": { "introduced": "1.2" },
         "storingDataDynamodb": { "introduced": "3.13" },
         "storingDataRedis": { "introduced": "1.2" },
-        "testDataSource": { "introduced": "2.6" },
+        "testDataSource": { "introduced": "2.6", "removed": "3.0" },
         "track": { "introduced": "1.0" },
         "variationDetail": { "introduced": "1.0" }
       }
