@@ -25,7 +25,8 @@
         "privateAttrs": { "introduced": "1.0" },
         "relayProxyProxy": { "introduced": "1.0" },
         "track": { "introduced": "1.0" },
-        "variationDetail": { "introduced": "1.1" }
+        "variationDetail": { "introduced": "1.1" },
+        "webProxy": { "introduced": "3.11" }
       }
     },
     "cpp-server-sdk": {
