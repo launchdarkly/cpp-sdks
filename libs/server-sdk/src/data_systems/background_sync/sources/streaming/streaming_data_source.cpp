@@ -48,7 +48,6 @@ void StreamingDataSource::StartAsync(
     data_model::SDKDataSet const* bootstrap_data) {
     boost::ignore_unused(bootstrap_data);
 
-    sink_ = dest;
     event_handler_.emplace(*dest, logger_, status_manager_);
 
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
@@ -133,21 +132,21 @@ void StreamingDataSource::StartAsync(
             if (!self || headers.result_int() != 200) {
                 return;
             }
-            ReportEnvironmentId(*self->sink_, headers);
+            if (auto environment_id = ReadEnvironmentId(headers)) {
+                self->environment_id_ = std::move(environment_id);
+            }
         });
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
-            auto status =
-                self->event_handler_->HandleMessage(event.type(), event.data());
-            if (status ==
-                DataSourceEventHandler::MessageStatus::kInvalidMessage) {
+            auto status = self->event_handler_->HandleMessage(
+                event.type(), event.data(), self->environment_id_);
+            if (status == DataSourceEventHandler::MessageStatus::kInvalidMessage) {
                 // Invalid data received - restart the connection with backoff
                 // to get a fresh stream. The backoff mechanism prevents rapid
                 // reconnection attempts.
                 LD_LOG(self->logger_, LogLevel::kWarn)
-                    << "Received invalid data from stream, restarting "
-                       "connection";
+                    << "Received invalid data from stream, restarting connection";
                 if (self->client_) {
                     self->client_->async_restart("invalid data in stream");
                 }

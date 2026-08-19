@@ -71,11 +71,6 @@ class JsonDestination final : public data_interfaces::IDestination {
                 data_model::SegmentDescriptor segment) override;
 
     /**
-     * @brief No-op; serialized destinations do not store the environment ID.
-     */
-    void SetEnvironmentId(std::string environment_id) override;
-
-    /**
      * @return Identity of this destination. Used in logs.
      */
     [[nodiscard]] std::string const& Identity() const override;

@@ -162,32 +162,46 @@ TEST(MakeFDv2PollRequestTest, ValidFilterKeyIsIncluded) {
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll?filter=my-filter_1.0");
 }
 
-TEST(HandleFDv2PollResponseTest, OkReportsEnvironmentId) {
-    auto result =
-        HandleResponse(200, R"({"events":[]})", {{"X-LD-EnvID", "env-123"}});
-    EXPECT_EQ(std::optional<std::string>{"env-123"}, result.environment_id);
+// Environment ID of the change set carried by a poll result, if the result
+// carried a change set at all.
+static std::optional<std::string> ChangeSetEnvironmentId(
+    FDv2SourceResult const& result) {
+    if (auto const* cs =
+            std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+        return cs->change_set.environment_id;
+    }
+    return std::nullopt;
 }
 
-TEST(HandleFDv2PollResponseTest, NotModifiedReportsEnvironmentId) {
+// A payload which produces a change set result.
+static std::string const kChangeSetBody =
+    R"({"events":[)"
+    R"({"event":"server-intent","data":{"payloads":[)"
+    R"({"id":"p1","target":1,"intentCode":"xfer-full"}]}},)"
+    R"({"event":"payload-transferred","data":{"state":"abc","version":1}})"
+    R"(]})";
+
+TEST(HandleFDv2PollResponseTest, OkReportsEnvironmentIdWithChangeSet) {
     auto result =
-        HandleResponse(304, std::nullopt, {{"X-LD-EnvID", "env-123"}});
-    EXPECT_EQ(std::optional<std::string>{"env-123"}, result.environment_id);
+        HandleResponse(200, kChangeSetBody, {{"X-LD-EnvID", "env-123"}});
+    EXPECT_EQ(std::optional<std::string>{"env-123"},
+              ChangeSetEnvironmentId(result));
 }
 
 TEST(HandleFDv2PollResponseTest, ErrorStatusDoesNotReportEnvironmentId) {
     auto result =
         HandleResponse(503, std::nullopt, {{"X-LD-EnvID", "env-123"}});
-    EXPECT_FALSE(result.environment_id);
+    EXPECT_FALSE(ChangeSetEnvironmentId(result));
 }
 
 TEST(HandleFDv2PollResponseTest, MissingHeaderDoesNotReportEnvironmentId) {
-    auto result = HandleResponse(200, R"({"events":[]})", {});
-    EXPECT_FALSE(result.environment_id);
+    auto result = HandleResponse(200, kChangeSetBody, {});
+    EXPECT_FALSE(ChangeSetEnvironmentId(result));
 }
 
 TEST(HandleFDv2PollResponseTest, EmptyHeaderDoesNotReportEnvironmentId) {
-    auto result = HandleResponse(200, R"({"events":[]})", {{"X-LD-EnvID", ""}});
-    EXPECT_FALSE(result.environment_id);
+    auto result = HandleResponse(200, kChangeSetBody, {{"X-LD-EnvID", ""}});
+    EXPECT_FALSE(ChangeSetEnvironmentId(result));
 }
 
 TEST(MakeFDv2PollRequestTest, InvalidFilterKeyIsDropped) {

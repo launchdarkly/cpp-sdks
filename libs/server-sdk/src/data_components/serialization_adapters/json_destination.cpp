@@ -111,8 +111,6 @@ void JsonDestination::Upsert(std::string const& key,
                     dest_.Upsert(Kinds::Segment, key, Serialize(key, segment)));
 }
 
-void JsonDestination::SetEnvironmentId(std::string) {}
-
 void JsonDestination::LogUpsertResult(
     std::string const& key,
     std::string const& data_type,

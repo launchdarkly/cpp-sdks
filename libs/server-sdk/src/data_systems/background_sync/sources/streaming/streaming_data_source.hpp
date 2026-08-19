@@ -46,8 +46,9 @@ class StreamingDataSource final
 
     config::built::BackgroundSyncConfig::StreamingConfig streaming_config_;
 
-    // Destination for all data obtained via streaming. Set by StartAsync.
-    data_interfaces::IDestination* sink_ = nullptr;
+    // Environment ID from the most recent successful stream response. Read
+    // and written only from the SSE client's callbacks.
+    std::optional<std::string> environment_id_;
 
     std::shared_ptr<sse::Client> client_;
 };

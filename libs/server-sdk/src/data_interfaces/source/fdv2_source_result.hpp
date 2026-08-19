@@ -98,12 +98,6 @@ struct FDv2SourceResult {
      * Set if the underlying transport observed an FDv1 fallback directive.
      */
     std::optional<FDv1FallbackDirective> fdv1_fallback;
-
-    /**
-     * Set if the underlying transport reported the environment ID (e.g. an
-     * X-LD-EnvID response header).
-     */
-    std::optional<std::string> environment_id;
 };
 
 }  // namespace launchdarkly::server_side::data_interfaces

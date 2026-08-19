@@ -121,12 +121,16 @@ TEST(FDv1AdapterSynchronizerTest, FDv1EnvironmentIdIsReportedWithChangeSet) {
 
     auto future = adapter.Next(data_model::Selector{});
 
-    source->destination_->SetEnvironmentId("env-123");
-    source->destination_->Init(data_model::SDKDataSet{});
+    data_model::SDKDataSet data_set;
+    data_set.environment_id = "env-123";
+    source->destination_->Init(std::move(data_set));
 
     auto result = future.WaitForResult(1s);
     ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(std::optional<std::string>{"env-123"}, result->environment_id);
+    auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
+    ASSERT_NE(change_set, nullptr);
+    EXPECT_EQ(std::optional<std::string>{"env-123"},
+              change_set->change_set.environment_id);
 }
 
 TEST(FDv1AdapterSynchronizerTest, FDv1UpsertProducesPartialChangeSet) {

@@ -211,7 +211,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                     data_model::ChangeSetType::kNone,
                     {},
                     data_model::Selector{}}},
-            fdv1_fallback, ReadEnvironmentId(res.Headers())};
+            fdv1_fallback};
     }
 
     if (res.Status() == 200) {
@@ -239,7 +239,10 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
         if (!result.fdv1_fallback) {
             result.fdv1_fallback = fdv1_fallback;
         }
-        result.environment_id = ReadEnvironmentId(res.Headers());
+        if (auto* cs =
+                std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+            cs->change_set.environment_id = ReadEnvironmentId(res.Headers());
+        }
         return result;
     }
 

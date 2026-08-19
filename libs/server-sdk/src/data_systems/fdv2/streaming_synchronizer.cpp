@@ -345,7 +345,10 @@ void FDv2StreamingSynchronizer::State::Notify(FDv2SourceResult result) {
         if (!result.fdv1_fallback) {
             result.fdv1_fallback = latest_fdv1_fallback_;
         }
-        result.environment_id = environment_id_;
+        if (auto* cs =
+                std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+            cs->change_set.environment_id = environment_id_;
+        }
         if (pending_promise_) {
             promise = std::move(pending_promise_);
             pending_promise_.reset();

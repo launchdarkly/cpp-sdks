@@ -305,20 +305,26 @@ TEST(MemoryStoreTest, HasNoEnvironmentIdByDefault) {
     EXPECT_FALSE(store.EnvironmentId());
 }
 
-TEST(MemoryStoreTest, EnvironmentIdIsNotVisibleBeforeInit) {
+TEST(MemoryStoreTest, EnvironmentIdIsTakenFromInitData) {
     MemoryStore store;
-    store.SetEnvironmentId("env-123");
-    EXPECT_FALSE(store.EnvironmentId());
-
-    store.Init(SDKDataSet());
+    SDKDataSet data_set;
+    data_set.environment_id = "env-123";
+    store.Init(std::move(data_set));
     EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
 }
 
-TEST(MemoryStoreTest, EnvironmentIdIsRetainedAcrossInit) {
+TEST(MemoryStoreTest, EnvironmentIdIsRetainedWhenLaterDataOmitsIt) {
     MemoryStore store;
-    store.SetEnvironmentId("env-123");
+    SDKDataSet data_set;
+    data_set.environment_id = "env-123";
+    store.Init(std::move(data_set));
+
     store.Init(SDKDataSet());
-    store.Init(SDKDataSet());
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
+
+    SDKDataSet empty_id;
+    empty_id.environment_id = "";
+    store.Init(std::move(empty_id));
     EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
 }
 

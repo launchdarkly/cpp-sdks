@@ -3,8 +3,8 @@
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 
-#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_flag.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
@@ -103,10 +103,6 @@ void PollingDataSource::DoPoll() {
 }
 
 void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
-    if (!res.IsError() && (res.Status() == 200 || res.Status() == 304)) {
-        ReportEnvironmentId(*sink_, res.Headers());
-    }
-
     auto header_etag = res.Headers().find("etag");
     bool has_etag = header_etag != res.Headers().end();
 
@@ -155,6 +151,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
 
             if (poll_result.has_value()) {
+                poll_result->environment_id = ReadEnvironmentId(res.Headers());
                 sink_->Init(std::move(*poll_result));
                 status_manager_.SetState(
                     DataSourceStatus::DataSourceState::kValid);

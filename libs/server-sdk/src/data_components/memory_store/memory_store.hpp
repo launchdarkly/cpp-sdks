@@ -44,8 +44,6 @@ class MemoryStore final : public data_interfaces::IStore,
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
 
-    void SetEnvironmentId(std::string environment_id) override;
-
     /**
      * @return The environment ID reported by LaunchDarkly, if any has been
      * received.
@@ -68,6 +66,10 @@ class MemoryStore final : public data_interfaces::IStore,
     MemoryStore& operator=(MemoryStore&&) = delete;
 
    private:
+    // Requires data_mutex_ to be held. Ignores empty values so that data
+    // without an environment ID does not discard a previously reported one.
+    void RetainEnvironmentId(std::optional<std::string> const& environment_id);
+
     static inline std::string const description_ = "memory";
     std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
         flags_;

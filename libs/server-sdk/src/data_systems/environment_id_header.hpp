@@ -30,15 +30,4 @@ inline std::optional<std::string> ReadEnvironmentId(
     return std::string(it->value().data(), it->value().size());
 }
 
-/**
- * Reports the environment ID from the given response headers to the given
- * destination, if the headers contain a non-empty environment ID.
- */
-template <typename Destination, typename Headers>
-void ReportEnvironmentId(Destination& destination, Headers const& headers) {
-    if (auto environment_id = ReadEnvironmentId(headers)) {
-        destination.SetEnvironmentId(*std::move(environment_id));
-    }
-}
-
 }  // namespace launchdarkly::server_side::data_systems
