@@ -29,12 +29,22 @@ runs:
         toolset: ${{ inputs.toolset }}
         platform_version: ${{ inputs.platform_version }}
 
+    - name: Cache boost (Windows)
+      if: runner.os == 'Windows'
+      id: cache-boost-windows
+      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      with:
+        path: 'C:\local\boost_1_87_0'
+        key: boost-windows-msvc-14.3-1.87.0
+
     - name: Download boost binaries from artifactory
       if: runner.os == 'Windows'
       id: boost-download
       shell: bash
       run: |
-        choco install boost-msvc-14.3 --version 1.87.0 -y --no-progress
+        if [ "${{ steps.cache-boost-windows.outputs.cache-hit }}" != "true" ]; then
+          choco install boost-msvc-14.3 --version 1.87.0 -y --no-progress
+        fi
         echo "BOOST_ROOT=C:\local\boost_1_87_0" >> $GITHUB_OUTPUT
         echo "Boost_DIR=C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0" >> $GITHUB_OUTPUT
 
