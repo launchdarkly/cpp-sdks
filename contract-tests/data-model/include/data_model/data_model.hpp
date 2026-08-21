@@ -150,7 +150,7 @@ struct ConfigWrapper {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigWrapper, name, version);
 
 struct ConfigPersistentCache {
-    std::string mode;  // "off", "ttl", "infinite"
+    std::string mode;        // "off", "ttl", "infinite"
     std::optional<int> ttl;  // TTL in seconds (sent by test harness as "ttl")
 };
 
@@ -178,6 +178,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPersistentDataStore,
                                                 store,
                                                 cache);
 
+struct ConfigDataSystemStore {
+    std::optional<ConfigPersistentDataStore> persistentDataStore;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemStore,
+                                                persistentDataStore);
+
 struct ConfigDataSynchronizerParams {
     std::optional<ConfigStreamingParams> streaming;
     std::optional<ConfigPollingParams> polling;
@@ -199,13 +206,15 @@ struct ConfigDataSystemParams {
     std::optional<std::vector<ConfigDataSynchronizerParams>> synchronizers;
     std::optional<ConfigPollingParams> fdv1Fallback;
     std::optional<std::string> payloadFilter;
+    std::optional<ConfigDataSystemStore> store;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemParams,
                                                 initializers,
                                                 synchronizers,
                                                 fdv1Fallback,
-                                                payloadFilter);
+                                                payloadFilter,
+                                                store);
 
 struct ConfigBigSegmentsParams {
     std::string callbackUri;

@@ -16,6 +16,14 @@ on:
 jobs:
   contract-tests-dynamodb:
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - harness: v2
+            suppressions: contract-tests/server-contract-tests/persistence-suppressions.txt
+          - harness: v3
+            suppressions: contract-tests/server-contract-tests/persistence-suppressions-fdv2.txt
     services:
       dynamodb:
         image: amazon/dynamodb-local
@@ -42,7 +50,10 @@ jobs:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
           enable_persistence_tests: true
-          extra_params: '--skip-from ./contract-tests/server-contract-tests/suppressions.txt'
+          version: ${{ matrix.harness }}
+          branch: ${{ matrix.harness }}
+          # The other suites are covered by libs/server-sdk's workflow.
+          extra_params: -run=persistent.data.store -skip-from=${{ matrix.suppressions }}
 
   build-test-dynamodb:
     runs-on: ubuntu-22.04

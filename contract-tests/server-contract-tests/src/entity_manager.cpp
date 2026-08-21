@@ -64,6 +64,19 @@ MakePersistentStoreSource(ConfigPersistentStore const& store) {
                                store.type);
 }
 
+// The v2 harness sends the store at the top level, the v3 harness nests it
+// under the data system.
+std::optional<ConfigPersistentDataStore> PersistentDataStoreConfig(
+    ConfigParams const& in) {
+    if (in.persistentDataStore) {
+        return in.persistentDataStore;
+    }
+    if (in.dataSystem && in.dataSystem->store) {
+        return in.dataSystem->store->persistentDataStore;
+    }
+    return std::nullopt;
+}
+
 void ApplyCacheConfig(config::builders::LazyLoadBuilder& lazy_load,
                       ConfigPersistentCache const& cache) {
     if (cache.mode == "off") {
@@ -353,8 +366,8 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     }
 
 #ifdef LD_PERSISTENT_STORE_ENABLED
-    if (in.persistentDataStore) {
-        auto source = MakePersistentStoreSource(in.persistentDataStore->store);
+    if (auto const persistent = PersistentDataStoreConfig(in)) {
+        auto source = MakePersistentStoreSource(persistent->store);
         if (!source) {
             LD_LOG(logger_, LogLevel::kWarn)
                 << "entity_manager: couldn't create persistent store source: "
@@ -364,7 +377,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
         auto lazy_load = config::builders::LazyLoadBuilder();
         lazy_load.Source(std::move(*source));
-        ApplyCacheConfig(lazy_load, in.persistentDataStore->cache);
+        ApplyCacheConfig(lazy_load, persistent->cache);
 
         config_builder.DataSystem().Method(
             config::builders::DataSystemBuilder::LazyLoad(
