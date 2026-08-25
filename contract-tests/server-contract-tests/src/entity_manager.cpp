@@ -9,10 +9,87 @@
 
 #include <boost/json.hpp>
 
+#ifdef LD_REDIS_SUPPORT_ENABLED
+#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
+#endif
+
+#ifdef LD_DYNAMODB_SUPPORT_ENABLED
+#include <launchdarkly/server_side/integrations/dynamodb/dynamodb_source.hpp>
+#endif
+
 using launchdarkly::LogLevel;
 using namespace launchdarkly::server_side;
 
+#if defined(LD_REDIS_SUPPORT_ENABLED) || defined(LD_DYNAMODB_SUPPORT_ENABLED)
+#define LD_PERSISTENT_STORE_ENABLED
+#endif
+
 namespace {
+
+#ifdef LD_PERSISTENT_STORE_ENABLED
+tl::expected<config::builders::LazyLoadBuilder::SourcePtr, std::string>
+MakePersistentStoreSource(ConfigPersistentStore const& store) {
+#ifdef LD_REDIS_SUPPORT_ENABLED
+    if (store.type == "redis") {
+        auto source = integrations::RedisDataSource::Create(
+            store.dsn, store.prefix.value_or("launchdarkly"));
+        if (!source) {
+            return tl::make_unexpected(source.error());
+        }
+        return std::move(*source);
+    }
+#endif
+#ifdef LD_DYNAMODB_SUPPORT_ENABLED
+    if (store.type == "dynamodb") {
+        // The test harness creates this table and provides its endpoint as the
+        // DSN. Credentials are required by the AWS SDK, but ignored by
+        // DynamoDB Local.
+        integrations::DynamoDBClientOptions options;
+        options.region = "us-east-1";
+        options.endpoint = store.dsn;
+        options.aws_access_key_id = "dummy";
+        options.aws_secret_access_key = "dummy";
+        options.aws_session_token = "dummy";
+
+        auto source = integrations::DynamoDBDataSource::Create(
+            "sdk-contract-tests", store.prefix.value_or(""),
+            std::move(options));
+        if (!source) {
+            return tl::make_unexpected(source.error());
+        }
+        return std::move(*source);
+    }
+#endif
+    return tl::make_unexpected("unsupported persistent store type: " +
+                               store.type);
+}
+
+// The v2 harness sends the store at the top level, the v3 harness nests it
+// under the data system.
+std::optional<ConfigPersistentDataStore> PersistentDataStoreConfig(
+    ConfigParams const& in) {
+    if (in.persistentDataStore) {
+        return in.persistentDataStore;
+    }
+    if (in.dataSystem && in.dataSystem->store) {
+        return in.dataSystem->store->persistentDataStore;
+    }
+    return std::nullopt;
+}
+
+void ApplyCacheConfig(config::builders::LazyLoadBuilder& lazy_load,
+                      ConfigPersistentCache const& cache) {
+    if (cache.mode == "off") {
+        lazy_load.CacheRefresh(std::chrono::seconds(0));
+    } else if (cache.mode == "ttl") {
+        if (cache.ttl) {
+            lazy_load.CacheRefresh(std::chrono::seconds(*cache.ttl));
+        }
+    } else if (cache.mode == "infinite") {
+        lazy_load.CacheRefresh(std::chrono::hours(24 * 365));
+    }
+}
+#endif
 
 config::builders::DataSystemBuilder::FDv2 BuildFDv2(
     ConfigDataSystemParams const& cfg,
@@ -287,6 +364,26 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             config_builder.HttpProperties().WrapperVersion(in.wrapper->version);
         }
     }
+
+#ifdef LD_PERSISTENT_STORE_ENABLED
+    if (auto const persistent = PersistentDataStoreConfig(in)) {
+        auto source = MakePersistentStoreSource(persistent->store);
+        if (!source) {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "entity_manager: couldn't create persistent store source: "
+                << source.error();
+            return std::nullopt;
+        }
+
+        auto lazy_load = config::builders::LazyLoadBuilder();
+        lazy_load.Source(std::move(*source));
+        ApplyCacheConfig(lazy_load, persistent->cache);
+
+        config_builder.DataSystem().Method(
+            config::builders::DataSystemBuilder::LazyLoad(
+                std::move(lazy_load)));
+    }
+#endif
 
     if (in.bigSegments) {
         auto store = std::make_shared<ContractTestBigSegmentStore>(

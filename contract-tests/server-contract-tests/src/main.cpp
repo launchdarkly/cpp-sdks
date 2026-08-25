@@ -54,6 +54,12 @@ int main(int argc, char* argv[]) {
         srv.add_capability("instance-id");
         srv.add_capability("fdv1-fallback");
         srv.add_capability("big-segments");
+#ifdef LD_REDIS_SUPPORT_ENABLED
+        srv.add_capability("persistent-data-store-redis");
+#endif
+#ifdef LD_DYNAMODB_SUPPORT_ENABLED
+        srv.add_capability("persistent-data-store-dynamodb");
+#endif
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
