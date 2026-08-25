@@ -71,9 +71,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -104,9 +104,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -150,9 +150,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -183,9 +183,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -229,9 +229,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -262,9 +262,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -308,9 +308,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
@@ -341,9 +341,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.1.0
+      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
           subject-checksums: checksums.txt
 
