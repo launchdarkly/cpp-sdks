@@ -61,8 +61,8 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -71,8 +71,8 @@ jobs:
   build-redis-mac:
     runs-on: macos-15
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -83,8 +83,8 @@ jobs:
   build-test-redis-windows:
     runs-on: windows-2022
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci

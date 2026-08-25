@@ -21,8 +21,8 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/client-contract-tests/client-tests
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: client-tests
@@ -43,8 +43,8 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/client-contract-tests/client-tests
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: client-tests
@@ -61,8 +61,8 @@ jobs:
   build-test:
     runs-on: ubuntu-22.04
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
@@ -71,8 +71,8 @@ jobs:
   build-test-curl:
     runs-on: ubuntu-22.04
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
@@ -82,8 +82,8 @@ jobs:
   build-test-client-mac:
     runs-on: macos-15
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
@@ -93,8 +93,8 @@ jobs:
   build-test-client-mac-curl:
     runs-on: macos-15
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
@@ -105,8 +105,8 @@ jobs:
   build-test-client-windows:
     runs-on: windows-2022
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci
@@ -123,8 +123,8 @@ jobs:
   build-test-client-windows-curl:
     runs-on: windows-2022
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci
