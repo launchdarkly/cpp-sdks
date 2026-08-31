@@ -2,6 +2,10 @@
 
 #include <data_systems/fdv2/fdv1_adapter_synchronizer.hpp>
 
+#include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
+
 #include <chrono>
 #include <memory>
 #include <string>
@@ -65,58 +69,77 @@ FDv1AdapterSynchronizer::SourceBuilder MakeMockBuilder(
     };
 }
 
-// FDv1 source that captures the destination pointer and never completes its
-// ShutdownAsync. It models a real StreamingDataSource or PollingDataSource with
-// a callback still in flight during teardown. The source keeps the destination
-// pointer. It has not yet signaled that shutdown is complete.
-class DeferredShutdownFDv1Source final : public IDataSynchronizer {
+// FDv1 source that mirrors the real StreamingDataSource/PollingDataSource
+// teardown. It keeps itself alive with shared_from_this, defers its
+// ShutdownAsync completion, and delivers one more callback to the destination
+// before signaling completion. The contract requires the destination to stay
+// valid until then.
+class DeferredCompletionFDv1Source final
+    : public IDataSynchronizer,
+      public std::enable_shared_from_this<DeferredCompletionFDv1Source> {
    public:
+    explicit DeferredCompletionFDv1Source(boost::asio::any_io_executor executor)
+        : executor_(std::move(executor)) {}
+
     void StartAsync(IDestination* destination,
                     data_model::SDKDataSet const* /*bootstrap*/) override {
         destination_ = destination;
     }
 
-    // Keeps the completion but never invokes it, so the adapter never learns
-    // that in-flight work has drained.
+    // Posts the drain: one in-flight upsert into the destination, then the
+    // completion. Holds shared_from_this so the source outlives the adapter's
+    // teardown, as the real sources do during async shutdown.
     void ShutdownAsync(std::function<void()> completion) override {
-        completion_ = std::move(completion);
+        boost::asio::post(executor_, [self = shared_from_this(),
+                                      completion = std::move(completion)]() {
+            data_model::Flag flag;
+            flag.key = "late";
+            flag.version = 1;
+            self->destination_->Upsert("late",
+                                       data_model::FlagDescriptor(flag));
+            self->completion_invoked = true;
+            if (completion) {
+                completion();
+            }
+        });
     }
 
     std::string const& Identity() const override {
-        static std::string const id = "deferred fdv1";
+        static std::string const id = "deferred completion fdv1";
         return id;
     }
 
+    boost::asio::any_io_executor executor_;
     IDestination* destination_ = nullptr;
-    std::function<void()> completion_;
+    bool completion_invoked = false;
 };
 
 }  // namespace
 
 // The IDataSynchronizer contract states the destination pointer stays valid
-// until the ShutdownAsync completion handler is called. Close() fires a no-op
-// completion and returns without waiting. The destructor then frees the
-// destination. A source callback still in flight then lands on freed memory.
-// AddressSanitizer reports the heap-use-after-free.
-TEST(FDv1AdapterSynchronizerTest,
-     SourceCallbackAfterCloseHitsFreedDestination) {
-    // Outlives the adapter, like a real source whose in-flight callback holds a
-    // shared_from_this reference across the adapter's teardown.
-    auto source = std::make_shared<DeferredShutdownFDv1Source>();
+// until the ShutdownAsync completion handler is called. This source upserts
+// once during shutdown and then fires the completion. The adapter must keep the
+// destination alive until the completion fires. Otherwise the drain lands on
+// freed memory, a use-after-free.
+TEST(FDv1AdapterSynchronizerTest, DestinationStaysValidUntilShutdownCompletes) {
+    boost::asio::io_context ioc;
+    auto source =
+        std::make_shared<DeferredCompletionFDv1Source>(ioc.get_executor());
     {
         FDv1AdapterSynchronizer adapter(
             [source](DataSourceStatusManager&) { return source; });
         adapter.Next(data_model::Selector{});  // triggers StartAsync
-    }  // adapter destroyed: Close() runs, then the destination is freed
+    }  // adapter destroyed: Close() requests shutdown, the drain is still
+       // pending
 
-    // StartAsync ran and handed the destination to the source.
+    // StartAsync handed the destination to the source.
     ASSERT_NE(source->destination_, nullptr);
 
-    // The source delivers its in-flight callback into the freed destination.
-    data_model::Flag flag;
-    flag.key = "late";
-    flag.version = 1;
-    source->destination_->Upsert("late", data_model::FlagDescriptor(flag));
+    // Run the pending drain: the source upserts into the destination, then
+    // fires the shutdown completion.
+    ioc.run();
+
+    EXPECT_TRUE(source->completion_invoked);
 }
 
 TEST(FDv1AdapterSynchronizerTest, FirstNextStartsFDv1Source) {
