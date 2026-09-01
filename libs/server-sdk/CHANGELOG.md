@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.13.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.13.1...launchdarkly-cpp-server-v3.13.2) (2026-09-01)
+
+
+### Bug Fixes
+
+* allow lazy load evaluations when $inited key is not set ([#508](https://github.com/launchdarkly/cpp-sdks/issues/508)) ([120b79a](https://github.com/launchdarkly/cpp-sdks/commit/120b79aa0fe52a28477035702f23fbc2dc95df12))
+
 ## [3.13.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.13.0...launchdarkly-cpp-server-v3.13.1) (2026-08-04)
 
 
