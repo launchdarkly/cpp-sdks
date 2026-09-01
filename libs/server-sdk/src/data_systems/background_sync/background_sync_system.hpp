@@ -31,7 +31,8 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
         config::built::BackgroundSyncConfig const& background_sync_config,
         config::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
-        data_components::DataSourceStatusManager& status_manager,
+        std::shared_ptr<data_components::DataSourceStatusManager>
+            status_manager,
         Logger const& logger);
 
     BackgroundSync(BackgroundSync const& item) = delete;
@@ -57,7 +58,7 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
 
    private:
     data_components::MemoryStore store_;
-    data_components::ChangeNotifier change_notifier_;
+    std::shared_ptr<data_components::ChangeNotifier> change_notifier_;
     // Needs to be shared to that the source can keep itself alive through
     // async operations.
     std::shared_ptr<data_interfaces::IDataSynchronizer> synchronizer_;
