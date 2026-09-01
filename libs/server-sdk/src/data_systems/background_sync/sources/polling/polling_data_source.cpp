@@ -3,8 +3,8 @@
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 
-#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/detail/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
@@ -65,19 +65,18 @@ std::string const& PollingDataSource::Identity() const {
 PollingDataSource::PollingDataSource(
     boost::asio::any_io_executor const& ioc,
     Logger const& logger,
-    data_components::DataSourceStatusManager& status_manager,
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::PollingConfig const&
         data_source_config,
     config::built::HttpProperties const& http_properties)
     : logger_(logger),
-      status_manager_(status_manager),
+      status_manager_(std::move(status_manager)),
       requester_(ioc, http_properties.Tls()),
       polling_interval_(data_source_config.poll_interval),
       request_(
           MakeRequest(logger_, data_source_config, endpoints, http_properties)),
-      timer_(ioc),
-      sink_(nullptr) {
+      timer_(ioc) {
     if (polling_interval_ < data_source_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
@@ -127,7 +126,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
 
     if (res.IsError()) {
         auto const& error_message = res.ErrorMessage();
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kInterrupted,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
             error_message.has_value() ? *error_message : "unknown error");
@@ -141,7 +140,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
             auto parsed = boost::json::parse(body.value(), error_code);
             if (error_code) {
                 LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
-                status_manager_.SetError(
+                status_manager_->SetError(
                     DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                     kErrorParsingPut);
                 return;
@@ -150,18 +149,20 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
 
             if (poll_result.has_value()) {
-                sink_->Init(std::move(*poll_result));
-                status_manager_.SetState(
-                    DataSourceStatus::DataSourceState::kValid);
+                if (auto sink = sink_.lock()) {
+                    sink->Init(std::move(*poll_result));
+                    status_manager_->SetState(
+                        DataSourceStatus::DataSourceState::kValid);
+                }
                 return;
             }
             LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
-            status_manager_.SetError(
+            status_manager_->SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorPutInvalid);
             return;
         }
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kInterrupted,
             DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
             "polling response contained no body.");
@@ -172,12 +173,12 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
         // parse the body.
     } else {
         if (network::IsRecoverableStatus(res.Status())) {
-            status_manager_.SetState(
+            status_manager_->SetState(
                 DataSourceStatus::DataSourceState::kInterrupted, res.Status(),
                 launchdarkly::network::ErrorForStatusCode(
                     res.Status(), "polling request", "will retry"));
         } else {
-            status_manager_.SetState(
+            status_manager_->SetState(
                 DataSourceStatus::DataSourceState::kOff, res.Status(),
                 launchdarkly::network::ErrorForStatusCode(
                     res.Status(), "polling request", std::nullopt));
@@ -226,16 +227,16 @@ void PollingDataSource::StartPollingTimer() {
 }
 
 void PollingDataSource::StartAsync(
-    data_interfaces::IDestination* dest,
+    std::shared_ptr<data_interfaces::IDestination> dest,
     data_model::SDKDataSet const* bootstrap_data) {
     boost::ignore_unused(bootstrap_data);
 
     sink_ = dest;
 
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
+    status_manager_->SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kOff,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
             kCouldNotParseEndpoint);
@@ -248,7 +249,7 @@ void PollingDataSource::StartAsync(
 }
 
 void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
+    status_manager_->SetState(DataSourceStatus::DataSourceState::kInitializing);
     timer_.cancel();
     if (completion) {
         boost::asio::post(timer_.get_executor(), completion);

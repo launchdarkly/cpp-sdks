@@ -24,12 +24,13 @@ namespace {
 // the IDestination it was given so the test can drive Init/Upsert.
 class MockFDv1Source final : public IDataSynchronizer {
    public:
-    explicit MockFDv1Source(DataSourceStatusManager& /*status_manager*/) {}
+    explicit MockFDv1Source(
+        std::shared_ptr<DataSourceStatusManager> /*status_manager*/) {}
 
-    void StartAsync(IDestination* destination,
+    void StartAsync(std::shared_ptr<IDestination> destination,
                     data_model::SDKDataSet const* bootstrap) override {
         ++start_count;
-        destination_ = destination;
+        destination_ = std::move(destination);
         bootstrap_was_null = (bootstrap == nullptr);
     }
 
@@ -45,7 +46,7 @@ class MockFDv1Source final : public IDataSynchronizer {
         return id;
     }
 
-    IDestination* destination_ = nullptr;
+    std::shared_ptr<IDestination> destination_;
     int start_count = 0;
     int shutdown_count = 0;
     bool bootstrap_was_null = false;
@@ -57,9 +58,9 @@ class MockFDv1Source final : public IDataSynchronizer {
 FDv1AdapterSynchronizer::SourceBuilder MakeMockBuilder(
     MockFDv1Source** out_source = nullptr,
     DataSourceStatusManager** out_sm = nullptr) {
-    return [out_source, out_sm](DataSourceStatusManager& sm) {
+    return [out_source, out_sm](std::shared_ptr<DataSourceStatusManager> sm) {
         if (out_sm) {
-            *out_sm = &sm;
+            *out_sm = sm.get();
         }
         auto source = std::make_shared<MockFDv1Source>(sm);
         if (out_source) {
@@ -81,9 +82,9 @@ class DeferredCompletionFDv1Source final
     explicit DeferredCompletionFDv1Source(boost::asio::any_io_executor executor)
         : executor_(std::move(executor)) {}
 
-    void StartAsync(IDestination* destination,
+    void StartAsync(std::shared_ptr<IDestination> destination,
                     data_model::SDKDataSet const* /*bootstrap*/) override {
-        destination_ = destination;
+        destination_ = std::move(destination);
     }
 
     // Posts the drain: one in-flight upsert into the destination, then the
@@ -110,7 +111,7 @@ class DeferredCompletionFDv1Source final
     }
 
     boost::asio::any_io_executor executor_;
-    IDestination* destination_ = nullptr;
+    std::shared_ptr<IDestination> destination_;
     bool completion_invoked = false;
 };
 
@@ -127,7 +128,9 @@ TEST(FDv1AdapterSynchronizerTest, DestinationStaysValidUntilShutdownCompletes) {
         std::make_shared<DeferredCompletionFDv1Source>(ioc.get_executor());
     {
         FDv1AdapterSynchronizer adapter(
-            [source](DataSourceStatusManager&) { return source; });
+            [source](std::shared_ptr<DataSourceStatusManager>) {
+                return source;
+            });
         adapter.Next(data_model::Selector{});  // triggers StartAsync
     }  // adapter destroyed: Close() requests shutdown, the drain is still
        // pending
