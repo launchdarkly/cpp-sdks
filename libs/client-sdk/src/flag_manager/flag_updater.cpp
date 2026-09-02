@@ -71,6 +71,18 @@ void FlagUpdater::Init(Context const& context,
         DispatchEvent(std::move(event));
     }
 }
+void FlagUpdater::Apply(Context const& context,
+                        FlagChangeSet change_set,
+                        bool /* from_cache */) {
+    std::lock_guard lock{signal_mutex_};
+
+    auto events = flag_store_.Apply(change_set, HasListeners());
+
+    for (auto& event : events) {
+        DispatchEvent(std::move(event));
+    }
+}
+
 void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
     auto handler = signals_.find(event.FlagName());
     if (handler != signals_.end()) {

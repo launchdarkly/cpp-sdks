@@ -12,11 +12,15 @@ using launchdarkly::ContextBuilder;
 using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
+using launchdarkly::client_side::FlagChange;
+using launchdarkly::client_side::FlagChangeSet;
 using launchdarkly::client_side::ItemDescriptor;
 using launchdarkly::client_side::flag_manager::FlagStore;
 using launchdarkly::client_side::flag_manager::FlagUpdater;
 using launchdarkly::client_side::flag_manager::FlagValueChangeEvent;
 using launchdarkly::client_side::flag_manager::IFlagNotifier;
+using launchdarkly::data_model::ChangeSetType;
+using launchdarkly::data_model::Selector;
 using Tombstone = launchdarkly::data_model::Tombstone;
 
 TEST(FlagUpdaterDataTests, HandlesEmptyInit) {
@@ -207,7 +211,8 @@ TEST(FlagUpdaterEventTests, SecondInitWithUpdateProducesEvents) {
 
     std::atomic_bool got_event(false);
     notifier->OnFlagChange(
-        "flagA", [&got_event, &manager](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA",
+        [&got_event, &manager](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->OldValue().AsString());
@@ -776,4 +781,76 @@ TEST(FlagUpdaterEventTests, CanListenToMultipleFlags) {
 
     EXPECT_TRUE(got_event_a);
     EXPECT_TRUE(got_event_b);
+}
+
+TEST(FlagUpdaterApplyTests, ApplyDispatchesValueChangeEvents) {
+    FlagStore manager;
+    FlagUpdater updater(manager);
+
+    IFlagNotifier* notifier = &updater;
+
+    std::atomic_bool got_event(false);
+    auto connection = notifier->OnFlagChange(
+        "flagA",
+        [&got_event, &manager](std::shared_ptr<FlagValueChangeEvent> event) {
+            got_event.store(true);
+
+            EXPECT_EQ("test", event->OldValue().AsString());
+            EXPECT_EQ("potato", event->NewValue().AsString());
+            EXPECT_EQ("flagA", event->FlagName());
+            EXPECT_FALSE(event->Deleted());
+
+            // The value in the store should be consistent with the new value.
+            EXPECT_EQ("potato",
+                      manager.Get("flagA")->item->Detail().Value().AsString());
+        });
+
+    updater.Apply(
+        ContextBuilder().Kind("user", "user-key").Build(),
+        FlagChangeSet{
+            ChangeSetType::kFull,
+            {FlagChange{"flagA",
+                        ItemDescriptor{EvaluationResult{
+                            1, std::nullopt, false, false, std::nullopt,
+                            EvaluationDetailInternal{
+                                Value("test"), std::nullopt, std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ false);
+
+    // The first full data set is what the SDK starts from, not a change.
+    EXPECT_FALSE(got_event);
+
+    updater.Apply(
+        ContextBuilder().Kind("user", "user-key").Build(),
+        FlagChangeSet{
+            ChangeSetType::kPartial,
+            {FlagChange{
+                "flagA",
+                ItemDescriptor{EvaluationResult{
+                    2, std::nullopt, false, false, std::nullopt,
+                    EvaluationDetailInternal{Value("potato"), std::nullopt,
+                                             std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ false);
+
+    EXPECT_TRUE(got_event);
+}
+
+TEST(FlagUpdaterApplyTests, ApplyOfNoneChangeSetDispatchesNothing) {
+    FlagStore manager;
+    FlagUpdater updater(manager);
+
+    IFlagNotifier* notifier = &updater;
+
+    std::atomic_bool got_event(false);
+    auto connection = notifier->OnFlagChange(
+        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+            got_event.store(true);
+        });
+
+    updater.Apply(ContextBuilder().Kind("user", "user-key").Build(),
+                  FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+                  /* from_cache= */ false);
+
+    EXPECT_FALSE(got_event);
 }

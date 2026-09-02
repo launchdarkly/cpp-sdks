@@ -11,11 +11,15 @@ using launchdarkly::ContextBuilder;
 using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
+using launchdarkly::client_side::FlagChange;
+using launchdarkly::client_side::FlagChangeSet;
 using launchdarkly::client_side::ItemDescriptor;
 using launchdarkly::client_side::flag_manager::FlagPersistence;
 using launchdarkly::client_side::flag_manager::FlagStore;
 using launchdarkly::client_side::flag_manager::FlagUpdater;
 using launchdarkly::client_side::flag_manager::PersistenceEncodeKey;
+using launchdarkly::data_model::ChangeSetType;
+using launchdarkly::data_model::Selector;
 
 class TestPersistence : public IPersistence {
    public:
@@ -171,4 +175,82 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     EXPECT_EQ(1, space.count(PersistenceEncodeKey("potato:bob-key")));
     // Sha256 potato:susan-key
     EXPECT_EQ(1, space.count(PersistenceEncodeKey("potato:susan-key")));
+}
+TEST(FlagPersistenceTests, StoresCacheOnApply) {
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 5, []() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{500}};
+        });
+
+    flag_persistence.Apply(
+        context,
+        FlagChangeSet{
+            ChangeSetType::kFull,
+            {FlagChange{"flagA",
+                        ItemDescriptor{EvaluationResult{
+                            1, std::nullopt, false, false, std::nullopt,
+                            EvaluationDetailInternal{
+                                Value("test"), std::nullopt, std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ false);
+
+    EXPECT_EQ(R"({"flagA":{"version":1,"value":"test"}})",
+              persistence->store_
+                  ["LaunchDarkly_rUTcjlHPv6Vegd27YmtGYkEGkEUGaEbn5M0JYTFQUpA="]
+                  ["CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0="]);
+}
+
+TEST(FlagPersistenceTests, ApplyOfNoneChangeSetDoesNotWriteTheCache) {
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence("the-key", updater, store, persistence,
+                                     logger, 5);
+
+    flag_persistence.Apply(context,
+                           FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+                           /* from_cache= */ false);
+
+    EXPECT_TRUE(persistence->store_.empty());
+}
+
+// Writing data straight back to the cache it was read from would be a no-op.
+TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence("the-key", updater, store, persistence,
+                                     logger, 5);
+
+    flag_persistence.Apply(
+        context,
+        FlagChangeSet{
+            ChangeSetType::kFull,
+            {FlagChange{"flagA",
+                        ItemDescriptor{EvaluationResult{
+                            1, std::nullopt, false, false, std::nullopt,
+                            EvaluationDetailInternal{
+                                Value("test"), std::nullopt, std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ true);
+
+    EXPECT_TRUE(persistence->store_.empty());
+    // The data is still applied to the store, so evaluation can use it.
+    ASSERT_TRUE(store.Get("flagA"));
 }
