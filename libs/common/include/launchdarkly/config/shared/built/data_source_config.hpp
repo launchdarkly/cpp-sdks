@@ -56,9 +56,16 @@ struct DataSourceConfig;
 
 template <>
 struct DataSourceConfig<ClientSDK> {
-    std::variant<StreamingConfig<ClientSDK>, PollingConfig<ClientSDK>> method;
+    std::variant<StreamingConfig<ClientSDK>,
+                 PollingConfig<ClientSDK>,
+                 FDv2Config<ClientSDK>>
+        method;
 
     bool with_reasons;
+    /**
+     * Ignored when the method is FDv2, which supersedes the REPORT
+     * transport with its own choice of GET or POST.
+     */
     bool use_report;
 };
 

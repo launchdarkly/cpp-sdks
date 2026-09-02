@@ -4,7 +4,9 @@
 #include <launchdarkly/config/shared/builders/config_builder.hpp>
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
+#include <launchdarkly/config/shared/builders/fdv2_builder.hpp>
 #include <launchdarkly/config/shared/built/persistence.hpp>
+#include <launchdarkly/config/shared/connection_mode.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 
@@ -20,6 +22,8 @@ using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
 using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
+using FDv2Builder = config::shared::builders::FDv2Builder;
+using ConnectionMode = config::shared::ConnectionMode;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
 using PersistenceBuilder = config::shared::builders::PersistenceBuilder<SDK>;
 using TlsBuilder = config::shared::builders::TlsBuilder<SDK>;

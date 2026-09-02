@@ -8,8 +8,9 @@ struct MethodVisitor {};
 template <>
 struct MethodVisitor<ClientSDK> {
     using SDK = ClientSDK;
-    using Result =
-        std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>;
+    using Result = std::variant<built::StreamingConfig<SDK>,
+                                built::PollingConfig<SDK>,
+                                built::FDv2Config<SDK>>;
 
     Result operator()(StreamingBuilder<SDK> const& streaming) const {
         return streaming.Build();
@@ -18,6 +19,8 @@ struct MethodVisitor<ClientSDK> {
     Result operator()(PollingBuilder<SDK> const& polling) const {
         return polling.Build();
     }
+
+    Result operator()(FDv2Builder const& fdv2) const { return fdv2.Build(); }
 };
 
 template <typename SDK>
@@ -75,6 +78,12 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     PollingBuilder<ClientSDK> builder) {
+    method_ = std::move(builder);
+    return *this;
+}
+
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
+    FDv2Builder builder) {
     method_ = std::move(builder);
     return *this;
 }
