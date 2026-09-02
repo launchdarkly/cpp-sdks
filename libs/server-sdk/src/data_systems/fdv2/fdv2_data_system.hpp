@@ -3,15 +3,14 @@
 #include "../../data_components/change_notifier/change_notifier.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
-#include "../../data_interfaces/source/ifdv2_condition.hpp"
 #include "../../data_interfaces/source/ifdv2_initializer_factory.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer_factory.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
-#include "conditions.hpp"
-#include "source_manager.hpp"
 
 #include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/data_model/selector.hpp>
+#include <launchdarkly/data_sources/fdv2/conditions.hpp>
+#include <launchdarkly/data_sources/fdv2/source_manager.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
@@ -24,6 +23,17 @@
 #include <vector>
 
 namespace launchdarkly::server_side::data_systems {
+
+// The orchestration primitives the client and server SDKs share.
+using internal::data_sources::Conditions;
+using internal::data_sources::FallbackConditionFactory;
+using internal::data_sources::IFDv2Condition;
+using internal::data_sources::IFDv2ConditionFactory;
+using internal::data_sources::RecoveryConditionFactory;
+using internal::data_sources::SourceSignal;
+
+using SourceManager = internal::data_sources::SourceManager<
+    data_interfaces::IFDv2SynchronizerFactory>;
 
 /**
  * FDv2DataSystem is the IDataSystem implementation for the FDv2 protocol.
@@ -163,10 +173,8 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
             initializer_factories,
         std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
             synchronizer_factories,
-        std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
-            fallback_condition_factory,
-        std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
-            recovery_condition_factory,
+        std::unique_ptr<IFDv2ConditionFactory> fallback_condition_factory,
+        std::unique_ptr<IFDv2ConditionFactory> recovery_condition_factory,
         boost::asio::any_io_executor ioc,
         data_components::DataSourceStatusManager* status_manager,
         Logger const& logger);
@@ -247,7 +255,7 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     void StartSynchronizers();
     void RunSynchronizerNext();
     void OnSynchronizerResult(data_interfaces::FDv2SourceResult result);
-    void OnConditionFired(data_interfaces::IFDv2Condition::Type type);
+    void OnConditionFired(IFDv2Condition::Type type);
 
     // Schedules an FDv2 recovery attempt after the given TTL. Called with
     // mutex_ held. TTL of 0 disables the recovery and is a no-op.
@@ -273,10 +281,8 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     boost::asio::any_io_executor const ioc_;
     std::vector<std::unique_ptr<data_interfaces::IFDv2InitializerFactory>> const
         initializer_factories_;
-    std::unique_ptr<data_interfaces::IFDv2ConditionFactory> const
-        fallback_condition_factory_;
-    std::unique_ptr<data_interfaces::IFDv2ConditionFactory> const
-        recovery_condition_factory_;
+    std::unique_ptr<IFDv2ConditionFactory> const fallback_condition_factory_;
+    std::unique_ptr<IFDv2ConditionFactory> const recovery_condition_factory_;
     // Non-owning. Lifetime guaranteed by the caller (see constructor doc).
     data_components::DataSourceStatusManager* const status_manager_;
 

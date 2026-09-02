@@ -1,41 +1,31 @@
 #include <gtest/gtest.h>
 
-#include <data_interfaces/source/ifdv2_synchronizer.hpp>
-#include <data_interfaces/source/ifdv2_synchronizer_factory.hpp>
-#include <data_systems/fdv2/source_manager.hpp>
+#include <launchdarkly/data_sources/fdv2/source_manager.hpp>
 
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-using namespace launchdarkly::server_side::data_interfaces;
-using namespace launchdarkly::server_side::data_systems;
-
 namespace {
 
 // Stub synchronizer; SourceManager only cares that Build() returns one.
-class StubSynchronizer : public IFDv2Synchronizer {
+class StubSynchronizer {};
+
+// Stands in for an SDK's synchronizer factory interface, which is all
+// SourceManager requires of its type parameter.
+class StubFactory {
    public:
-    launchdarkly::async::Future<FDv2SourceResult> Next(
-        launchdarkly::data_model::Selector) override {
-        return launchdarkly::async::MakeFuture(
-            FDv2SourceResult{FDv2SourceResult::Shutdown{}});
-    }
-
-    void Close() override {}
-
-    std::string const& Identity() const override {
-        static std::string const id = "stub";
-        return id;
-    }
+    virtual std::unique_ptr<StubSynchronizer> Build() = 0;
+    [[nodiscard]] virtual bool IsFDv1Fallback() const { return false; }
+    virtual ~StubFactory() = default;
 };
 
 // Counts Build() calls for assertion. Tests don't run the returned
 // synchronizer, so a fresh stub each time is fine.
-class CountingFactory : public IFDv2SynchronizerFactory {
+class CountingFactory : public StubFactory {
    public:
-    std::unique_ptr<IFDv2Synchronizer> Build() override {
+    std::unique_ptr<StubSynchronizer> Build() override {
         ++build_count;
         return std::make_unique<StubSynchronizer>();
     }
@@ -49,6 +39,9 @@ class FDv1FallbackFactory : public CountingFactory {
 };
 
 }  // namespace
+
+using SourceManager =
+    launchdarkly::internal::data_sources::SourceManager<StubFactory>;
 
 TEST(SourceManagerTest, EmptyManagerReportsZeroAvailable) {
     SourceManager mgr({});
@@ -64,7 +57,7 @@ TEST(SourceManagerTest, NextSynchronizerReturnsFirstThenWrapsAround) {
     auto f1 = std::make_unique<CountingFactory>();
     auto* f0_ptr = f0.get();
     auto* f1_ptr = f1.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(f0));
     factories.push_back(std::move(f1));
     SourceManager mgr(std::move(factories));
@@ -88,7 +81,7 @@ TEST(SourceManagerTest, BlockCurrentSynchronizerRemovesItFromRotation) {
     auto* f0_ptr = f0.get();
     auto* f1_ptr = f1.get();
     auto* f2_ptr = f2.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(f0));
     factories.push_back(std::move(f1));
     factories.push_back(std::move(f2));
@@ -117,7 +110,7 @@ TEST(SourceManagerTest, BlockCurrentSynchronizerRemovesItFromRotation) {
 TEST(SourceManagerTest, AllBlockedReturnsNullAndZeroCount) {
     auto f0 = std::make_unique<CountingFactory>();
     auto f1 = std::make_unique<CountingFactory>();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(f0));
     factories.push_back(std::move(f1));
     SourceManager mgr(std::move(factories));
@@ -138,7 +131,7 @@ TEST(SourceManagerTest, ResetSourceIndexSendsNextCallToTheFirstAvailable) {
     auto f2 = std::make_unique<CountingFactory>();
     auto* f0_ptr = f0.get();
     auto* f2_ptr = f2.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(f0));
     factories.push_back(std::move(f1));
     factories.push_back(std::move(f2));
@@ -162,7 +155,7 @@ TEST(SourceManagerTest, ResetSourceIndexSkipsBlockedFirstFactory) {
     auto f1 = std::make_unique<CountingFactory>();
     auto* f0_ptr = f0.get();
     auto* f1_ptr = f1.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(f0));
     factories.push_back(std::move(f1));
     SourceManager mgr(std::move(factories));
@@ -183,7 +176,7 @@ TEST(SourceManagerTest, ResetSourceIndexSkipsBlockedFirstFactory) {
 
 TEST(SourceManagerTest, IsCurrentSynchronizerFDv1FallbackFalseForFDv2Factory) {
     auto f0 = std::make_unique<CountingFactory>();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(f0));
     SourceManager mgr(std::move(factories));
 
@@ -195,7 +188,7 @@ TEST(SourceManagerTest, FDv1FallbackFactoryStartsBlockedAndIsSkipped) {
     auto fdv2 = std::make_unique<CountingFactory>();
     auto fdv1 = std::make_unique<FDv1FallbackFactory>();
     auto* fdv1_ptr = fdv1.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(fdv2));
     factories.push_back(std::move(fdv1));
     SourceManager mgr(std::move(factories));
@@ -210,7 +203,7 @@ TEST(SourceManagerTest, SwitchToFDv1FallbackBlocksFDv2AndUnblocksFDv1) {
     auto fdv2 = std::make_unique<CountingFactory>();
     auto fdv1 = std::make_unique<FDv1FallbackFactory>();
     auto* fdv1_ptr = fdv1.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(fdv2));
     factories.push_back(std::move(fdv1));
     SourceManager mgr(std::move(factories));
@@ -226,7 +219,7 @@ TEST(SourceManagerTest, SwitchToFDv1FallbackBlocksFDv2AndUnblocksFDv1) {
 
 TEST(SourceManagerTest, SwitchToFDv1FallbackWithoutAdapterBlocksEverything) {
     auto fdv2 = std::make_unique<CountingFactory>();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(fdv2));
     SourceManager mgr(std::move(factories));
 
@@ -240,7 +233,7 @@ TEST(SourceManagerTest, SwitchToFDv1FallbackUnblocksPreviouslyBlockedFDv2) {
     auto fdv2 = std::make_unique<CountingFactory>();
     auto fdv1 = std::make_unique<FDv1FallbackFactory>();
     auto* fdv1_ptr = fdv1.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(fdv2));
     factories.push_back(std::move(fdv1));
     SourceManager mgr(std::move(factories));
@@ -260,7 +253,7 @@ TEST(SourceManagerTest, SwitchBackToFDv2UnblocksFDv2AndBlocksFDv1) {
     auto fdv2 = std::make_unique<CountingFactory>();
     auto* fdv2_ptr = fdv2.get();
     auto fdv1 = std::make_unique<FDv1FallbackFactory>();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(fdv2));
     factories.push_back(std::move(fdv1));
     SourceManager mgr(std::move(factories));
@@ -279,7 +272,7 @@ TEST(SourceManagerTest, SwitchBackToFDv2UnblocksFDv2AndBlocksFDv1) {
 TEST(SourceManagerTest, SwitchBackToFDv2UnblocksTerminallyFailedFDv2Factory) {
     auto fdv2 = std::make_unique<CountingFactory>();
     auto* fdv2_ptr = fdv2.get();
-    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    std::vector<std::unique_ptr<StubFactory>> factories;
     factories.push_back(std::move(fdv2));
     SourceManager mgr(std::move(factories));
 
