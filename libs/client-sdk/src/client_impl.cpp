@@ -160,6 +160,10 @@ static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
 
 std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     UpdateContextSynchronized(context);
+    // A selector describes one context's data, so it is never carried over.
+    // Any flag data already loaded stays available for evaluation until a
+    // full data set arrives for the new context.
+    flag_manager_.ClearSelector();
     flag_manager_.LoadCache(context);
     event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
