@@ -4,6 +4,8 @@
 
 #include <launchdarkly/network/http_requester.hpp>
 
+#include <boost/beast/http/message.hpp>
+
 #include <optional>
 #include <string>
 
@@ -19,5 +21,8 @@ struct FDv2ResponseHeaders {
 
 FDv2ResponseHeaders ReadFDv2ResponseHeaders(
     network::HttpResult::HeadersType const& headers);
+
+FDv2ResponseHeaders ReadFDv2ResponseHeaders(
+    boost::beast::http::response_header<> const& headers);
 
 }  // namespace launchdarkly::client_side::data_sources
