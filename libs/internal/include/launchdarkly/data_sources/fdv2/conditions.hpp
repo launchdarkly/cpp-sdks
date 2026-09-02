@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../data_interfaces/source/ifdv2_condition.hpp"
+#include <launchdarkly/data_sources/fdv2/ifdv2_condition.hpp>
 
 #include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/async/promise.hpp>
@@ -14,7 +14,7 @@
 #include <optional>
 #include <vector>
 
-namespace launchdarkly::server_side::data_systems {
+namespace launchdarkly::internal::data_sources {
 
 /**
  * Base class for conditions that fire after a duration elapses on the
@@ -25,8 +25,12 @@ namespace launchdarkly::server_side::data_systems {
  * Derived classes implement Inform() to translate orchestrator events into
  * arm/cancel actions on the timer. Subclasses also implement GetType() to
  * report whether they are a fallback or recovery condition.
+ *
+ * Thread-safe: every method may be called from any thread. The timer state is
+ * held behind a mutex in a shared State, so a timer callback firing on the
+ * executor is safe against a concurrent Close() from a caller's thread.
  */
-class TimedCondition : public data_interfaces::IFDv2Condition {
+class TimedCondition : public IFDv2Condition {
    public:
     TimedCondition(boost::asio::any_io_executor executor,
                    std::chrono::milliseconds timeout);
@@ -54,6 +58,9 @@ class TimedCondition : public data_interfaces::IFDv2Condition {
    private:
     struct State {
         std::mutex mutex;
+        // All protected by mutex. timer_cancel is replaced when the timer is
+        // re-armed, so the lock covers the replacement and not just the
+        // source's own operations.
         bool closed = false;
         async::Promise<Type> promise;
         std::optional<async::CancellationSource> timer_cancel;
@@ -68,13 +75,15 @@ class TimedCondition : public data_interfaces::IFDv2Condition {
  * Fires after the active synchronizer has been continuously interrupted for
  * the configured timeout. Each CHANGE_SET result cancels any pending timer;
  * the next Interrupted status re-arms it.
+ *
+ * Thread-safe, as TimedCondition is.
  */
 class FallbackCondition final : public TimedCondition {
    public:
     FallbackCondition(boost::asio::any_io_executor executor,
                       std::chrono::milliseconds timeout);
 
-    void Inform(data_interfaces::FDv2SourceResult const& result) override;
+    void Inform(SourceSignal signal) override;
 
     [[nodiscard]] Type GetType() const override { return Type::kFallback; }
 };
@@ -83,31 +92,33 @@ class FallbackCondition final : public TimedCondition {
  * Fires after the active synchronizer has been running for the configured
  * timeout, regardless of result content. The timer is started at
  * construction; Inform() is a no-op.
+ *
+ * Thread-safe, as TimedCondition is.
  */
 class RecoveryCondition final : public TimedCondition {
    public:
     RecoveryCondition(boost::asio::any_io_executor executor,
                       std::chrono::milliseconds timeout);
 
-    void Inform(data_interfaces::FDv2SourceResult const& result) override;
+    void Inform(SourceSignal signal) override;
 
     [[nodiscard]] Type GetType() const override { return Type::kRecovery; }
 };
 
 /**
  * Builds fresh FallbackCondition instances on demand.
+ *
+ * Thread-safe: Build() and GetType() may be called from any thread, and
+ * hold no state beyond the executor and timeout given at construction.
  */
-class FallbackConditionFactory final
-    : public data_interfaces::IFDv2ConditionFactory {
+class FallbackConditionFactory final : public IFDv2ConditionFactory {
    public:
     FallbackConditionFactory(boost::asio::any_io_executor executor,
                              std::chrono::milliseconds timeout);
 
-    [[nodiscard]] std::unique_ptr<data_interfaces::IFDv2Condition> Build()
-        override;
+    [[nodiscard]] std::unique_ptr<IFDv2Condition> Build() override;
 
-    [[nodiscard]] data_interfaces::IFDv2Condition::Type GetType()
-        const override;
+    [[nodiscard]] IFDv2Condition::Type GetType() const override;
 
    private:
     boost::asio::any_io_executor const executor_;
@@ -116,18 +127,18 @@ class FallbackConditionFactory final
 
 /**
  * Builds fresh RecoveryCondition instances on demand.
+ *
+ * Thread-safe: Build() and GetType() may be called from any thread, and
+ * hold no state beyond the executor and timeout given at construction.
  */
-class RecoveryConditionFactory final
-    : public data_interfaces::IFDv2ConditionFactory {
+class RecoveryConditionFactory final : public IFDv2ConditionFactory {
    public:
     RecoveryConditionFactory(boost::asio::any_io_executor executor,
                              std::chrono::milliseconds timeout);
 
-    [[nodiscard]] std::unique_ptr<data_interfaces::IFDv2Condition> Build()
-        override;
+    [[nodiscard]] std::unique_ptr<IFDv2Condition> Build() override;
 
-    [[nodiscard]] data_interfaces::IFDv2Condition::Type GetType()
-        const override;
+    [[nodiscard]] IFDv2Condition::Type GetType() const override;
 
    private:
     boost::asio::any_io_executor const executor_;
@@ -145,8 +156,7 @@ class RecoveryConditionFactory final
 class Conditions final {
    public:
     explicit Conditions(
-        std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>>
-            conditions);
+        std::vector<std::unique_ptr<IFDv2Condition>> conditions);
 
     ~Conditions();
 
@@ -161,29 +171,30 @@ class Conditions final {
      * `token` once the result is no longer needed, so that the per-call
      * Promise (and its registered continuations) can be released.
      */
-    [[nodiscard]] async::Future<data_interfaces::IFDv2Condition::Type>
-    GetFuture(async::CancellationToken token);
+    [[nodiscard]] async::Future<IFDv2Condition::Type> GetFuture(
+        async::CancellationToken token);
 
-    void Inform(data_interfaces::FDv2SourceResult const& result);
+    void Inform(SourceSignal signal);
 
     void Close();
 
    private:
     struct PendingEntry {
         std::int64_t id;
-        async::Promise<data_interfaces::IFDv2Condition::Type> promise;
+        async::Promise<IFDv2Condition::Type> promise;
         std::unique_ptr<async::CancellationCallback> cancel_cb;
     };
 
     struct State {
         std::mutex mutex;
+        // All protected by mutex.
         std::int64_t next_id = 0;
         std::vector<PendingEntry> pending;
-        std::optional<data_interfaces::IFDv2Condition::Type> aggregate_result;
+        std::optional<IFDv2Condition::Type> aggregate_result;
     };
 
-    std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>> conditions_;
+    std::vector<std::unique_ptr<IFDv2Condition>> conditions_;
     std::shared_ptr<State> const state_;
 };
 
-}  // namespace launchdarkly::server_side::data_systems
+}  // namespace launchdarkly::internal::data_sources

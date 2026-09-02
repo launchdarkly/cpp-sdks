@@ -8,12 +8,14 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/events/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/signals/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/data_sources/fdv2/*.hpp"
 )
 
 # Automatic library: static or dynamic based on user config.
 set(INTERNAL_SOURCES
         ${HEADER_LIST}
         context_filter.cpp
+        data_sources/fdv2/conditions.cpp
         events/asio_event_processor.cpp
         events/null_event_processor.cpp
         events/common_events.cpp
