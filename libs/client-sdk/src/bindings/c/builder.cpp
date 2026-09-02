@@ -21,6 +21,8 @@ using namespace launchdarkly::client_side;
 #define TO_POLL_BUILDER(ptr) \
     (reinterpret_cast<DataSourceBuilder::Polling*>(ptr))
 
+#define TO_FDV2_BUILDER(ptr) (reinterpret_cast<DataSourceBuilder::FDv2*>(ptr))
+
 #define FROM_POLL_BUILDER(ptr) (reinterpret_cast<LDDataSourcePollBuilder>(ptr))
 
 #define TO_BASIC_LOGGING_BUILDER(ptr) \
@@ -246,6 +248,17 @@ LDClientConfigBuilder_DataSource_MethodPoll(
     DataSourceBuilder::Polling* pb = TO_POLL_BUILDER(poll_builder);
     TO_BUILDER(b)->DataSource().Method(*pb);
     LDDataSourcePollBuilder_Free(poll_builder);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_MethodFDv2(LDClientConfigBuilder b,
+                                            LDClientFDv2Builder fdv2_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(fdv2_builder);
+
+    DataSourceBuilder::FDv2* fb = TO_FDV2_BUILDER(fdv2_builder);
+    TO_BUILDER(b)->DataSource().Method(*fb);
+    LDClientFDv2Builder_Free(fdv2_builder);
 }
 
 LD_EXPORT(LDDataSourceStreamBuilder) LDDataSourceStreamBuilder_New() {
