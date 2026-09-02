@@ -41,6 +41,7 @@ add_library(${LIBNAME} OBJECT
         config/app_info_builder.cpp
         config/http_properties.cpp
         config/data_source_builder.cpp
+        config/fdv2_builder.cpp
         config/http_properties_builder.cpp
         bindings/c/value.cpp
         bindings/c/array_builder.cpp
