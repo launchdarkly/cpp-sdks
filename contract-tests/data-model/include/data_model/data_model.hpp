@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -201,12 +202,36 @@ struct ConfigDataInitializerParams {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataInitializerParams,
                                                 polling);
 
+// One connection mode's pipeline, for client-side SDKs.
+struct ConfigModeDefinitionParams {
+    std::optional<std::vector<ConfigDataInitializerParams>> initializers;
+    std::optional<std::vector<ConfigDataSynchronizerParams>> synchronizers;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigModeDefinitionParams,
+                                                initializers,
+                                                synchronizers);
+
+// Which connection mode a client-side SDK starts in, and how any of them are
+// customized.
+struct ConfigConnectionModeParams {
+    std::optional<std::string> initialConnectionMode;
+    std::optional<std::map<std::string, ConfigModeDefinitionParams>>
+        customConnectionModes;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigConnectionModeParams,
+                                                initialConnectionMode,
+                                                customConnectionModes);
+
 struct ConfigDataSystemParams {
     std::optional<std::vector<ConfigDataInitializerParams>> initializers;
     std::optional<std::vector<ConfigDataSynchronizerParams>> synchronizers;
     std::optional<ConfigPollingParams> fdv1Fallback;
     std::optional<std::string> payloadFilter;
     std::optional<ConfigDataSystemStore> store;
+    std::optional<bool> useDefaultDataSystem;
+    std::optional<ConfigConnectionModeParams> connectionModeConfig;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemParams,
@@ -214,7 +239,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemParams,
                                                 synchronizers,
                                                 fdv1Fallback,
                                                 payloadFilter,
-                                                store);
+                                                store,
+                                                useDefaultDataSystem,
+                                                connectionModeConfig);
 
 struct ConfigBigSegmentsParams {
     std::string callbackUri;
