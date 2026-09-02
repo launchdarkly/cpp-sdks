@@ -4,6 +4,7 @@
 #include <launchdarkly/encoding/sha_256.hpp>
 
 #include <launchdarkly/detail/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/json_item_descriptor.hpp>
 
@@ -59,17 +60,22 @@ void FlagPersistence::Apply(Context const& context,
         change_set.type != data_model::ChangeSetType::kNone;
     sink_.Apply(context, std::move(change_set), from_cache);
     if (from_cache) {
-        // Writing cached data back to the cache it came from would be a no-op.
+        // Writing cached data back to the cache would be a no-op, and it was
+        // never confirmed current by the service.
         return;
     }
+    // Both a payload and a confirmation that nothing changed mean the cache
+    // is up to date as of now.
+    RecordFreshness(context);
     if (changed_data) {
         StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
     }
 }
 
-void FlagPersistence::LoadCached(Context const& context) {
+std::optional<std::unordered_map<std::string, ItemDescriptor>>
+FlagPersistence::ReadCached(Context const& context) {
     if (!persistence_ || !context.Valid()) {
-        return;
+        return std::nullopt;
     }
 
     std::lock_guard lock(persistence_mutex_);
@@ -77,7 +83,7 @@ void FlagPersistence::LoadCached(Context const& context) {
         environment_namespace_, PersistenceEncodeKey(context.CanonicalKey()));
 
     if (!data) {
-        return;
+        return std::nullopt;
     }
 
     boost::system::error_code error_code;
@@ -86,7 +92,7 @@ void FlagPersistence::LoadCached(Context const& context) {
         LD_LOG(logger_, LogLevel::kError)
             << "Failed to parse flag data from persistence: "
             << error_code.message();
-        return;
+        return std::nullopt;
     }
 
     auto res = boost::json::value_to<tl::expected<
@@ -94,16 +100,49 @@ void FlagPersistence::LoadCached(Context const& context) {
         JsonError>>(parsed);
     if (!res) {
         LD_LOG(logger_, LogLevel::kError)
-            << "Failed to parse flag data from persistence: "
-            << error_code.message();
-        return;
+            << "Failed to parse flag data from persistence";
+        return std::nullopt;
     }
 
     // If the map was null or omitted, treat it like an empty data set.
-    auto map =
-        res.value().value_or(std::unordered_map<std::string, ItemDescriptor>{});
+    return res.value().value_or(
+        std::unordered_map<std::string, ItemDescriptor>{});
+}
 
-    sink_.Init(context, std::move(map));
+void FlagPersistence::LoadCached(Context const& context) {
+    if (auto data = ReadCached(context)) {
+        sink_.Init(context, std::move(*data));
+    }
+}
+
+// Identifies a context by everything it carries, not just its key. Changing
+// an attribute can change how flags evaluate.
+static std::string FreshnessId(Context const& context) {
+    return PersistenceEncodeKey(
+        boost::json::serialize(boost::json::value_from(context)));
+}
+
+void FlagPersistence::RecordFreshness(Context const& context) {
+    if (!persistence_ || !context.Valid()) {
+        return;
+    }
+
+    std::lock_guard lock(persistence_mutex_);
+    auto index = ReadIndexAt(freshness_key_);
+    index.Notice(FreshnessId(context), time_stamper_());
+    index.Prune(max_cached_contexts_);
+    persistence_->Set(environment_namespace_, freshness_key_,
+                      boost::json::serialize(boost::json::value_from(index)));
+}
+
+std::optional<std::chrono::time_point<std::chrono::system_clock>>
+FlagPersistence::FreshnessFor(Context const& context) {
+    if (!persistence_ || !context.Valid()) {
+        return std::nullopt;
+    }
+
+    std::lock_guard lock(persistence_mutex_);
+    return ReadIndexAt(freshness_key_).TimestampFor(FreshnessId(context));
 }
 
 void FlagPersistence::StoreCache(std::string const& context_id) {
@@ -112,7 +151,7 @@ void FlagPersistence::StoreCache(std::string const& context_id) {
     }
 
     std::lock_guard lock(persistence_mutex_);
-    auto index = GetIndex();
+    auto index = ReadIndexAt(index_key_);
     index.Notice(context_id, time_stamper_());
     auto pruned = index.Prune(max_cached_contexts_);
     for (auto& id : pruned) {
@@ -127,11 +166,9 @@ void FlagPersistence::StoreCache(std::string const& context_id) {
                       boost::json::serialize(v));
 }
 
-ContextIndex FlagPersistence::GetIndex() {
+ContextIndex FlagPersistence::ReadIndexAt(std::string const& key) {
     if (persistence_) {
-        std::lock_guard lock(persistence_mutex_);
-        auto index_data =
-            persistence_->Read(environment_namespace_, index_key_);
+        auto index_data = persistence_->Read(environment_namespace_, key);
 
         if (index_data) {
             boost::system::error_code error_code;

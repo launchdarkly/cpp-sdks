@@ -211,7 +211,7 @@ TEST(FlagPersistenceTests, StoresCacheOnApply) {
                   ["CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0="]);
 }
 
-TEST(FlagPersistenceTests, ApplyOfNoneChangeSetDoesNotWriteTheCache) {
+TEST(FlagPersistenceTests, ApplyOfNoneChangeSetDoesNotWriteTheFlagData) {
     auto context = ContextBuilder().Kind("user", "user-key").Build();
     auto store = FlagStore();
     auto updater = FlagUpdater(store);
@@ -227,11 +227,130 @@ TEST(FlagPersistenceTests, ApplyOfNoneChangeSetDoesNotWriteTheCache) {
                            FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
                            /* from_cache= */ false);
 
-    // Nothing is written to the cache.
-    EXPECT_TRUE(persistence->store_.empty());
+    // The context's flag data is not written.
+    auto& space = persistence->store_.begin()->second;
+    EXPECT_EQ(0, space.count(PersistenceEncodeKey("user:user-key")));
 }
 
-// Writing data straight back to the cache it was read from would be a no-op.
+TEST(FlagPersistenceTests, RecordsFreshnessOnAPayload) {
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 5, []() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{500}};
+        });
+
+    EXPECT_FALSE(flag_persistence.FreshnessFor(context).has_value());
+
+    flag_persistence.Apply(
+        context,
+        FlagChangeSet{
+            ChangeSetType::kFull,
+            {FlagChange{"flagA",
+                        ItemDescriptor{EvaluationResult{
+                            1, std::nullopt, false, false, std::nullopt,
+                            EvaluationDetailInternal{
+                                Value("test"), std::nullopt, std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ false);
+
+    EXPECT_EQ(
+        std::chrono::system_clock::time_point{std::chrono::milliseconds{500}},
+        flag_persistence.FreshnessFor(context));
+}
+
+// A "none" intent is the service confirming the SDK's data is current, which
+// is exactly as good as receiving it again.
+TEST(FlagPersistenceTests, RecordsFreshnessOnANoneChangeSet) {
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 5, []() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{700}};
+        });
+
+    flag_persistence.Apply(context,
+                           FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+                           /* from_cache= */ false);
+
+    EXPECT_EQ(
+        std::chrono::system_clock::time_point{std::chrono::milliseconds{700}},
+        flag_persistence.FreshnessFor(context));
+}
+
+// The freshness record is keyed by the whole context, because changing an
+// attribute can change how flags evaluate.
+TEST(FlagPersistenceTests, FreshnessIsPerContextAttributeSet) {
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 5, []() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{500}};
+        });
+
+    auto plain = ContextBuilder().Kind("user", "user-key").Build();
+    auto with_attribute =
+        ContextBuilder().Kind("user", "user-key").Set("country", "US").Build();
+
+    flag_persistence.Apply(plain,
+                           FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+                           /* from_cache= */ false);
+
+    EXPECT_TRUE(flag_persistence.FreshnessFor(plain).has_value());
+    EXPECT_FALSE(flag_persistence.FreshnessFor(with_attribute).has_value());
+}
+
+// A stored context that has aged out of the cache should not keep a freshness
+// record alive either.
+TEST(FlagPersistenceTests, PrunesFreshnessBeyondMaxContexts) {
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    uint64_t now = 0;
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 2, [&now]() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{now}};
+        });
+
+    auto first = ContextBuilder().Kind("user", "first").Build();
+    for (auto const& key : {"first", "second", "third"}) {
+        flag_persistence.Apply(
+            ContextBuilder().Kind("user", key).Build(),
+            FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+            /* from_cache= */ false);
+        now++;
+    }
+
+    EXPECT_FALSE(flag_persistence.FreshnessFor(first).has_value());
+    EXPECT_TRUE(
+        flag_persistence
+            .FreshnessFor(ContextBuilder().Kind("user", "third").Build())
+            .has_value());
+}
+
+// Data read out of the cache was never confirmed current by the service, so
+// writing it back or counting it as fresh would be misleading.
 TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
     auto context = ContextBuilder().Kind("user", "user-key").Build();
     auto store = FlagStore();
@@ -258,6 +377,8 @@ TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
 
     // Nothing is written back.
     EXPECT_TRUE(persistence->store_.empty());
+    // Nor was it confirmed current by the service, so it is not freshness.
+    EXPECT_FALSE(flag_persistence.FreshnessFor(context).has_value());
     // The data is still applied to the store, so evaluation can use it.
     ASSERT_TRUE(store.Get("flagA"));
 }
