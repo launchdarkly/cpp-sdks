@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <data_systems/fdv2/conditions.hpp>
+#include <launchdarkly/data_sources/fdv2/conditions.hpp>
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -8,8 +8,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace launchdarkly::server_side::data_interfaces;
-using namespace launchdarkly::server_side::data_systems;
+using namespace launchdarkly::internal::data_sources;
 using namespace std::chrono_literals;
 
 using launchdarkly::async::CancellationToken;
@@ -52,11 +51,7 @@ TEST(FallbackConditionTest, InterruptedArmsTimerWhichFiresAfterTimeout) {
     FallbackCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
-    condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
-        FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
-            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-    }});
+    condition.Inform(SourceSignal::kInterrupted);
 
     auto result = future.WaitForResult(1s);
 
@@ -71,18 +66,8 @@ TEST(FallbackConditionTest, ChangeSetCancelsActiveTimer) {
 
     // Arm the timer with Interrupted, then cancel via ChangeSet before it
     // fires.
-    condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
-        FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
-            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-    }});
-    condition.Inform(FDv2SourceResult{FDv2SourceResult::ChangeSet{
-        launchdarkly::data_model::ChangeSet<ChangeSetData>{
-            launchdarkly::data_model::ChangeSetType::kFull,
-            {},
-            launchdarkly::data_model::Selector{},
-        },
-    }});
+    condition.Inform(SourceSignal::kInterrupted);
+    condition.Inform(SourceSignal::kChangeSet);
 
     // Wait well past the 100ms threshold; future should remain unresolved.
     std::this_thread::sleep_for(300ms);
@@ -94,11 +79,7 @@ TEST(FallbackConditionTest, CloseCancelsActiveTimerAndResolvesWithCancelled) {
     FallbackCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
-    condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
-        FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
-            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-    }});
+    condition.Inform(SourceSignal::kInterrupted);
     condition.Close();
 
     auto result = future.WaitForResult(200ms);
@@ -127,18 +108,8 @@ TEST(RecoveryConditionTest, InformDoesNotAffectTimer) {
 
     // Recovery is purely time-based; results from the synchronizer should not
     // disturb the timer in either direction.
-    condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
-        FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
-            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-    }});
-    condition.Inform(FDv2SourceResult{FDv2SourceResult::ChangeSet{
-        launchdarkly::data_model::ChangeSet<ChangeSetData>{
-            launchdarkly::data_model::ChangeSetType::kFull,
-            {},
-            launchdarkly::data_model::Selector{},
-        },
-    }});
+    condition.Inform(SourceSignal::kInterrupted);
+    condition.Inform(SourceSignal::kChangeSet);
 
     auto result = future.WaitForResult(1s);
     ASSERT_TRUE(result.has_value());
@@ -198,11 +169,7 @@ TEST(ConditionsTest, InformForwardsToAllUnderlyingConditions) {
         std::make_unique<RecoveryCondition>(ioc.GetExecutor(), /*timeout=*/1s));
     Conditions conditions(std::move(conds));
 
-    conditions.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
-        FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
-            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-    }});
+    conditions.Inform(SourceSignal::kInterrupted);
 
     auto result = conditions.GetFuture(CancellationToken{}).WaitForResult(1s);
 

@@ -1,15 +1,27 @@
 #pragma once
 
-#include "fdv2_source_result.hpp"
-
 #include <launchdarkly/async/promise.hpp>
 
 #include <memory>
 
-namespace launchdarkly::server_side::data_interfaces {
+namespace launchdarkly::internal::data_sources {
 
 /**
- * A condition observes the orchestrator's stream of synchronizer results and
+ * What the orchestrator observed from the active synchronizer, reduced to the
+ * distinctions a condition acts on. The orchestrator maps its own result type
+ * onto this before informing its conditions.
+ */
+enum class SourceSignal {
+    /** A changeset arrived. */
+    kChangeSet,
+    /** The synchronizer reported a recoverable failure. */
+    kInterrupted,
+    /** Anything else, which no condition acts on. */
+    kOther,
+};
+
+/**
+ * A condition observes the orchestrator's stream of synchronizer signals and
  * fires when criteria for a synchronizer transition are met.
  *
  * Each condition plays one of two roles, identified by Type():
@@ -18,7 +30,7 @@ namespace launchdarkly::server_side::data_interfaces {
  *   - kRecovery: when fired, the orchestrator stops the active fallback
  *     synchronizer and returns to the most-preferred synchronizer.
  *
- * Conditions are stateful: the orchestrator pushes results into a condition
+ * Conditions are stateful: the orchestrator pushes signals into a condition
  * via Inform() so the condition can update its internal state (typically a
  * timer). When the condition's criteria are satisfied, the future returned
  * by Execute() resolves with the condition's Type.
@@ -52,10 +64,10 @@ class IFDv2Condition {
     [[nodiscard]] virtual async::Future<Type> Execute() = 0;
 
     /**
-     * Pushes a synchronizer result into the condition so it can update any
+     * Pushes a synchronizer signal into the condition so it can update any
      * internal state (e.g., arm or cancel a timer).
      */
-    virtual void Inform(FDv2SourceResult const& result) = 0;
+    virtual void Inform(SourceSignal signal) = 0;
 
     /**
      * Cancels any pending internal work and resolves the future returned by
@@ -104,4 +116,4 @@ class IFDv2ConditionFactory {
     IFDv2ConditionFactory() = default;
 };
 
-}  // namespace launchdarkly::server_side::data_interfaces
+}  // namespace launchdarkly::internal::data_sources

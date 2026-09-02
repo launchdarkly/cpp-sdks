@@ -1,13 +1,11 @@
 #pragma once
 
-#include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
-#include "../../data_interfaces/source/ifdv2_synchronizer_factory.hpp"
-
 #include <cstddef>
 #include <memory>
+#include <utility>
 #include <vector>
 
-namespace launchdarkly::server_side::data_systems {
+namespace launchdarkly::internal::data_sources {
 
 /**
  * Manages a list of synchronizer factories together with per-factory state
@@ -26,12 +24,25 @@ namespace launchdarkly::server_side::data_systems {
  * Factories whose IsFDv1Fallback() returns true start in the Blocked state.
  *
  * Not thread-safe. The caller is responsible for serializing all calls.
+ *
+ * @tparam Factory The SDK's synchronizer factory interface, which must supply
+ * IsFDv1Fallback() and a Build() returning a smart pointer to a synchronizer.
  */
+template <typename Factory>
 class SourceManager {
    public:
-    explicit SourceManager(
-        std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
-            factories);
+    using SynchronizerPtr = decltype(std::declval<Factory&>().Build());
+
+    explicit SourceManager(std::vector<std::unique_ptr<Factory>> factories) {
+        synchronizers_.reserve(factories.size());
+        for (auto& factory : factories) {
+            bool const is_fdv1_fallback = factory->IsFDv1Fallback();
+            synchronizers_.push_back(SynchronizerFactoryWithState{
+                std::move(factory),
+                is_fdv1_fallback ? State::kBlocked : State::kAvailable,
+                is_fdv1_fallback});
+        }
+    }
 
     /**
      * Advances to the next Available synchronizer factory (wrapping past the
@@ -39,19 +50,40 @@ class SourceManager {
      * as the current one for subsequent queries. Returns nullptr if no
      * Available factory exists.
      */
-    std::unique_ptr<data_interfaces::IFDv2Synchronizer> NextSynchronizer();
+    SynchronizerPtr NextSynchronizer() {
+        if (synchronizers_.empty()) {
+            current_factory_index_ = -1;
+            return nullptr;
+        }
+        for (std::size_t visited = 0; visited < synchronizers_.size();
+             ++visited) {
+            synchronizer_index_ = (synchronizer_index_ + 1) %
+                                  static_cast<int>(synchronizers_.size());
+            if (synchronizers_[synchronizer_index_].state ==
+                State::kAvailable) {
+                current_factory_index_ = synchronizer_index_;
+                return synchronizers_[synchronizer_index_].factory->Build();
+            }
+        }
+        current_factory_index_ = -1;
+        return nullptr;
+    }
 
     /**
      * Marks the currently tracked factory as Blocked. No-op if no factory is
      * currently tracked.
      */
-    void BlockCurrentSynchronizer();
+    void BlockCurrentSynchronizer() {
+        if (current_factory_index_ >= 0) {
+            synchronizers_[current_factory_index_].state = State::kBlocked;
+        }
+    }
 
     /**
      * Resets the iteration cursor so that the next call to NextSynchronizer
      * begins searching from index 0.
      */
-    void ResetSourceIndex();
+    void ResetSourceIndex() { synchronizer_index_ = -1; }
 
     /**
      * Blocks every non-FDv1 factory and unblocks the FDv1 fallback factory,
@@ -59,37 +91,69 @@ class SourceManager {
      * NextSynchronizer returns the FDv1 fallback. If no FDv1 fallback factory
      * was configured, every factory is left blocked.
      */
-    void SwitchToFDv1Fallback();
+    void SwitchToFDv1Fallback() {
+        for (auto& entry : synchronizers_) {
+            entry.state =
+                entry.is_fdv1_fallback ? State::kAvailable : State::kBlocked;
+        }
+        synchronizer_index_ = -1;
+    }
 
     /**
      * Returns synchronizer state to the initial configuration, including
      * unblocking factories previously blocked by terminal errors.
      */
-    void SwitchBackToFDv2();
+    void SwitchBackToFDv2() {
+        for (auto& entry : synchronizers_) {
+            entry.state =
+                entry.is_fdv1_fallback ? State::kBlocked : State::kAvailable;
+        }
+        synchronizer_index_ = -1;
+    }
 
     /**
      * Returns true if the currently tracked factory is the first Available
      * factory in the list. Returns false if no factory is currently tracked.
      */
-    [[nodiscard]] bool IsPrimeSynchronizer() const;
+    [[nodiscard]] bool IsPrimeSynchronizer() const {
+        for (std::size_t i = 0; i < synchronizers_.size(); ++i) {
+            if (synchronizers_[i].state == State::kAvailable) {
+                return synchronizer_index_ == static_cast<int>(i);
+            }
+        }
+        return false;
+    }
 
     /**
      * Returns the count of factories not in the Blocked state.
      */
-    [[nodiscard]] std::size_t AvailableSynchronizerCount() const;
+    [[nodiscard]] std::size_t AvailableSynchronizerCount() const {
+        std::size_t count = 0;
+        for (auto const& s : synchronizers_) {
+            if (s.state == State::kAvailable) {
+                ++count;
+            }
+        }
+        return count;
+    }
 
     /**
      * Returns the total number of factories configured at construction
      * (including any currently in the Blocked state). Constant for the
      * lifetime of the SourceManager.
      */
-    [[nodiscard]] std::size_t SynchronizerCount() const;
+    [[nodiscard]] std::size_t SynchronizerCount() const {
+        return synchronizers_.size();
+    }
 
     /**
      * Returns true if the currently tracked factory is the FDv1 fallback
      * synchronizer.
      */
-    [[nodiscard]] bool IsCurrentSynchronizerFDv1Fallback() const;
+    [[nodiscard]] bool IsCurrentSynchronizerFDv1Fallback() const {
+        return current_factory_index_ >= 0 &&
+               synchronizers_[current_factory_index_].is_fdv1_fallback;
+    }
 
     SourceManager(SourceManager const&) = delete;
     SourceManager(SourceManager&&) = delete;
@@ -101,7 +165,7 @@ class SourceManager {
     enum class State { kAvailable, kBlocked };
 
     struct SynchronizerFactoryWithState {
-        std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory> factory;
+        std::unique_ptr<Factory> factory;
         State state = State::kAvailable;
         bool is_fdv1_fallback = false;
     };
@@ -113,4 +177,4 @@ class SourceManager {
     int current_factory_index_ = -1;
 };
 
-}  // namespace launchdarkly::server_side::data_systems
+}  // namespace launchdarkly::internal::data_sources
