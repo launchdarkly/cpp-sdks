@@ -21,6 +21,18 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+// The distinctions the conditions act on, out of the whole result.
+SourceSignal SignalFor(data_interfaces::FDv2SourceResult const& result) {
+    using Result = data_interfaces::FDv2SourceResult;
+    if (std::get_if<Result::ChangeSet>(&result.value)) {
+        return SourceSignal::kChangeSet;
+    }
+    if (std::get_if<Result::Interrupted>(&result.value)) {
+        return SourceSignal::kInterrupted;
+    }
+    return SourceSignal::kOther;
+}
+
 }  // namespace
 
 FDv2DataSystem::FDv2DataSystem(
@@ -28,10 +40,8 @@ FDv2DataSystem::FDv2DataSystem(
         initializer_factories,
     std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
         synchronizer_factories,
-    std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
-        fallback_condition_factory,
-    std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
-        recovery_condition_factory,
+    std::unique_ptr<IFDv2ConditionFactory> fallback_condition_factory,
+    std::unique_ptr<IFDv2ConditionFactory> recovery_condition_factory,
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager* status_manager,
     Logger const& logger)
@@ -293,9 +303,8 @@ void FDv2DataSystem::RunSynchronizerNext() {
             });
 }
 
-void FDv2DataSystem::OnConditionFired(
-    data_interfaces::IFDv2Condition::Type type) {
-    using Type = data_interfaces::IFDv2Condition::Type;
+void FDv2DataSystem::OnConditionFired(IFDv2Condition::Type type) {
+    using Type = IFDv2Condition::Type;
     if (type == Type::kCancelled) {
         return;
     }
@@ -320,7 +329,7 @@ void FDv2DataSystem::OnConditionFired(
 }
 
 std::unique_ptr<Conditions> FDv2DataSystem::BuildActiveConditions() const {
-    std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>> conditions;
+    std::vector<std::unique_ptr<IFDv2Condition>> conditions;
     // With only one synchronizer available there's nothing to fall back to
     // or recover from, so leave the conditions empty.
     if (source_manager_.AvailableSynchronizerCount() == 1) {
@@ -346,7 +355,7 @@ void FDv2DataSystem::OnSynchronizerResult(
             return;
         }
         if (active_conditions_) {
-            active_conditions_->Inform(result);
+            active_conditions_->Inform(SignalFor(result));
         }
     }
 
