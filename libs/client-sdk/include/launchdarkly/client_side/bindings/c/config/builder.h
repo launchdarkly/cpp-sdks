@@ -4,6 +4,7 @@
 #pragma once
 
 #include <launchdarkly/client_side/bindings/c/config/config.h>
+#include <launchdarkly/client_side/bindings/c/config/fdv2_builder/fdv2_builder.h>
 
 #include <launchdarkly/bindings/c/config/logging_builder.h>
 #include <launchdarkly/bindings/c/export.h>
@@ -320,6 +321,25 @@ LD_EXPORT(void)
 LDClientConfigBuilder_DataSource_MethodPoll(
     LDClientConfigBuilder b,
     LDDataSourcePollBuilder poll_builder);
+
+/**
+ * Set the FDv2 configuration for the builder. The builder is automatically
+ * freed.
+ *
+ * FDv2 is the current flag delivery protocol. It supersedes the streaming and
+ * polling methods above, which speak FDv1, and configures both transports
+ * itself through named connection modes.
+ *
+ * WARNING: Do not call any other LDClientFDv2Builder function on the provided
+ * LDClientFDv2Builder after calling this function. It is undefined behavior.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param fdv2_builder The FDv2 builder. The builder is consumed; do not free
+ * it. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_MethodFDv2(LDClientConfigBuilder b,
+                                            LDClientFDv2Builder fdv2_builder);
 
 /**
  * Creates a new DataSource builder for the Streaming method.
