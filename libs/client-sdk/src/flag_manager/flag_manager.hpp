@@ -28,6 +28,13 @@ class FlagManager {
 
     void LoadCache(Context const& context);
 
+    /**
+     * Forgets the selector for the data currently held, leaving the data in
+     * place. Called when the evaluation context changes, since a selector
+     * describes one context's data and is never reused for another.
+     */
+    void ClearSelector();
+
    private:
     FlagStore flag_store_;
     FlagUpdater flag_updater_;
