@@ -28,6 +28,7 @@ add_library(${LIBNAME} OBJECT
         attributes_builder.cpp
         error.cpp
         config/service_endpoints.cpp
+        config/connection_mode.cpp
         config/events.cpp
         config/endpoints_builder.cpp
         config/events_builder.cpp
