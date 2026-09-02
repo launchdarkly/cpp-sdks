@@ -15,6 +15,16 @@
 
 namespace launchdarkly::client_side::flag_manager {
 
+/**
+ * Applies data source updates to the store and dispatches the resulting
+ * change events to registered listeners.
+ *
+ * Thread-safe. Every method takes signal_mutex_, so an update arriving on a
+ * data source's thread cannot interleave with a listener being registered or
+ * removed. Listener callbacks run on the thread that delivered the update,
+ * while that mutex is held, so a callback must not register listeners of its
+ * own.
+ */
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
     FlagUpdater(FlagStore& flag_store);
@@ -23,6 +33,9 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
     void Upsert(Context const& context,
                 std::string key,
                 ItemDescriptor item) override;
+    void Apply(Context const& context,
+               FlagChangeSet change_set,
+               bool from_cache) override;
 
     /**
      * Listen for changes for the specific flag.

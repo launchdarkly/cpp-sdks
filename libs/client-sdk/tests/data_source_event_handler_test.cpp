@@ -25,10 +25,17 @@ class TestHandler : public IDataSourceUpdateSink {
         upsert_data_.emplace_back(key, data);
         count_ += 1;
     }
+    void Apply(Context const& context,
+               FlagChangeSet change_set,
+               bool from_cache) override {
+        apply_data_.push_back(std::move(change_set));
+        count_ += 1;
+    }
 
     uint64_t count_ = 0;
     std::vector<std::unordered_map<std::string, ItemDescriptor>> init_data_;
     std::vector<std::pair<std::string, ItemDescriptor>> upsert_data_;
+    std::vector<FlagChangeSet> apply_data_;
 };
 
 TEST(StreamingDataHandlerTests, HandlesPutMessage) {
