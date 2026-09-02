@@ -16,6 +16,6 @@ endif ()
 
 add_executable(gtest_${LIBNAME}
         ${tests})
-target_link_libraries(gtest_${LIBNAME} launchdarkly::client launchdarkly::internal GTest::gtest_main)
+target_link_libraries(gtest_${LIBNAME} launchdarkly::client launchdarkly::internal launchdarkly::sse GTest::gtest_main)
 
 gtest_discover_tests(gtest_${LIBNAME})
