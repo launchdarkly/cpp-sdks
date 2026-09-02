@@ -2,6 +2,7 @@
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
+#include <launchdarkly/config/shared/built/fdv2_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/persistence.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
@@ -73,6 +74,52 @@ struct Defaults<ClientSDK> {
     static auto PollingConfig() -> shared::built::PollingConfig<ClientSDK> {
         return {std::chrono::minutes(5), "/msdk/evalx/contexts",
                 "/msdk/evalx/context", std::chrono::minutes(5)};
+    }
+
+    /**
+     * The three connection modes a desktop SDK provides, starting in
+     * streaming, with automatic mode switching off.
+     */
+    static auto FDv2Config() -> shared::built::FDv2Config<ClientSDK> {
+        using Config = shared::built::FDv2Config<ClientSDK>;
+
+        // Both timeouts are chosen for consistency with the other
+        // LaunchDarkly SDKs.
+        auto const fallback_timeout = std::chrono::seconds(120);
+        auto const recovery_timeout = std::chrono::seconds(300);
+
+        Config::StreamingConfig const streaming{std::chrono::seconds(1),
+                                                std::nullopt};
+        Config::PollingConfig const polling{std::chrono::minutes(5),
+                                            std::nullopt};
+        Config::FDv1FallbackConfig const fdv1_fallback{std::chrono::minutes(5),
+                                                       std::nullopt};
+
+        return {
+            shared::ConnectionMode::kStreaming,
+            "https://sdk.launchdarkly.com",
+            "https://clientstream.launchdarkly.com",
+            {
+                // Streaming initializes from the cache, then polls for a
+                // basis so that the stream can deliver only what changed,
+                // and falls back to polling if the stream cannot be kept up.
+                {shared::ConnectionMode::kStreaming,
+                 Config::ModeDefinition{{Config::CacheConfig{}, polling},
+                                        {streaming, polling},
+                                        fdv1_fallback}},
+                {shared::ConnectionMode::kPolling,
+                 Config::ModeDefinition{
+                     {Config::CacheConfig{}}, {polling}, fdv1_fallback}},
+                // Offline evaluates against the cache and makes no requests,
+                // so it has nothing to fall back to.
+                {shared::ConnectionMode::kOffline,
+                 Config::ModeDefinition{
+                     {Config::CacheConfig{}}, {}, std::nullopt}},
+            },
+            /* use_post= */ false,
+            fallback_timeout,
+            recovery_timeout,
+        };
     }
 
     static std::size_t MaxCachedContexts() { return 5; }
