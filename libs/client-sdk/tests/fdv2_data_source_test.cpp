@@ -169,6 +169,16 @@ class MultiShotSynchronizerFactory : public IFDv2SynchronizerFactory {
     std::vector<std::unique_ptr<IFDv2Synchronizer>> sources_;
 };
 
+// Stands in for the FDv1 tier, which the orchestrator keeps in reserve.
+class FDv1FallbackFactory : public MultiShotSynchronizerFactory {
+   public:
+    explicit FDv1FallbackFactory(
+        std::vector<std::unique_ptr<IFDv2Synchronizer>> sources)
+        : MultiShotSynchronizerFactory(std::move(sources)) {}
+
+    [[nodiscard]] bool IsFDv1Fallback() const override { return true; }
+};
+
 // Initializer whose Run() stays pending until Deliver() resolves it, so
 // orchestration can be examined in flight.
 class StalledInitializer : public IFDv2Initializer {
@@ -280,6 +290,10 @@ class Harness {
     }
 
     boost::asio::io_context& Context() { return ioc_; }
+
+    // Runs the orchestration to a standstill without waiting on timers, for
+    // tests where a scheduled retry is not the point.
+    void Drain() { ioc_.poll(); }
     DataSourceStatusManager& StatusManager() { return status_manager_; }
     flag_manager::FlagStore const& Store() { return flag_manager_.Store(); }
 
@@ -800,4 +814,145 @@ TEST(ClientFDv2DataSourceTest, CacheSourcedDataIsMarkedAsSuch) {
     ASSERT_EQ(2u, h.Applies().size());
     EXPECT_TRUE(h.Applies()[0]);
     EXPECT_FALSE(h.Applies()[1]);
+}
+
+// ============================================================================
+// FDv1 fallback
+// ============================================================================
+
+namespace {
+
+FDv2SourceResult WithFallbackDirective(FDv2SourceResult result,
+                                       std::chrono::seconds ttl) {
+    result.fdv1_fallback = FDv1FallbackDirective{ttl};
+    return result;
+}
+
+}  // namespace
+
+// The payload that arrived alongside the directive is still applied before the
+// SDK moves off FDv2.
+TEST(ClientFDv2DataSourceTest, FallbackDirectiveOnAnInitializerAppliesItsData) {
+    Harness h;
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(std::make_unique<OneShotInitializerFactory>(
+        std::make_unique<MockInitializer>(WithFallbackDirective(
+            MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                                {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                                MakeSelector(1, "state-1")),
+            std::chrono::seconds{3600}))));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{})));
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> fdv1_sources;
+    fdv1_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{}));
+    synchronizers.push_back(
+        std::make_unique<FDv1FallbackFactory>(std::move(fdv1_sources)));
+
+    auto source =
+        h.MakeDataSource(std::move(initializers), std::move(synchronizers));
+    source->Start();
+    h.Drain();
+
+    EXPECT_TRUE(h.Store().Get("flagA"));
+}
+
+TEST(ClientFDv2DataSourceTest, FallbackDirectiveStartsTheFDv1Tier) {
+    Harness h;
+
+    std::vector<FDv2SourceResult> fdv2_results;
+    fdv2_results.push_back(WithFallbackDirective(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                            MakeSelector(1, "state-1")),
+        std::chrono::seconds{3600}));
+
+    std::vector<FDv2SourceResult> fdv1_results;
+    fdv1_results.push_back(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"from-fdv1", MakeFlag(1, Value("b"))}},
+                            data_model::Selector{}));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::make_unique<MockSynchronizer>(std::move(fdv2_results))));
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> fdv1_sources;
+    fdv1_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::move(fdv1_results)));
+    auto fdv1 = std::make_unique<FDv1FallbackFactory>(std::move(fdv1_sources));
+    auto* fdv1_ptr = fdv1.get();
+    synchronizers.push_back(std::move(fdv1));
+
+    auto source = h.MakeDataSource({}, std::move(synchronizers));
+    source->Start();
+    h.Drain();
+
+    EXPECT_EQ(1, fdv1_ptr->build_count_);
+    EXPECT_TRUE(h.Store().Get("from-fdv1"));
+}
+
+// Continuing to attempt FDv2 after the service has said not to would be
+// pointless, so the SDK disconnects instead.
+TEST(ClientFDv2DataSourceTest, FallbackWithNoFDv1TierDisconnects) {
+    Harness h;
+
+    std::vector<FDv2SourceResult> fdv2_results;
+    fdv2_results.push_back(WithFallbackDirective(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                            MakeSelector(1, "state-1")),
+        std::chrono::seconds{3600}));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::make_unique<MockSynchronizer>(std::move(fdv2_results))));
+
+    auto source = h.MakeDataSource({}, std::move(synchronizers));
+    source->Start();
+    h.Drain();
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInterrupted, h.State());
+    // Flag data already received stays available for evaluation.
+    EXPECT_TRUE(h.Store().Get("flagA"));
+}
+
+// Once the TTL elapses the SDK tries FDv2 again, so a fallback is never
+// permanent.
+TEST(ClientFDv2DataSourceTest, FDv2IsRetriedAfterTheFallbackTtl) {
+    Harness h;
+
+    std::vector<FDv2SourceResult> first_fdv2;
+    first_fdv2.push_back(WithFallbackDirective(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                            MakeSelector(1, "state-1")),
+        std::chrono::seconds{1}));
+
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> fdv2_sources;
+    fdv2_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::move(first_fdv2)));
+    fdv2_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{}));
+
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> fdv1_sources;
+    fdv1_sources.push_back(std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{}, nullptr, nullptr,
+        /* stall_after_results= */ true));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    auto fdv2 =
+        std::make_unique<MultiShotSynchronizerFactory>(std::move(fdv2_sources));
+    auto* fdv2_ptr = fdv2.get();
+    synchronizers.push_back(std::move(fdv2));
+    synchronizers.push_back(
+        std::make_unique<FDv1FallbackFactory>(std::move(fdv1_sources)));
+
+    auto source = h.MakeDataSource({}, std::move(synchronizers));
+    source->Start();
+    h.Context().run();
+
+    EXPECT_EQ(2, fdv2_ptr->build_count_);
 }
