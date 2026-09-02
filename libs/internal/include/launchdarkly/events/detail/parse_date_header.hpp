@@ -2,23 +2,28 @@
 
 #include <chrono>
 #include <iomanip>
+#include <locale>
 #include <optional>
 #include <sstream>
 
 namespace launchdarkly::events::detail {
 
+/**
+ * Parses an HTTP Date header into a time point, or returns nullopt if the
+ * value is not a well-formed HTTP date.
+ */
 template <typename Clock>
-
 static std::optional<typename Clock::time_point> ParseDateHeader(
-    std::string const& datetime,
-    std::locale const& locale) {
+    std::string const& datetime) {
     // The following comments may not be entirely accurate.
     // TODO: There must be a better way.
 
     std::tm gmt_tm = {};
 
     std::istringstream string_stream(datetime);
-    string_stream.imbue(locale);
+    // An HTTP date always spells the day and month in English, whatever the
+    // host's locale.
+    string_stream.imbue(std::locale::classic());
     string_stream >> std::get_time(&gmt_tm, "%a, %d %b %Y %H:%M:%S GMT");
     if (string_stream.fail()) {
         return std::nullopt;

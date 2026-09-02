@@ -61,15 +61,9 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     ioc_thread.join();
 }
 
-class EventProcessorTests : public ::testing::Test {
-   public:
-    EventProcessorTests() : locale("en_US.utf-8") {}
-    std::locale locale;
-};
-
 // This test is a temporary test that exists only to ensure the event processor
 // compiles; it should be replaced by more robust tests (and contract tests.)
-TEST_F(EventProcessorTests, ProcessorCompiles) {
+TEST(EventProcessorTests, ProcessorCompiles) {
     using namespace launchdarkly;
 
     Logger logger{
@@ -103,12 +97,12 @@ TEST_F(EventProcessorTests, ProcessorCompiles) {
     ioc_thread.join();
 }
 
-TEST_F(EventProcessorTests, ParseValidDateHeader) {
+TEST(EventProcessorTests, ParseValidDateHeader) {
     using namespace launchdarkly;
 
     using Clock = std::chrono::system_clock;
-    auto date = events::detail::ParseDateHeader<Clock>(
-        "Wed, 21 Oct 2015 07:28:00 GMT", locale);
+    auto date =
+        events::detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT");
 
     ASSERT_TRUE(date);
 
@@ -116,23 +110,23 @@ TEST_F(EventProcessorTests, ParseValidDateHeader) {
               std::chrono::microseconds(1445412480000000));
 }
 
-TEST_F(EventProcessorTests, ParseInvalidDateHeader) {
+TEST(EventProcessorTests, ParseInvalidDateHeader) {
     using namespace launchdarkly;
 
     auto not_a_date =
         events::detail::ParseDateHeader<std::chrono::system_clock>(
-            "this is definitely not a date", locale);
+            "this is definitely not a date");
 
     ASSERT_FALSE(not_a_date);
 
     auto not_gmt = events::detail::ParseDateHeader<std::chrono::system_clock>(
-        "Wed, 21 Oct 2015 07:28:00 PST", locale);
+        "Wed, 21 Oct 2015 07:28:00 PST");
 
     ASSERT_FALSE(not_gmt);
 
     auto missing_year =
         events::detail::ParseDateHeader<std::chrono::system_clock>(
-            "Wed, 21 Oct 07:28:00 GMT", locale);
+            "Wed, 21 Oct 07:28:00 GMT");
 
     ASSERT_FALSE(missing_year);
 }
