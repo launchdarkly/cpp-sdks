@@ -48,6 +48,7 @@ std::string const& MemoryStore::Identity() const {
 void MemoryStore::Init(data_model::SDKDataSet dataSet) {
     std::lock_guard lock{data_mutex_};
     initialized_ = true;
+    RetainEnvironmentId(dataSet.environment_id);
     flags_.clear();
     segments_.clear();
     for (auto flag : dataSet.flags) {
@@ -74,6 +75,21 @@ void MemoryStore::Upsert(std::string const& key,
         std::make_shared<data_model::SegmentDescriptor>(std::move(segment));
 }
 
+std::optional<std::string> MemoryStore::EnvironmentId() const {
+    std::lock_guard lock{data_mutex_};
+    if (!initialized_) {
+        return std::nullopt;
+    }
+    return environment_id_;
+}
+
+void MemoryStore::RetainEnvironmentId(
+    std::optional<std::string> const& environment_id) {
+    if (environment_id && !environment_id->empty()) {
+        environment_id_ = environment_id;
+    }
+}
+
 bool MemoryStore::RemoveFlag(std::string const& key) {
     std::lock_guard lock{data_mutex_};
     return flags_.erase(key) == 1;
@@ -87,6 +103,8 @@ bool MemoryStore::RemoveSegment(std::string const& key) {
 void MemoryStore::Apply(
     data_model::ChangeSet<data_interfaces::ChangeSetData> changeSet) {
     std::lock_guard lock{data_mutex_};
+
+    RetainEnvironmentId(changeSet.environment_id);
 
     switch (changeSet.type) {
         case data_model::ChangeSetType::kNone:

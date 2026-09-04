@@ -2,6 +2,7 @@
 
 #include <launchdarkly/network/http_requester.hpp>
 
+#include "../../../environment_id_header.hpp"
 #include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
@@ -125,10 +126,21 @@ void StreamingDataSource::StartAsync(
 
     auto weak_self = weak_from_this();
 
+    client_builder.on_response(
+        [weak_self](boost::beast::http::response_header<> const& headers) {
+            auto self = weak_self.lock();
+            if (!self || headers.result_int() != 200) {
+                return;
+            }
+            if (auto environment_id = ReadEnvironmentId(headers)) {
+                self->environment_id_ = std::move(environment_id);
+            }
+        });
+
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
-            auto status =
-                self->event_handler_->HandleMessage(event.type(), event.data());
+            auto status = self->event_handler_->HandleMessage(
+                event.type(), event.data(), self->environment_id_);
             if (status == DataSourceEventHandler::MessageStatus::kInvalidMessage) {
                 // Invalid data received - restart the connection with backoff
                 // to get a fresh stream. The backoff mechanism prevents rapid
