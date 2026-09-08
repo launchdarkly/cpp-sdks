@@ -61,6 +61,26 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
     EXPECT_TRUE(val->Detail().Reason()->get().InExperiment());
 }
 
+TEST(EvaluationResultTests, PrerequisitesSurviveAlongsideReason) {
+    // The reason and no-reason paths build the result separately. This guards
+    // the reason path against dropping the top-level prerequisites.
+    auto evaluation_result = boost::json::value_to<
+        tl::expected<std::optional<EvaluationResult>, JsonError>>(
+        boost::json::parse("{"
+                           "\"version\": 12,"
+                           "\"value\": true,"
+                           "\"prerequisites\": [\"prereqA\", \"prereqB\"],"
+                           "\"reason\": {\"kind\":\"OFF\"}"
+                           "}"));
+
+    auto const& val = evaluation_result.value();
+    ASSERT_TRUE(val->Prerequisites().has_value());
+    EXPECT_EQ((std::vector<std::string>{"prereqA", "prereqB"}),
+              *val->Prerequisites());
+    EXPECT_EQ(EvaluationReason::Kind::kOff,
+              val->Detail().Reason()->get().Kind());
+}
+
 TEST(EvaluationResultTests, ToJsonAllFields) {
     EvaluationReason reason(EvaluationReason::Kind::kOff,
                             EvaluationReason::ErrorKind::kMalformedFlag, 12,
