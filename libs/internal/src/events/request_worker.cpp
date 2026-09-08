@@ -1,6 +1,6 @@
+#include <boost/beast/http/status.hpp>
 #include <launchdarkly/events/detail/parse_date_header.hpp>
 #include <launchdarkly/events/detail/request_worker.hpp>
-#include <boost/beast/http/status.hpp>
 
 namespace launchdarkly::events::detail {
 
@@ -9,7 +9,6 @@ namespace http = boost::beast::http;
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
                              std::size_t id,
-                             std::optional<std::locale> date_header_locale,
                              config::shared::built::TlsOptions tls_options,
                              Logger& logger)
     : timer_(std::move(io)),
@@ -18,7 +17,6 @@ RequestWorker::RequestWorker(boost::asio::any_io_executor io,
       requester_(timer_.get_executor(), tls_options),
       batch_(std::nullopt),
       tag_("flush-worker[" + std::to_string(id) + "]: "),
-      date_header_locale_(std::move(date_header_locale)),
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
@@ -87,15 +85,11 @@ void RequestWorker::OnDeliveryAttempt(network::HttpResult const& result,
             batch_.reset();
             break;
         case Action::ParseDateAndReset: {
-            if (!date_header_locale_) {
-                batch_.reset();
-                break;
-            }
             auto headers = result.Headers();
             if (auto date = headers.find("Date"); date != headers.end()) {
                 if (auto server_time =
                         ParseDateHeader<std::chrono::system_clock>(
-                            date->second, *date_header_locale_)) {
+                            date->second)) {
                     callback(batch_->Count(), *server_time);
                 }
             }
