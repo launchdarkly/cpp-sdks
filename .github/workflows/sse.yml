@@ -51,6 +51,8 @@ jobs:
           branch: 'main'
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          # The SSE test harness doesn't support persistence tests.
+          enable_persistence_tests: false
 
   contract-tests-curl:
     runs-on: ubuntu-22.04
@@ -74,3 +76,5 @@ jobs:
           branch: 'main'
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          # The SSE test harness doesn't support persistence tests.
+          enable_persistence_tests: false
