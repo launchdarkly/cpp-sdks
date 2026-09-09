@@ -137,7 +137,8 @@ DataSourceEventHandler::DataSourceEventHandler(
 
 DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     std::string const& type,
-    std::string const& data) {
+    std::string const& data,
+    std::optional<std::string> const& environment_id) {
     if (type == "put") {
         boost::system::error_code error_code;
         auto parsed = boost::json::parse(data, error_code);
@@ -162,7 +163,9 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
 
         // Check the inner optional.
         if (res->has_value()) {
-            handler_.Init(std::move((*res)->data));
+            auto& data_set = (*res)->data;
+            data_set.environment_id = environment_id;
+            handler_.Init(std::move(data_set));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return MessageStatus::kMessageHandled;
         }

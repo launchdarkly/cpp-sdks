@@ -41,4 +41,8 @@ std::string const& OfflineSystem::Identity() const {
     return ident;
 }
 
+std::optional<std::string> OfflineSystem::EnvironmentId() const {
+    return std::nullopt;
+}
+
 }  // namespace launchdarkly::server_side::data_systems

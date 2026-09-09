@@ -1,5 +1,6 @@
 #include "streaming_synchronizer.hpp"
 #include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
+#include "../environment_id_header.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/async/timer.hpp>
@@ -186,6 +187,13 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
 
 void FDv2StreamingSynchronizer::State::OnResponse(
     HttpResponseHeader const& headers) {
+    if (headers.result_int() == 200) {
+        if (auto environment_id = ReadEnvironmentId(headers)) {
+            std::lock_guard lock(mutex_);
+            environment_id_ = *std::move(environment_id);
+        }
+    }
+
     auto const it = headers.find("X-LD-FD-Fallback");
     if (it == headers.end() || !boost::iequals(it->value(), "true")) {
         std::lock_guard lock(mutex_);
@@ -336,6 +344,10 @@ void FDv2StreamingSynchronizer::State::Notify(FDv2SourceResult result) {
         // header.
         if (!result.fdv1_fallback) {
             result.fdv1_fallback = latest_fdv1_fallback_;
+        }
+        if (auto* cs =
+                std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+            cs->change_set.environment_id = environment_id_;
         }
         if (pending_promise_) {
             promise = std::move(pending_promise_);

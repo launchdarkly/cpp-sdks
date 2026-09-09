@@ -229,6 +229,12 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
      */
     bool Initialized() const override;
 
+    /**
+     * Returns the environment ID reported by LaunchDarkly alongside the data,
+     * if data has been received and the transport reported one.
+     */
+    std::optional<std::string> EnvironmentId() const override;
+
    private:
     /**
      * Signals the orchestration loop to stop and closes any active source.

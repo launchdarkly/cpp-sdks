@@ -55,6 +55,8 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
 
     bool Initialized() const override;
 
+    std::optional<std::string> EnvironmentId() const override;
+
    private:
     data_components::MemoryStore store_;
     data_components::ChangeNotifier change_notifier_;

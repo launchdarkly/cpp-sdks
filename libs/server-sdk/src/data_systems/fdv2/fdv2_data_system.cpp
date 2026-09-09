@@ -487,4 +487,8 @@ bool FDv2DataSystem::Initialized() const {
     return store_.Initialized();
 }
 
+std::optional<std::string> FDv2DataSystem::EnvironmentId() const {
+    return store_.EnvironmentId();
+}
+
 }  // namespace launchdarkly::server_side::data_systems

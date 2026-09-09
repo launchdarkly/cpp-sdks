@@ -149,6 +149,8 @@ class FDv2StreamingSynchronizer final
         // FDv1 fallback directive from the most recent SSE response.
         std::optional<data_interfaces::FDv1FallbackDirective>
             latest_fdv1_fallback_;
+        // Environment ID reported by the most recent successful SSE response.
+        std::optional<std::string> environment_id_;
         data_model::Selector latest_selector_;
         std::optional<boost::urls::url> base_url_;
         std::shared_ptr<sse::Client> sse_client_;

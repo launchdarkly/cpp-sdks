@@ -1,5 +1,6 @@
 #include "fdv2_polling_impl.hpp"
 #include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
+#include "../environment_id_header.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/network/http_error_messages.hpp>
@@ -237,6 +238,10 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
         // goodbye event) takes precedence over the HTTP response header.
         if (!result.fdv1_fallback) {
             result.fdv1_fallback = fdv1_fallback;
+        }
+        if (auto* cs =
+                std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+            cs->change_set.environment_id = ReadEnvironmentId(res.Headers());
         }
         return result;
     }
