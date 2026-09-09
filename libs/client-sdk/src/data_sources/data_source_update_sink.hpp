@@ -17,10 +17,8 @@ namespace launchdarkly::client_side {
 
 using ItemDescriptor = data_model::ItemDescriptor<EvaluationResult>;
 
-/**
- * The new state of one flag within a changeset: either an evaluation result
- * or a tombstone marking the flag deleted.
- */
+// One flag's new state: an evaluation result, or an empty descriptor
+// (tombstone) if the flag was deleted.
 struct FlagChange {
     std::string key;
     ItemDescriptor item;
@@ -28,12 +26,6 @@ struct FlagChange {
 
 using FlagChangeSetData = std::vector<FlagChange>;
 
-/**
- * A set of flag changes to apply as a unit, along with the selector
- * identifying the resulting data set. A full changeset replaces the flag
- * data, a partial changeset merges into it, and a "none" changeset confirms
- * the existing data is current.
- */
 using FlagChangeSet = data_model::ChangeSet<FlagChangeSetData>;
 
 /**

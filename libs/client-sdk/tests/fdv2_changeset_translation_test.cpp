@@ -12,12 +12,12 @@ using namespace launchdarkly::data_model;
 using namespace launchdarkly::client_side;
 using namespace launchdarkly::client_side::data_sources;
 
-// A flag-eval object as it appears on the wire: a flagVersion of its own, and
-// no version, which the enclosing put-object envelope carries instead.
+// A flag-eval object on the wire. It has a flagVersion but no version. The
+// enclosing put-object envelope carries the version instead.
 static char const* const kFlagEvalJson =
     R"({"value":"a","variation":1,"flagVersion":5,"trackEvents":true})";
 
-// A version on the object itself, which the envelope's takes precedence over.
+// Object with its own version, which is overridden by the envelope's.
 static char const* const kFlagEvalJsonWithVersion =
     R"({"value":"a","variation":1,"version":99,"trackEvents":true})";
 

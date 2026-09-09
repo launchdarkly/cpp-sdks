@@ -10,7 +10,7 @@ using data_model::ChangeSetType;
 using data_model::FDv2Change;
 using data_model::FDv2ChangeSet;
 
-// The only object kind a client SDK evaluates.
+// FDv2 "kind" tag for a client-side evaluated flag.
 static char const* const kFlagEval = "flag-eval";
 
 std::optional<FlagChangeSet> TranslateChangeSet(FDv2ChangeSet const& change_set,
@@ -43,8 +43,6 @@ std::optional<FlagChangeSet> TranslateChangeSet(FDv2ChangeSet const& change_set,
             continue;
         }
 
-        // The envelope carries the version. The object it wraps has only a
-        // flagVersion.
         auto result = ParseEvaluationResult(change.object, change.version);
         if (!result) {
             LD_LOG(logger, LogLevel::kError)

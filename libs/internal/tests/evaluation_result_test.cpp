@@ -62,8 +62,7 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
 }
 
 TEST(EvaluationResultTests, PrerequisitesSurviveAlongsideReason) {
-    // The reason and no-reason paths build the result separately. This guards
-    // the reason path against dropping the top-level prerequisites.
+    // Guards the reason path against dropping top-level prerequisites.
     auto evaluation_result = boost::json::value_to<
         tl::expected<std::optional<EvaluationResult>, JsonError>>(
         boost::json::parse("{"

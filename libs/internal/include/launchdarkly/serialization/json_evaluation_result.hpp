@@ -16,10 +16,8 @@ namespace launchdarkly {
  *
  * @param json_value The object to deserialize. A null value yields
  * std::nullopt rather than an error.
- * @param version_override The version to use, whatever the object says. FDv2
- * carries it on the enclosing envelope, and the object it wraps has none of
- * its own. Pass std::nullopt to take the version from the object, which is
- * the FDv1 wire format.
+ * @param version_override The version to assign to the result. Pass
+ * std::nullopt to read the version from the object itself.
  */
 tl::expected<std::optional<EvaluationResult>, JsonError> ParseEvaluationResult(
     boost::json::value const& json_value,
