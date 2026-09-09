@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.14.2...launchdarkly-cpp-internal-v0.14.3) (2026-09-09)
+
+
+### Bug Fixes
+
+* Parse the event Date header in the classic locale ([#604](https://github.com/launchdarkly/cpp-sdks/issues/604)) ([8c0d6a8](https://github.com/launchdarkly/cpp-sdks/commit/8c0d6a8064a28c51b06c7512988ef478c90118f6))
+
 ## [0.14.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.14.1...launchdarkly-cpp-internal-v0.14.2) (2026-08-04)
 
 
