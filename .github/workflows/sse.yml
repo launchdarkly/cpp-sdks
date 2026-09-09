@@ -45,13 +45,14 @@ jobs:
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
-      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1
         with:
           repo: 'sse-contract-tests'
           branch: 'main'
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          # The SSE test harness doesn't support persistence tests.
+          enable_persistence_tests: false
 
   contract-tests-curl:
     runs-on: ubuntu-22.04
@@ -69,10 +70,11 @@ jobs:
           use_curl: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
-      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1
         with:
           repo: 'sse-contract-tests'
           branch: 'main'
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          # The SSE test harness doesn't support persistence tests.
+          enable_persistence_tests: false
