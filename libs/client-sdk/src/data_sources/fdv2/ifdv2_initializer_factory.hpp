@@ -19,9 +19,7 @@ class IFDv2InitializerFactory {
 
     /**
      * Whether the initializers this factory builds read from the local cache
-     * rather than the network. When the cache is the only possible source of
-     * data, a miss still completes initialization successfully, so the
-     * orchestrator needs to tell the two apart.
+     * rather than the network.
      */
     [[nodiscard]] virtual bool IsFromCache() const { return false; }
 

@@ -49,8 +49,6 @@ TEST(FDv1FallbackDirectiveTests, TreatsAMalformedTtlHeaderAsAbsent) {
     }
 }
 
-// Every SDK that fell back within the same window would otherwise retry FDv2
-// at the same moment.
 TEST(FDv1FallbackDirectiveTests, DefaultTtlJitterVaries) {
     std::set<std::chrono::seconds> observed;
     for (int i = 0; i < 50; i++) {
