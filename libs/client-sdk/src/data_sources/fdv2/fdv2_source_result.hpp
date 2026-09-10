@@ -13,9 +13,7 @@
 namespace launchdarkly::client_side::data_sources {
 
 /**
- * An instruction from the service to stop using FDv2 and fall back to FDv1
- * for a while. It arrives on any FDv2 response whose transport can observe
- * it, either as a response header or on a goodbye message.
+ * An instruction from the service to stop using FDv2 and fall back to FDv1.
  */
 struct FDv1FallbackDirective {
     /** Used whenever the service supplies no usable TTL. */

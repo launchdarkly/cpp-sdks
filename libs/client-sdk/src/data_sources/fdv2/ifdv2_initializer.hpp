@@ -13,8 +13,8 @@ namespace launchdarkly::client_side::data_sources {
  * used to load a basis before handing off to an IFDv2Synchronizer.
  *
  * Implementations must be thread-safe to the extent this contract needs:
- * Run() is called from one thread at a time, and Close() may be called
- * concurrently with it from another.
+ * Run() is called at most once, and Close() may be called concurrently with
+ * it from another thread.
  */
 class IFDv2Initializer {
    public:

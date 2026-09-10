@@ -18,9 +18,7 @@ class IFDv2SynchronizerFactory {
     virtual std::unique_ptr<IFDv2Synchronizer> Build() = 0;
 
     /**
-     * Whether the synchronizers this factory builds speak FDv1. The FDv1
-     * tier is held in reserve. It is used only while the service has directed
-     * the SDK away from FDv2, and never alongside an FDv2 synchronizer.
+     * Whether the synchronizers this factory builds speak FDv1.
      */
     [[nodiscard]] virtual bool IsFDv1Fallback() const { return false; }
 
