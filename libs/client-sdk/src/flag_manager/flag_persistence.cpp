@@ -3,9 +3,9 @@
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/encoding/sha_256.hpp>
 
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/json_item_descriptor.hpp>
-#include <launchdarkly/detail/serialization/json_primitives.hpp>
 
 #include <utility>
 
@@ -50,6 +50,21 @@ void FlagPersistence::Upsert(Context const& context,
                              ItemDescriptor item) {
     sink_.Upsert(context, key, item);
     StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
+}
+
+void FlagPersistence::Apply(Context const& context,
+                            FlagChangeSet change_set,
+                            bool from_cache) {
+    bool const changed_data =
+        change_set.type != data_model::ChangeSetType::kNone;
+    sink_.Apply(context, std::move(change_set), from_cache);
+    if (from_cache) {
+        // Writing cached data back to the cache it came from would be a no-op.
+        return;
+    }
+    if (changed_data) {
+        StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
+    }
 }
 
 void FlagPersistence::LoadCached(Context const& context) {
