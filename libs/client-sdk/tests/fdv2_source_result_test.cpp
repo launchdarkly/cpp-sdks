@@ -20,6 +20,7 @@ TEST(FDv1FallbackDirectiveTests, UsesAServiceSuppliedTtlAsGiven) {
 TEST(FDv1FallbackDirectiveTests, JittersTheDefaultWhenNoTtlIsSupplied) {
     auto const directive = FDv1FallbackDirective::FromServiceTtl(std::nullopt);
 
+    // The jittered 1-hour default lands in [30min, 1h].
     EXPECT_GE(directive.ttl, 30min);
     EXPECT_LE(directive.ttl, 1h);
 }
@@ -28,6 +29,7 @@ TEST(FDv1FallbackDirectiveTests, FallsBackToTheDefaultForOutOfRangeTtls) {
     for (auto ttl : {0s, 3601s, std::chrono::seconds{24h * 7}}) {
         auto const directive = FDv1FallbackDirective::FromServiceTtl(ttl);
 
+        // The jittered 1-hour default lands in [30min, 1h].
         EXPECT_GE(directive.ttl, 30min);
         EXPECT_LE(directive.ttl, 1h);
     }
@@ -41,6 +43,7 @@ TEST(FDv1FallbackDirectiveTests, TreatsAMalformedTtlHeaderAsAbsent) {
     for (auto const* value : {"", "abc", "12.5", "60s", "-60", " 60"}) {
         auto const directive = FDv1FallbackDirective::FromServiceTtl(value);
 
+        // The jittered 1-hour default lands in [30min, 1h].
         EXPECT_GE(directive.ttl, 30min);
         EXPECT_LE(directive.ttl, 1h);
     }
