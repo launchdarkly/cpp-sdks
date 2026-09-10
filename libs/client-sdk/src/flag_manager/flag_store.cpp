@@ -82,8 +82,7 @@ std::vector<FlagValueChangeEvent> FlagStore::Apply(
 
     bool const full = change_set.type == data_model::ChangeSetType::kFull;
 
-    // Snapshotted so the events describe the transition the store actually
-    // made.
+    // Snapshot the old data so the events describe the exact transition.
     auto previous = std::move(data_);
     if (!full) {
         data_ = previous;
@@ -100,7 +99,8 @@ std::vector<FlagValueChangeEvent> FlagStore::Apply(
             auto const existing = previous.find(change.key);
             ItemDescriptor const* prev =
                 existing != previous.end() ? existing->second.get() : nullptr;
-            if (auto event = ComputeFlagChange(change.key, prev, &change.item)) {
+            if (auto event =
+                    ComputeFlagChange(change.key, prev, &change.item)) {
                 events.push_back(std::move(*event));
             }
         }

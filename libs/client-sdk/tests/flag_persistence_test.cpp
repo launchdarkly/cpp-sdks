@@ -176,6 +176,7 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     // Sha256 potato:susan-key
     EXPECT_EQ(1, space.count(PersistenceEncodeKey("potato:susan-key")));
 }
+
 TEST(FlagPersistenceTests, StoresCacheOnApply) {
     auto context = ContextBuilder().Kind("user", "user-key").Build();
     auto store = FlagStore();

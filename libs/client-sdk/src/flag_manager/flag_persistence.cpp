@@ -59,8 +59,7 @@ void FlagPersistence::Apply(Context const& context,
         change_set.type != data_model::ChangeSetType::kNone;
     sink_.Apply(context, std::move(change_set), from_cache);
     if (from_cache) {
-        // Writing cached data back to the cache it came from would be a
-        // no-op.
+        // Writing cached data back to the cache it came from would be a no-op.
         return;
     }
     if (changed_data) {
