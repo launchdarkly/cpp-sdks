@@ -190,6 +190,7 @@ TEST(FlagPersistenceTests, StoresCacheOnApply) {
                 std::chrono::milliseconds{500}};
         });
 
+    // Apply a full changeset that did not come from the cache.
     flag_persistence.Apply(
         context,
         FlagChangeSet{
@@ -202,6 +203,7 @@ TEST(FlagPersistenceTests, StoresCacheOnApply) {
             Selector{}},
         /* from_cache= */ false);
 
+    // The applied flag is written to the cache.
     EXPECT_EQ(R"({"flagA":{"version":1,"value":"test"}})",
               persistence->store_
                   ["LaunchDarkly_rUTcjlHPv6Vegd27YmtGYkEGkEUGaEbn5M0JYTFQUpA="]
@@ -219,10 +221,12 @@ TEST(FlagPersistenceTests, ApplyOfNoneChangeSetDoesNotWriteTheCache) {
     FlagPersistence flag_persistence("the-key", updater, store, persistence,
                                      logger, 5);
 
+    // Apply a "none" changeset.
     flag_persistence.Apply(context,
                            FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
                            /* from_cache= */ false);
 
+    // Nothing is written to the cache.
     EXPECT_TRUE(persistence->store_.empty());
 }
 
@@ -238,6 +242,7 @@ TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
     FlagPersistence flag_persistence("the-key", updater, store, persistence,
                                      logger, 5);
 
+    // Apply a changeset that came from the cache.
     flag_persistence.Apply(
         context,
         FlagChangeSet{
@@ -250,6 +255,7 @@ TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
             Selector{}},
         /* from_cache= */ true);
 
+    // Nothing is written back.
     EXPECT_TRUE(persistence->store_.empty());
     // The data is still applied to the store, so evaluation can use it.
     ASSERT_TRUE(store.Get("flagA"));

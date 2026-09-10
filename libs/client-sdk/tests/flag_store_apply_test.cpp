@@ -37,11 +37,13 @@ TEST(FlagStoreApplyTests, FullChangeSetReplacesAllData) {
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // A second full changeset carrying only flagB.
     store.Apply(FlagChangeSet{ChangeSetType::kFull,
                               {FlagChange{"flagB", Flag(2, Value("b2"))}},
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // flagA is dropped and flagB takes the new value.
     EXPECT_FALSE(store.Get("flagA"));
     EXPECT_EQ(Value("b2"), store.Get("flagB")->item->Detail().Value());
 }
@@ -54,27 +56,15 @@ TEST(FlagStoreApplyTests, PartialChangeSetMergesIntoExistingData) {
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // A partial changeset adding flagB.
     store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                               {FlagChange{"flagB", Flag(1, Value("b"))}},
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // flagA is kept and flagB is added.
     EXPECT_EQ(Value("a"), store.Get("flagA")->item->Detail().Value());
     EXPECT_EQ(Value("b"), store.Get("flagB")->item->Detail().Value());
-}
-
-TEST(FlagStoreApplyTests, NoneChangeSetLeavesDataUnchanged) {
-    FlagStore store;
-
-    store.Apply(FlagChangeSet{ChangeSetType::kFull,
-                              {FlagChange{"flagA", Flag(1, Value("a"))}},
-                              SelectorAt(1, "state-1")},
-                /* compute_changes= */ false);
-
-    store.Apply(FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
-                /* compute_changes= */ false);
-
-    EXPECT_EQ(Value("a"), store.Get("flagA")->item->Detail().Value());
 }
 
 TEST(FlagStoreApplyTests, DeleteStoresATombstone) {
@@ -85,12 +75,14 @@ TEST(FlagStoreApplyTests, DeleteStoresATombstone) {
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // A partial changeset deleting flagA.
     store.Apply(
         FlagChangeSet{ChangeSetType::kPartial,
                       {FlagChange{"flagA", ItemDescriptor{Tombstone{5}}}},
                       Selector{}},
         /* compute_changes= */ false);
 
+    // flagA becomes a tombstone that carries the delete version.
     auto descriptor = store.Get("flagA");
     ASSERT_TRUE(descriptor);
     EXPECT_FALSE(descriptor->item.has_value());
@@ -107,28 +99,29 @@ TEST(FlagStoreApplyTests, LowerVersionDoesNotRejectTheUpdate) {
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // A partial changeset with a lower version than the stored flag.
     store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                               {FlagChange{"flagA", Flag(2, Value("old"))}},
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // The lower-version update still applies.
     EXPECT_EQ(Value("old"), store.Get("flagA")->item->Detail().Value());
-}
-
-TEST(FlagStoreApplyTests, SelectorStartsEmpty) {
-    FlagStore store;
-
-    EXPECT_FALSE(store.CurrentSelector().value.has_value());
 }
 
 TEST(FlagStoreApplyTests, ChangeSetSelectorBecomesTheCurrentSelector) {
     FlagStore store;
 
+    // A fresh store has no selector.
+    EXPECT_FALSE(store.CurrentSelector().value.has_value());
+
+    // Apply a changeset carrying a selector.
     store.Apply(FlagChangeSet{ChangeSetType::kFull,
                               {FlagChange{"flagA", Flag(1, Value("a"))}},
                               SelectorAt(3, "state-3")},
                 /* compute_changes= */ false);
 
+    // The store adopts that selector.
     auto selector = store.CurrentSelector();
     ASSERT_TRUE(selector.value.has_value());
     EXPECT_EQ(3, selector.value->version);
@@ -143,17 +136,19 @@ TEST(FlagStoreApplyTests, PayloadWithoutASelectorDiscardsTheCurrentSelector) {
                               SelectorAt(3, "state-3")},
                 /* compute_changes= */ false);
 
+    // A partial changeset that carries no selector.
     store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                               {FlagChange{"flagA", Flag(2, Value("a2"))}},
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // The store discards the selector it had.
     EXPECT_FALSE(store.CurrentSelector().value.has_value());
 }
 
-// A "none" intent is not a payload. It confirms the data is current, so the
-// selector it was verified against still stands.
-TEST(FlagStoreApplyTests, NoneChangeSetKeepsTheCurrentSelector) {
+// A "none" intent is not a payload. It confirms the data is current, so both
+// the flag data and the selector it was verified against still stand.
+TEST(FlagStoreApplyTests, NoneChangeSetLeavesDataAndSelectorUnchanged) {
     FlagStore store;
 
     store.Apply(FlagChangeSet{ChangeSetType::kFull,
@@ -161,9 +156,13 @@ TEST(FlagStoreApplyTests, NoneChangeSetKeepsTheCurrentSelector) {
                               SelectorAt(3, "state-3")},
                 /* compute_changes= */ false);
 
+    // Apply a "none" changeset.
     store.Apply(FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
                 /* compute_changes= */ false);
 
+    // The flag data is untouched.
+    EXPECT_EQ(Value("a"), store.Get("flagA")->item->Detail().Value());
+    // The selector still stands.
     auto selector = store.CurrentSelector();
     ASSERT_TRUE(selector.value.has_value());
     EXPECT_EQ("state-3", selector.value->state);
@@ -177,8 +176,10 @@ TEST(FlagStoreApplyTests, ClearSelectorLeavesFlagDataInPlace) {
                               SelectorAt(3, "state-3")},
                 /* compute_changes= */ false);
 
+    // Clear the selector.
     store.ClearSelector();
 
+    // The selector is gone but the flag data remains.
     EXPECT_FALSE(store.CurrentSelector().value.has_value());
     EXPECT_EQ(Value("a"), store.Get("flagA")->item->Detail().Value());
 }
@@ -191,12 +192,14 @@ TEST(FlagStoreApplyTests, ReportsNoChangesWhenComputeChangesIsFalse) {
                               Selector{}},
                 /* compute_changes= */ false);
 
+    // Change flagA with change computation disabled.
     auto events =
         store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                                   {FlagChange{"flagA", Flag(2, Value("a2"))}},
                                   Selector{}},
                     /* compute_changes= */ false);
 
+    // No events are produced.
     EXPECT_TRUE(events.empty());
 }
 
@@ -208,12 +211,14 @@ TEST(FlagStoreApplyTests, ReportsAChangedValue) {
                               Selector{}},
                 /* compute_changes= */ true);
 
+    // Change flagA's value.
     auto events =
         store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                                   {FlagChange{"flagA", Flag(2, Value("a2"))}},
                                   Selector{}},
                     /* compute_changes= */ true);
 
+    // One event reports flagA moving from "a" to "a2".
     ASSERT_EQ(1u, events.size());
     EXPECT_EQ("flagA", events[0].FlagName());
     EXPECT_EQ(Value("a"), events[0].OldValue());
@@ -229,12 +234,14 @@ TEST(FlagStoreApplyTests, ReportsNothingWhenTheValueIsUnchanged) {
                               Selector{}},
                 /* compute_changes= */ true);
 
+    // Re-apply flagA with the same value at a new version.
     auto events =
         store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                                   {FlagChange{"flagA", Flag(2, Value("a"))}},
                                   Selector{}},
                     /* compute_changes= */ true);
 
+    // No event, because the value did not change.
     EXPECT_TRUE(events.empty());
 }
 
@@ -246,12 +253,14 @@ TEST(FlagStoreApplyTests, ReportsANewFlagAgainstANullOldValue) {
                               Selector{}},
                 /* compute_changes= */ true);
 
+    // Add a new flag, flagB.
     auto events =
         store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                                   {FlagChange{"flagB", Flag(1, Value("b"))}},
                                   Selector{}},
                     /* compute_changes= */ true);
 
+    // One event reports flagB appearing against a null old value.
     ASSERT_EQ(1u, events.size());
     EXPECT_EQ("flagB", events[0].FlagName());
     EXPECT_TRUE(events[0].OldValue().IsNull());
@@ -269,7 +278,9 @@ TEST(FlagStoreApplyTests, ReportsNothingForTheFirstFullChangeSet) {
                                   Selector{}},
                     /* compute_changes= */ true);
 
+    // No events, since this is the starting basis.
     EXPECT_TRUE(events.empty());
+    // The data is still stored.
     EXPECT_EQ(Value("a"), store.Get("flagA")->item->Detail().Value());
 }
 
@@ -281,12 +292,14 @@ TEST(FlagStoreApplyTests, ReportsADeletedFlag) {
                               Selector{}},
                 /* compute_changes= */ true);
 
+    // Delete flagA.
     auto events = store.Apply(
         FlagChangeSet{ChangeSetType::kPartial,
                       {FlagChange{"flagA", ItemDescriptor{Tombstone{5}}}},
                       Selector{}},
         /* compute_changes= */ true);
 
+    // One event reports flagA deleted, carrying its old value.
     ASSERT_EQ(1u, events.size());
     EXPECT_EQ("flagA", events[0].FlagName());
     EXPECT_EQ(Value("a"), events[0].OldValue());
@@ -302,6 +315,7 @@ TEST(FlagStoreApplyTests, ReportsNothingWhenDeletingAnAbsentFlag) {
                       Selector{}},
         /* compute_changes= */ true);
 
+    // No event, because there was nothing to delete.
     EXPECT_TRUE(events.empty());
 }
 
@@ -314,12 +328,14 @@ TEST(FlagStoreApplyTests, ReportsFlagsAFullChangeSetOmitsAsDeleted) {
                               Selector{}},
                 /* compute_changes= */ true);
 
+    // A full changeset that omits flagB.
     auto events =
         store.Apply(FlagChangeSet{ChangeSetType::kFull,
                                   {FlagChange{"flagA", Flag(2, Value("a"))}},
                                   Selector{}},
                     /* compute_changes= */ true);
 
+    // One event reports the omitted flagB deleted.
     ASSERT_EQ(1u, events.size());
     EXPECT_EQ("flagB", events[0].FlagName());
     EXPECT_EQ(Value("b"), events[0].OldValue());
@@ -337,13 +353,16 @@ TEST(FlagStoreApplyTests, ReportsNoDeletionForFlagsAPartialChangeSetOmits) {
                               Selector{}},
                 /* compute_changes= */ true);
 
+    // A partial changeset that omits flagB.
     auto events =
         store.Apply(FlagChangeSet{ChangeSetType::kPartial,
                                   {FlagChange{"flagA", Flag(2, Value("a2"))}},
                                   Selector{}},
                     /* compute_changes= */ true);
 
+    // Only flagA is reported as changed.
     ASSERT_EQ(1u, events.size());
     EXPECT_EQ("flagA", events[0].FlagName());
+    // flagB is left in place.
     EXPECT_EQ(Value("b"), store.Get("flagB")->item->Detail().Value());
 }

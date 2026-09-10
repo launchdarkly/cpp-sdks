@@ -805,6 +805,7 @@ TEST(FlagUpdaterApplyTests, ApplyDispatchesValueChangeEvents) {
                       manager.Get("flagA")->item->Detail().Value().AsString());
         });
 
+    // Establish the basis with a first full changeset.
     updater.Apply(
         ContextBuilder().Kind("user", "user-key").Build(),
         FlagChangeSet{
@@ -820,6 +821,7 @@ TEST(FlagUpdaterApplyTests, ApplyDispatchesValueChangeEvents) {
     // The first full data set is what the SDK starts from, not a change.
     EXPECT_FALSE(got_event);
 
+    // Change flagA's value.
     updater.Apply(
         ContextBuilder().Kind("user", "user-key").Build(),
         FlagChangeSet{
@@ -833,6 +835,7 @@ TEST(FlagUpdaterApplyTests, ApplyDispatchesValueChangeEvents) {
             Selector{}},
         /* from_cache= */ false);
 
+    // The listener received the change event.
     EXPECT_TRUE(got_event);
 }
 
@@ -848,9 +851,11 @@ TEST(FlagUpdaterApplyTests, ApplyOfNoneChangeSetDispatchesNothing) {
             got_event.store(true);
         });
 
+    // Apply a "none" changeset.
     updater.Apply(ContextBuilder().Kind("user", "user-key").Build(),
                   FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
                   /* from_cache= */ false);
 
+    // No change event is dispatched.
     EXPECT_FALSE(got_event);
 }
