@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -86,5 +87,15 @@ class FlagStore {
 
     mutable std::mutex data_mutex_;
 };
+
+/**
+ * Computes the value-change event for one flag moving from previous to
+ * current. Either pointer may be null when the flag is absent. Returns
+ * nullopt when the evaluated value did not change.
+ */
+std::optional<FlagValueChangeEvent> ComputeFlagChange(
+    std::string const& key,
+    ItemDescriptor const* previous,
+    ItemDescriptor const* current);
 
 }  // namespace launchdarkly::client_side::flag_manager

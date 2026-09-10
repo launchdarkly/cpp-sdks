@@ -13,9 +13,8 @@ namespace launchdarkly::client_side::flag_manager {
 
 namespace {
 
-// The evaluated value of a descriptor, or null if the descriptor is a
-// tombstone.
-Value ValueOf(ItemDescriptor const& descriptor) {
+// The evaluated value of a descriptor, or null if it has none.
+Value FlagValue(ItemDescriptor const& descriptor) {
     if (descriptor.item) {
         return descriptor.item->Detail().Value();
     }
@@ -23,6 +22,31 @@ Value ValueOf(ItemDescriptor const& descriptor) {
 }
 
 }  // namespace
+
+std::optional<FlagValueChangeEvent> ComputeFlagChange(
+    std::string const& key,
+    ItemDescriptor const* previous,
+    ItemDescriptor const* current) {
+    bool const had_value = previous && previous->item.has_value();
+    bool const has_value = current && current->item.has_value();
+
+    if (has_value) {
+        auto new_value = FlagValue(*current);
+        if (had_value) {
+            auto old_value = FlagValue(*previous);
+            if (new_value != old_value) {
+                return FlagValueChangeEvent(key, std::move(new_value),
+                                            std::move(old_value));
+            }
+            return std::nullopt;
+        }
+        return FlagValueChangeEvent(key, std::move(new_value), Value());
+    }
+    if (had_value) {
+        return FlagValueChangeEvent(key, FlagValue(*previous));
+    }
+    return std::nullopt;
+}
 
 void FlagStore::Init(
     std::unordered_map<std::string, ItemDescriptor> const& data) {
@@ -72,25 +96,12 @@ std::vector<FlagValueChangeEvent> FlagStore::Apply(
     bool const report = compute_changes && !(full && previous.empty());
 
     for (auto const& change : change_set.data) {
-        auto const existing = previous.find(change.key);
-        bool const had_value =
-            existing != previous.end() && existing->second->item.has_value();
-
         if (report) {
-            if (change.item.item) {
-                auto new_value = ValueOf(change.item);
-                if (had_value) {
-                    auto old_value = ValueOf(*existing->second);
-                    if (new_value != old_value) {
-                        events.emplace_back(change.key, std::move(new_value),
-                                            std::move(old_value));
-                    }
-                } else {
-                    events.emplace_back(change.key, std::move(new_value),
-                                        Value());
-                }
-            } else if (had_value) {
-                events.emplace_back(change.key, ValueOf(*existing->second));
+            auto const existing = previous.find(change.key);
+            ItemDescriptor const* prev =
+                existing != previous.end() ? existing->second.get() : nullptr;
+            if (auto event = ComputeFlagChange(change.key, prev, &change.item)) {
+                events.push_back(std::move(*event));
             }
         }
 
@@ -100,8 +111,11 @@ std::vector<FlagValueChangeEvent> FlagStore::Apply(
     // A full changeset is the complete data set, so anything it omits is gone.
     if (full && report) {
         for (auto const& [key, descriptor] : previous) {
-            if (descriptor->item.has_value() && data_.count(key) == 0) {
-                events.emplace_back(key, ValueOf(*descriptor));
+            if (data_.count(key) == 0) {
+                if (auto event =
+                        ComputeFlagChange(key, descriptor.get(), nullptr)) {
+                    events.push_back(std::move(*event));
+                }
             }
         }
     }

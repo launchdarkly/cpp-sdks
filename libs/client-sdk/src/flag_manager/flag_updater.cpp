@@ -8,20 +8,10 @@ namespace launchdarkly::client_side::flag_manager {
 
 FlagUpdater::FlagUpdater(FlagStore& flag_store) : flag_store_(flag_store) {}
 
-Value GetValue(ItemDescriptor& descriptor) {
-    if (descriptor.item) {
-        // `flag->` unwraps the first optional we know is present.
-        // The second `value()` is not an optional.
-        return descriptor.item->Detail().Value();
-    }
-    return {};
-}
-
 void FlagUpdater::Init(Context const& context,
                        std::unordered_map<std::string, ItemDescriptor> data) {
     std::lock_guard lock{signal_mutex_};
 
-    // Calculate what flags changed.
     std::list<FlagValueChangeEvent> change_events;
 
     auto old_flags = flag_store_.GetAll();
@@ -30,36 +20,19 @@ void FlagUpdater::Init(Context const& context,
     if (!old_flags.empty() && HasListeners()) {
         for (auto& new_pair : data) {
             auto existing = old_flags.find(new_pair.first);
-            if (existing != old_flags.end()) {
-                // The flag changed.
-                auto& evaluation_result = new_pair.second.item;
-                if (evaluation_result) {
-                    auto new_value = GetValue(new_pair.second);
-                    auto old_value = GetValue(*existing->second);
-                    if (new_value != old_value) {
-                        // Updated.
-                        change_events.emplace_back(new_pair.first,
-                                                   GetValue(new_pair.second),
-                                                   GetValue(*existing->second));
-                    }
-                } else {
-                    // Deleted.
-                    change_events.emplace_back(existing->first,
-                                               GetValue(*existing->second));
-                }
-
-            } else {
-                // It is a new flag.
-                change_events.emplace_back(new_pair.first,
-                                           GetValue(new_pair.second), Value());
+            ItemDescriptor const* previous =
+                existing != old_flags.end() ? existing->second.get() : nullptr;
+            if (auto event = ComputeFlagChange(new_pair.first, previous,
+                                               &new_pair.second)) {
+                change_events.push_back(std::move(*event));
             }
         }
         for (auto& old_pair : old_flags) {
-            auto still_exists = data.count(old_pair.first) != 0;
-            if (!still_exists) {
-                // Was in the old data, but not the new data, so it was deleted.
-                change_events.emplace_back(old_pair.first,
-                                           GetValue(*old_pair.second));
+            if (data.count(old_pair.first) == 0) {
+                if (auto event = ComputeFlagChange(
+                        old_pair.first, old_pair.second.get(), nullptr)) {
+                    change_events.push_back(std::move(*event));
+                }
             }
         }
     }
@@ -67,7 +40,6 @@ void FlagUpdater::Init(Context const& context,
     flag_store_.Init(data);
 
     for (auto& event : change_events) {
-        // Send the event.
         DispatchEvent(std::move(event));
     }
 }
@@ -109,20 +81,8 @@ void FlagUpdater::Upsert(Context const& context,
 
     flag_store_.Upsert(key, descriptor);
     if (HasListeners()) {
-        // Existed and updated.
-        if (existing && descriptor.item) {
-            DispatchEvent(FlagValueChangeEvent(key, GetValue(descriptor),
-                                               GetValue(*existing)));
-        } else if (descriptor.item) {
-            DispatchEvent(FlagValueChangeEvent(
-                key, descriptor.item.value().Detail().Value(), Value()));
-            // new flag
-        } else if (existing && existing->item.has_value()) {
-            // Existed and deleted.
-            DispatchEvent(FlagValueChangeEvent(key, GetValue(*existing)));
-        } else {
-            // Was deleted and is still deleted.
-            // Do nothing.
+        if (auto event = ComputeFlagChange(key, existing.get(), &descriptor)) {
+            DispatchEvent(std::move(*event));
         }
     }
 }
