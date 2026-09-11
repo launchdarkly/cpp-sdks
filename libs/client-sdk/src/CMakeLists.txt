@@ -15,6 +15,7 @@ target_sources(${LIBNAME} PRIVATE
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/fdv2/fdv2_changeset_translation.cpp
+        data_sources/fdv2/fdv2_source_result.cpp
         data_sources/data_source_event_handler.cpp
         data_sources/polling_data_source.cpp
         flag_manager/flag_store.cpp
@@ -30,6 +31,11 @@ target_sources(${LIBNAME} PRIVATE
         data_sources/polling_data_source.hpp
         data_sources/streaming_data_source.hpp
         data_sources/fdv2/fdv2_changeset_translation.hpp
+        data_sources/fdv2/fdv2_source_result.hpp
+        data_sources/fdv2/ifdv2_initializer.hpp
+        data_sources/fdv2/ifdv2_initializer_factory.hpp
+        data_sources/fdv2/ifdv2_synchronizer.hpp
+        data_sources/fdv2/ifdv2_synchronizer_factory.hpp
         flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
         bindings/c/sdk.cpp
