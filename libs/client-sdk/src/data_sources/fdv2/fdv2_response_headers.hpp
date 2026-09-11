@@ -9,7 +9,7 @@
 
 namespace launchdarkly::client_side::data_sources {
 
-/** The FDv2 response headers the SDK acts on. */
+/** Values read from an FDv2 response's headers. */
 struct FDv2ResponseHeaders {
     /** The environment the payload was evaluated in. */
     std::optional<std::string> environment_id;
