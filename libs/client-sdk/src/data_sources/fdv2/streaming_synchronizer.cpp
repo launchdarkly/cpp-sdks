@@ -16,11 +16,8 @@ static char const* const kIdentity = "FDv2 streaming synchronizer";
 
 static char const* const kPingEvent = "ping";
 
-// Maximum time between bytes read from the stream before the SSE client
-// declares the connection dead and reconnects. Must be greater than the
-// streaming service's heartbeat interval. Hardcoded rather than read from
-// HttpProperties, whose default ReadTimeout is sized for one-shot HTTP
-// requests and would cause spurious disconnects on a long-lived stream.
+// Read-idle timeout for the long-lived stream, larger than the service
+// heartbeat so a live connection is not declared dead.
 static constexpr std::chrono::minutes kDeadConnectionInterval{5};
 
 using ErrorInfo = FDv2SourceResult::ErrorInfo;
@@ -66,9 +63,8 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
 
     auto parsed = boost::urls::parse_uri(stream_config_.base_url);
     if (!parsed) {
-        // started_ intentionally left true: a bad endpoint URL is a
-        // configuration error that won't fix itself. The TerminalError
-        // result tells the orchestrator to stop retrying this synchronizer.
+        // A bad endpoint URL is a configuration error that won't fix itself,
+        // so started_ stays true and this synchronizer does not reconnect.
         LD_LOG(logger_, LogLevel::kError)
             << kIdentity << ": could not parse streaming endpoint URL";
         Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
@@ -160,7 +156,6 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
 
     auto client = builder.build();
     if (!client) {
-        // started_ intentionally left true: same reasoning as above.
         LD_LOG(logger_, LogLevel::kError)
             << kIdentity << ": could not build SSE client";
         Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{MakeError(
@@ -168,9 +163,7 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
         return;
     }
 
-    // Publishing the client and connecting are atomic with respect to
-    // Shutdown(). A client built after Shutdown ran is discarded without
-    // connecting, so there is nothing to clean up.
+    // If Close() ran while we were building, drop the client and stop.
     std::lock_guard lock(mutex_);
     if (closed_) {
         return;
@@ -265,7 +258,7 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
         [this](auto const& r) {
             using T = std::decay_t<decltype(r)>;
             if constexpr (std::is_same_v<T, std::monostate>) {
-                // Accumulating, heartbeat, or unknown event — nothing to do.
+                // Accumulating, heartbeat, or unknown event -- nothing to do.
             } else if constexpr (std::is_same_v<T, data_model::FDv2ChangeSet>) {
                 auto typed = TranslateChangeSet(r, logger_);
                 if (!typed) {
