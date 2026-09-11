@@ -362,10 +362,11 @@ TEST(ClientFDv2StreamingSynchronizerTest, FullTransferBecomesAChangeSet) {
     EXPECT_EQ("abc", change_set->change_set.selector.value->state);
 }
 
-TEST(ClientFDv2StreamingSynchronizerTest, GoodbyeReportsAndReconnects) {
+TEST(ClientFDv2StreamingSynchronizerTest,
+     GoodbyeReportsReconnectsAndCarriesItsTtl) {
     StreamingFixture f;
 
-    f.Push("goodbye", R"({"reason":"bye"})");
+    f.Push("goodbye", R"({"reason":"bye","protocolFallbackTTL":90})");
     auto result = f.NextResult();
 
     ASSERT_TRUE(result.has_value());
@@ -373,15 +374,6 @@ TEST(ClientFDv2StreamingSynchronizerTest, GoodbyeReportsAndReconnects) {
     ASSERT_NE(nullptr, goodbye);
     EXPECT_EQ("bye", goodbye->reason.value_or(""));
     EXPECT_EQ(1, f.client->restart_count_);
-}
-
-TEST(ClientFDv2StreamingSynchronizerTest, GoodbyeCarriesItsFallbackTtl) {
-    StreamingFixture f;
-
-    f.Push("goodbye", R"({"reason":"bye","protocolFallbackTTL":90})");
-    auto result = f.NextResult();
-
-    ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fdv1_fallback.has_value());
     EXPECT_EQ(90s, result->fdv1_fallback->ttl);
 }
@@ -474,6 +466,23 @@ TEST(ClientFDv2StreamingSynchronizerTest, ResultsCarryTheFallbackDirective) {
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fdv1_fallback.has_value());
     EXPECT_EQ(120s, result->fdv1_fallback->ttl);
+}
+
+TEST(ClientFDv2StreamingSynchronizerTest, GoodbyeTtlWinsOverTheHeader) {
+    StreamingFixture f;
+
+    FDv2StreamingSynchronizerTestPeer::OnResponse(
+        *f.synchronizer,
+        MakeResponseHeaders(
+            {{"X-LD-FD-Fallback", "true"}, {"X-LD-FD-Fallback-TTL", "120"}}));
+    f.Push("goodbye", R"({"reason":"bye","protocolFallbackTTL":90})");
+
+    auto result = f.NextResult();
+
+    ASSERT_TRUE(result.has_value());
+    // The goodbye's own TTL (90) wins over the header's (120).
+    ASSERT_TRUE(result->fdv1_fallback.has_value());
+    EXPECT_EQ(90s, result->fdv1_fallback->ttl);
 }
 
 TEST(ClientFDv2StreamingSynchronizerTest, ReconnectWithoutTheHeaderClearsIt) {
