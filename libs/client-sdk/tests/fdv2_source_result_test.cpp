@@ -18,7 +18,7 @@ TEST(FDv1FallbackDirectiveTests, UsesAServiceSuppliedTtlAsGiven) {
 }
 
 TEST(FDv1FallbackDirectiveTests, JittersTheDefaultWhenNoTtlIsSupplied) {
-    auto const directive = FDv1FallbackDirective::FromServiceTtl(std::nullopt);
+    auto const directive = FDv1FallbackDirective::DefaultTtl();
 
     // The jittered 1-hour default lands in [30min, 1h].
     EXPECT_GE(directive.ttl, 30min);
@@ -52,8 +52,7 @@ TEST(FDv1FallbackDirectiveTests, TreatsAMalformedTtlHeaderAsAbsent) {
 TEST(FDv1FallbackDirectiveTests, DefaultTtlJitterVaries) {
     std::set<std::chrono::seconds> observed;
     for (int i = 0; i < 50; i++) {
-        observed.insert(
-            FDv1FallbackDirective::FromServiceTtl(std::nullopt).ttl);
+        observed.insert(FDv1FallbackDirective::DefaultTtl().ttl);
     }
 
     EXPECT_GT(observed.size(), 1u);

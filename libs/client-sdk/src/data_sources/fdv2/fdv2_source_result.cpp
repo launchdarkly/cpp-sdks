@@ -19,12 +19,16 @@ std::chrono::seconds Jitter(std::chrono::seconds ttl) {
 
 }  // namespace
 
-FDv1FallbackDirective FDv1FallbackDirective::FromServiceTtl(
-    std::optional<std::chrono::seconds> ttl) {
-    if (ttl && *ttl > std::chrono::seconds::zero() && *ttl <= kDefaultTtl) {
-        return FDv1FallbackDirective{*ttl};
-    }
+FDv1FallbackDirective FDv1FallbackDirective::DefaultTtl() {
     return FDv1FallbackDirective{Jitter(kDefaultTtl)};
+}
+
+FDv1FallbackDirective FDv1FallbackDirective::FromServiceTtl(
+    std::chrono::seconds ttl) {
+    if (ttl > std::chrono::seconds::zero() && ttl <= kDefaultTtl) {
+        return FDv1FallbackDirective{ttl};
+    }
+    return DefaultTtl();
 }
 
 FDv1FallbackDirective FDv1FallbackDirective::FromServiceTtl(
@@ -34,7 +38,7 @@ FDv1FallbackDirective FDv1FallbackDirective::FromServiceTtl(
     auto const* end = begin + ttl.size();
     auto const [ptr, ec] = std::from_chars(begin, end, seconds);
     if (ec != std::errc{} || ptr != end) {
-        return FromServiceTtl(std::nullopt);
+        return DefaultTtl();
     }
     return FromServiceTtl(std::chrono::seconds(seconds));
 }

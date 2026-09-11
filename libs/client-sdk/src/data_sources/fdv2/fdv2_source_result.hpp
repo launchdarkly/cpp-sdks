@@ -20,21 +20,22 @@ struct FDv1FallbackDirective {
     static constexpr std::chrono::seconds kDefaultTtl = std::chrono::hours(1);
 
     /**
-     * Builds a directive from a TTL the service supplied, in seconds.
-     *
-     * A TTL outside (0, 1 hour] is replaced by the default, so a fallback is
-     * never indefinite. A service-supplied TTL is used as given, since the
-     * service jitters those itself. The default is jittered here so that SDKs
-     * which fell back together do not all retry at the same moment.
+     * Builds a directive using the jittered default TTL, so that SDKs which
+     * fell back together do not all retry at once. Used when the service
+     * supplies no usable TTL. Safe to call from any thread.
      */
-    static FDv1FallbackDirective FromServiceTtl(
-        std::optional<std::chrono::seconds> ttl);
+    static FDv1FallbackDirective DefaultTtl();
+
+    /**
+     * Builds a directive from a service-supplied TTL, used as given. A value
+     * outside (0, 1 hour] uses the jittered default instead, so a fallback is
+     * never indefinite.
+     */
+    static FDv1FallbackDirective FromServiceTtl(std::chrono::seconds ttl);
 
     /**
      * Builds a directive from the raw value of a TTL response header. A value
-     * that is not a whole number of seconds is treated as absent.
-     *
-     * Both overloads may be called from any thread.
+     * that is not a whole number of seconds uses the default.
      */
     static FDv1FallbackDirective FromServiceTtl(std::string_view ttl);
 
