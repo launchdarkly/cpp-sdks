@@ -50,7 +50,7 @@ FDv2ResponseHeaders ReadFDv2ResponseHeaders(
     auto const ttl = headers.find(kFDv1FallbackTtlHeader);
     result.fdv1_fallback =
         ttl == headers.end()
-            ? FDv1FallbackDirective::FromServiceTtl(std::nullopt)
+            ? FDv1FallbackDirective::DefaultTtl()
             : FDv1FallbackDirective::FromServiceTtl(
                   std::string_view{ttl->value().data(), ttl->value().size()});
 
