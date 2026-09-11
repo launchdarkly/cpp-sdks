@@ -79,6 +79,25 @@ Logger MakeNullLogger() {
     return Logger{std::make_shared<NullBackend>()};
 }
 
+FDv2RequestConfig MakeConfig(
+    std::string base_url,
+    FDv2ContextTransport transport = FDv2ContextTransport::kGetPath,
+    bool with_reasons = false) {
+    return FDv2RequestConfig{
+        std::move(base_url),
+        config::shared::Defaults<config::shared::ClientSDK>::HttpProperties(),
+        R"({"kind":"user","key":"user-key"})", transport, with_reasons};
+}
+
+boost::beast::http::response_header<> MakeResponseHeaders(
+    std::vector<std::pair<std::string, std::string>> const& headers) {
+    boost::beast::http::response_header<> result;
+    for (auto const& [name, value] : headers) {
+        result.set(name, value);
+    }
+    return result;
+}
+
 class IoContextRunner {
    public:
     IoContextRunner() : work_guard_(boost::asio::make_work_guard(ioc_)) {
@@ -100,23 +119,12 @@ class IoContextRunner {
     std::thread thread_;
 };
 
-FDv2RequestConfig MakeConfig(
-    std::string base_url,
-    FDv2ContextTransport transport = FDv2ContextTransport::kGetPath,
-    bool with_reasons = false) {
-    return FDv2RequestConfig{
-        std::move(base_url),
-        config::shared::Defaults<config::shared::ClientSDK>::HttpProperties(),
-        R"({"kind":"user","key":"user-key"})", transport, with_reasons};
-}
-
 // Records calls to the sse::Client interface, so tests can verify how the
 // synchronizer drives the connection without a real network client.
 class MockSseClient : public sse::Client {
    public:
-    void async_connect() override { ++connect_count_; }
+    void async_connect() override {}
     void async_shutdown(std::function<void()> completion) override {
-        ++shutdown_count_;
         if (completion) {
             completion();
         }
@@ -126,20 +134,36 @@ class MockSseClient : public sse::Client {
         last_restart_reason_ = reason;
     }
 
-    int connect_count_ = 0;
-    int shutdown_count_ = 0;
     int restart_count_ = 0;
     std::string last_restart_reason_;
 };
 
-boost::beast::http::response_header<> MakeResponseHeaders(
-    std::vector<std::pair<std::string, std::string>> const& headers) {
-    boost::beast::http::response_header<> result;
-    for (auto const& [name, value] : headers) {
-        result.set(name, value);
+// Builds a synchronizer that believes it is already streaming, so that tests
+// can push events at it without a connection.
+struct StreamingFixture {
+    Logger logger = MakeNullLogger();
+    IoContextRunner runner;
+    std::shared_ptr<MockSseClient> client = std::make_shared<MockSseClient>();
+    std::unique_ptr<FDv2StreamingSynchronizer> synchronizer;
+
+    explicit StreamingFixture(std::string poll_base_url = "http://localhost") {
+        synchronizer = std::make_unique<FDv2StreamingSynchronizer>(
+            runner.context().get_executor(), logger,
+            MakeConfig("https://stream.example.com"),
+            MakeConfig(std::move(poll_base_url)), 1s);
+        FDv2StreamingSynchronizerTestPeer::MarkStarted(*synchronizer);
+        FDv2StreamingSynchronizerTestPeer::SetSseClient(*synchronizer, client);
     }
-    return result;
-}
+
+    void Push(std::string type, std::string data) {
+        FDv2StreamingSynchronizerTestPeer::OnEvent(
+            *synchronizer, sse::Event(std::move(type), std::move(data)));
+    }
+
+    std::optional<FDv2SourceResult> NextResult() {
+        return synchronizer->Next(data_model::Selector{}).WaitForResult(2s);
+    }
+};
 
 }  // namespace
 
@@ -311,37 +335,6 @@ TEST(ClientFDv2StreamingSynchronizerTest, SelectorIsSentAsTheBasisPerConnect) {
 // Events
 // ============================================================================
 
-namespace {
-
-// Builds a synchronizer that believes it is already streaming, so that tests
-// can push events at it without a connection.
-struct StreamingFixture {
-    Logger logger = MakeNullLogger();
-    IoContextRunner runner;
-    std::shared_ptr<MockSseClient> client = std::make_shared<MockSseClient>();
-    std::unique_ptr<FDv2StreamingSynchronizer> synchronizer;
-
-    explicit StreamingFixture(std::string poll_base_url = "http://localhost") {
-        synchronizer = std::make_unique<FDv2StreamingSynchronizer>(
-            runner.context().get_executor(), logger,
-            MakeConfig("https://stream.example.com"),
-            MakeConfig(std::move(poll_base_url)), 1s);
-        FDv2StreamingSynchronizerTestPeer::MarkStarted(*synchronizer);
-        FDv2StreamingSynchronizerTestPeer::SetSseClient(*synchronizer, client);
-    }
-
-    void Push(std::string type, std::string data) {
-        FDv2StreamingSynchronizerTestPeer::OnEvent(
-            *synchronizer, sse::Event(std::move(type), std::move(data)));
-    }
-
-    std::optional<FDv2SourceResult> NextResult() {
-        return synchronizer->Next(data_model::Selector{}).WaitForResult(2s);
-    }
-};
-
-}  // namespace
-
 TEST(ClientFDv2StreamingSynchronizerTest, FullTransferBecomesAChangeSet) {
     StreamingFixture f;
 
@@ -374,6 +367,7 @@ TEST(ClientFDv2StreamingSynchronizerTest,
     ASSERT_NE(nullptr, goodbye);
     EXPECT_EQ("bye", goodbye->reason.value_or(""));
     EXPECT_EQ(1, f.client->restart_count_);
+    EXPECT_EQ("FDv2 goodbye received", f.client->last_restart_reason_);
     ASSERT_TRUE(result->fdv1_fallback.has_value());
     EXPECT_EQ(90s, result->fdv1_fallback->ttl);
 }
@@ -417,10 +411,8 @@ TEST(ClientFDv2StreamingSynchronizerTest, UnrecognizedEventIsIgnored) {
     EXPECT_FALSE(future.IsFinished());
 }
 
-// A ping carries no data, so the SDK asks for the current payload. Pointing
-// the poll at an unusable URL makes the answering request observable without
-// a network.
 TEST(ClientFDv2StreamingSynchronizerTest, PingTriggersAPoll) {
+    // An invalid URL makes the answering request observable without network.
     StreamingFixture f("not a url");
 
     f.Push("ping", "");
