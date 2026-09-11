@@ -21,8 +21,8 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-// The distinctions the conditions act on, out of the whole result.
-SourceSignal SignalFor(data_interfaces::FDv2SourceResult const& result) {
+// Reduces a source result to the signal the conditions act on.
+SourceSignal ClassifyResult(data_interfaces::FDv2SourceResult const& result) {
     using Result = data_interfaces::FDv2SourceResult;
     if (std::get_if<Result::ChangeSet>(&result.value)) {
         return SourceSignal::kChangeSet;
@@ -355,7 +355,7 @@ void FDv2DataSystem::OnSynchronizerResult(
             return;
         }
         if (active_conditions_) {
-            active_conditions_->Inform(SignalFor(result));
+            active_conditions_->Inform(ClassifyResult(result));
         }
     }
 
