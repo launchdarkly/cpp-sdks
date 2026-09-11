@@ -85,8 +85,6 @@ TEST(FDv2PollingSynchronizerTests, NextAfterCloseIsShutdown) {
         future.GetResult()->value));
 }
 
-// A poll interval below the floor would let repeated activations hammer the
-// service. The floor is the same one FDv1 polling enforces.
 TEST(FDv2PollingSynchronizerTests, IntervalIsClampedToTheMinimum) {
     boost::asio::io_context ioc;
     auto logger = MakeNullLogger();

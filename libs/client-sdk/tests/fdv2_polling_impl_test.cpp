@@ -55,6 +55,7 @@ TEST(ClientMakeFDv2PollRequestTest, EncodesTheContextIntoTheGetPath) {
         data_model::Selector{});
 
     EXPECT_EQ(network::HttpMethod::kGet, req.Method());
+    // The context, base64url-encoded, is the final path segment.
     EXPECT_EQ(
         "http://example.com/sdk/poll/eval/"
         "eyJraW5kIjoidXNlciIsImtleSI6InVzZXIta2V5In0=",
@@ -62,7 +63,7 @@ TEST(ClientMakeFDv2PollRequestTest, EncodesTheContextIntoTheGetPath) {
     EXPECT_FALSE(req.Body().has_value());
 }
 
-TEST(ClientMakeFDv2PollRequestTest, SendsTheContextInThePostBody) {
+TEST(ClientMakeFDv2PollRequestTest, EncodesTheContextInThePostBody) {
     auto req =
         MakeFDv2PollRequest(MakeConfig("http://example.com",
                                        FDv2ContextTransport::kPostBody, false),
@@ -76,7 +77,7 @@ TEST(ClientMakeFDv2PollRequestTest, SendsTheContextInThePostBody) {
               req.Properties().BaseHeaders().at("content-type"));
 }
 
-TEST(ClientMakeFDv2PollRequestTest, SendsANonEmptySelectorAsTheBasis) {
+TEST(ClientMakeFDv2PollRequestTest, EncodesANonEmptySelectorAsTheBasis) {
     auto req = MakeFDv2PollRequest(
         MakeConfig("http://example.com", FDv2ContextTransport::kPostBody,
                    false),
@@ -93,9 +94,7 @@ TEST(ClientMakeFDv2PollRequestTest, RequestsReasonsWhenConfigured) {
     EXPECT_EQ("http://example.com/sdk/poll/eval?withReasons=true", req.Url());
 }
 
-// Replaying a validator cached for one context on a request for another would
-// let the SDK mistake the other context's data for current.
-TEST(ClientMakeFDv2PollRequestTest, SendsNoConditionalRequestValidator) {
+TEST(ClientMakeFDv2PollRequestTest, OmitsTheConditionalRequestValidator) {
     auto req = MakeFDv2PollRequest(
         MakeConfig("http://example.com", FDv2ContextTransport::kGetPath, false),
         data_model::Selector{data_model::Selector::State{3, "state-3"}});
@@ -234,8 +233,6 @@ TEST(ClientHandleFDv2PollResponseTest, FDv1FallbackHeaderOtherThanTrueIgnored) {
     EXPECT_FALSE(result.fdv1_fallback.has_value());
 }
 
-// The directive travels on any response the transport can observe it on,
-// including a terminal one.
 TEST(ClientHandleFDv2PollResponseTest, FDv1FallbackTravelsWithATerminalError) {
     auto result =
         HandleResponse(401, std::nullopt, {{"X-LD-FD-Fallback", "true"}});
@@ -257,6 +254,7 @@ TEST(ClientHandleFDv2PollResponseTest, GoodbyeCarriesItsOwnFallbackTtl) {
 
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Goodbye>(result.value));
+    // The goodbye's own TTL (90) wins over the header's (120).
     ASSERT_TRUE(result.fdv1_fallback.has_value());
     EXPECT_EQ(90s, result.fdv1_fallback->ttl);
 }
