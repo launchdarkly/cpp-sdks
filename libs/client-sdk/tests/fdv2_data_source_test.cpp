@@ -443,8 +443,6 @@ TEST(ClientFDv2DataSourceTest, ExhaustedInitializersWithNoDataShutDown) {
     EXPECT_EQ(DataSourceStatus::DataSourceState::kShutdown, h.State());
 }
 
-// In offline mode the cache is the only thing that could ever supply data,
-// so a miss means zero flags rather than a failure to start.
 // Under FDv1 the client loaded the cache in its constructor, so cached flags
 // were evaluable immediately. They still are.
 TEST(ClientFDv2DataSourceTest, CachedDataIsAppliedBeforeStartReturns) {
@@ -469,6 +467,8 @@ TEST(ClientFDv2DataSourceTest, CachedDataIsAppliedBeforeStartReturns) {
     EXPECT_EQ(DataSourceStatus::DataSourceState::kValid, h.State());
 }
 
+// In offline mode the cache is the only thing that could ever supply data,
+// so a miss means zero flags rather than a failure to start.
 TEST(ClientFDv2DataSourceTest, CacheOnlyModeIsValidEvenOnAMiss) {
     Harness h;
 
