@@ -189,61 +189,51 @@ FDv2SourceResult HandleFDv2PollResponse(network::HttpResult const& res,
     }
 
     auto headers = ReadFDv2ResponseHeaders(res.Headers());
+    FDv2SourceResult result;
 
-    auto finish = [&headers](FDv2SourceResult result) {
-        // A directive parsed from the response body, such as one on a goodbye
-        // message, takes precedence over the response header.
-        if (!result.fdv1_fallback) {
-            result.fdv1_fallback = std::move(headers.fdv1_fallback);
-        }
-        result.environment_id = std::move(headers.environment_id);
-        return result;
-    };
-
-    // The SDK's data is confirmed current, which is what a "none" intent
-    // means.
     if (res.Status() == 304) {
-        return finish(FDv2SourceResult{FDv2SourceResult::ChangeSet{
-            FlagChangeSet{data_model::ChangeSetType::kNone,
-                          {},
-                          data_model::Selector{}}}});
-    }
-
-    if (res.Status() == 200) {
+        result = FDv2SourceResult{FDv2SourceResult::ChangeSet{FlagChangeSet{
+            data_model::ChangeSetType::kNone, {}, data_model::Selector{}}}};
+    } else if (res.Status() == 200) {
         auto const& body = res.Body();
         if (!body) {
-            return finish(FDv2SourceResult{FDv2SourceResult::Interrupted{
+            result = FDv2SourceResult{FDv2SourceResult::Interrupted{
                 MakeError(ErrorKind::kInvalidData, 0,
-                          "FDv2 polling response contained no body")}});
-        }
-
-        auto result = ParseFDv2PollResponse(*body, protocol_handler, logger);
-        if (auto* interrupted =
-                std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
-            if (interrupted->error.Kind() == ErrorKind::kErrorResponse) {
-                LD_LOG(logger, LogLevel::kInfo)
-                    << identity << ": " << interrupted->error.Message();
-            } else {
-                LD_LOG(logger, LogLevel::kError)
-                    << identity << ": " << interrupted->error.Message();
+                          "FDv2 polling response contained no body")}};
+        } else {
+            result = ParseFDv2PollResponse(*body, protocol_handler, logger);
+            if (auto* interrupted =
+                    std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
+                if (interrupted->error.Kind() == ErrorKind::kErrorResponse) {
+                    LD_LOG(logger, LogLevel::kInfo)
+                        << identity << ": " << interrupted->error.Message();
+                } else {
+                    LD_LOG(logger, LogLevel::kError)
+                        << identity << ": " << interrupted->error.Message();
+                }
             }
         }
-        return finish(std::move(result));
-    }
-
-    if (network::IsRecoverableStatus(res.Status())) {
+    } else if (network::IsRecoverableStatus(res.Status())) {
         std::string msg = network::ErrorForStatusCode(
             res.Status(), "FDv2 polling request", "will retry");
         LD_LOG(logger, LogLevel::kWarn) << identity << ": " << msg;
-        return finish(FDv2SourceResult{FDv2SourceResult::Interrupted{MakeError(
-            ErrorKind::kErrorResponse, res.Status(), std::move(msg))}});
+        result = FDv2SourceResult{FDv2SourceResult::Interrupted{MakeError(
+            ErrorKind::kErrorResponse, res.Status(), std::move(msg))}};
+    } else {
+        std::string msg = network::ErrorForStatusCode(
+            res.Status(), "FDv2 polling request", std::nullopt);
+        LD_LOG(logger, LogLevel::kError) << identity << ": " << msg;
+        result = FDv2SourceResult{FDv2SourceResult::TerminalError{MakeError(
+            ErrorKind::kErrorResponse, res.Status(), std::move(msg))}};
     }
 
-    std::string msg = network::ErrorForStatusCode(
-        res.Status(), "FDv2 polling request", std::nullopt);
-    LD_LOG(logger, LogLevel::kError) << identity << ": " << msg;
-    return finish(FDv2SourceResult{FDv2SourceResult::TerminalError{
-        MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg))}});
+    // A directive parsed from the response body, such as one on a goodbye
+    // message, takes precedence over the response header.
+    if (!result.fdv1_fallback) {
+        result.fdv1_fallback = std::move(headers.fdv1_fallback);
+    }
+    result.environment_id = std::move(headers.environment_id);
+    return result;
 }
 
 }  // namespace launchdarkly::client_side::data_sources

@@ -13,12 +13,7 @@
 namespace launchdarkly::client_side::data_sources {
 
 /**
- * Builds a request to the FDv2 client polling endpoint. A non-empty selector
- * is sent as the basis for a delta response.
- *
- * No conditional-request validator is sent. A validator cached for one
- * context must never be replayed for another, and the basis parameter already
- * gives the service what it needs to answer with a delta.
+ * Builds the request to the FDv2 client polling endpoint.
  */
 network::HttpRequest MakeFDv2PollRequest(FDv2RequestConfig const& config,
                                          data_model::Selector const& selector);
