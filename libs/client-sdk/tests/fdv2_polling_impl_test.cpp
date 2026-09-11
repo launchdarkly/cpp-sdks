@@ -69,6 +69,7 @@ TEST(ClientMakeFDv2PollRequestTest, EncodesTheContextInThePostBody) {
                                        FDv2ContextTransport::kPostBody, false),
                             data_model::Selector{});
 
+    // POST carries the context in the body, so the path has no context segment.
     EXPECT_EQ(network::HttpMethod::kPost, req.Method());
     EXPECT_EQ("http://example.com/sdk/poll/eval", req.Url());
     ASSERT_TRUE(req.Body().has_value());
@@ -145,6 +146,7 @@ TEST(ClientHandleFDv2PollResponseTest, TranslatesAFullTransferToAChangeSet) {
 TEST(ClientHandleFDv2PollResponseTest, TreatsNotModifiedAsANoneIntent) {
     auto result = HandleResponse(304, std::nullopt, {});
 
+    // 304 carries no body and surfaces as a none changeset.
     auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result.value);
     ASSERT_NE(nullptr, change_set);
     EXPECT_EQ(data_model::ChangeSetType::kNone, change_set->change_set.type);
@@ -168,6 +170,7 @@ TEST(ClientHandleFDv2PollResponseTest, ReportsNoEnvironmentIdWhenAbsent) {
 TEST(ClientHandleFDv2PollResponseTest, RecoverableStatusIsInterrupted) {
     auto result = HandleResponse(500, std::nullopt, {});
 
+    // A 500 is recoverable, so it interrupts rather than terminates.
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result.value));
 }
@@ -175,6 +178,7 @@ TEST(ClientHandleFDv2PollResponseTest, RecoverableStatusIsInterrupted) {
 TEST(ClientHandleFDv2PollResponseTest, UnrecoverableStatusIsTerminal) {
     auto result = HandleResponse(401, std::nullopt, {});
 
+    // A 401 is not recoverable, so the source terminates.
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::TerminalError>(result.value));
 }
@@ -188,10 +192,12 @@ TEST(ClientHandleFDv2PollResponseTest, NetworkErrorIsInterrupted) {
 
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result.value));
+    // A transport error carries no response headers, so no fallback directive.
     EXPECT_FALSE(result.fdv1_fallback.has_value());
 }
 
 TEST(ClientHandleFDv2PollResponseTest, AbandonsAnUntranslatableChangeSet) {
+    // The put-object's object field is an array, not an object.
     std::string const body =
         R"({"events":[)"
         R"({"event":"server-intent","data":{"payloads":[)"
@@ -203,6 +209,7 @@ TEST(ClientHandleFDv2PollResponseTest, AbandonsAnUntranslatableChangeSet) {
 
     auto result = HandleResponse(200, body, {});
 
+    // The whole payload is abandoned, surfacing as a recoverable interruption.
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result.value));
 }

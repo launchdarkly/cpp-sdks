@@ -36,6 +36,7 @@ TEST(FDv2PollingInitializerTests, UnparseableEndpointIsATerminalError) {
 
     auto future = initializer.Run();
 
+    // A bad endpoint fails synchronously with a terminal error.
     ASSERT_TRUE(future.IsFinished());
     EXPECT_TRUE(std::holds_alternative<FDv2SourceResult::TerminalError>(
         future.GetResult()->value));
@@ -65,6 +66,7 @@ TEST(FDv2PollingSynchronizerTests, CloseUnblocksAPendingNext) {
     auto future = synchronizer.Next(data_model::Selector{});
     synchronizer.Close();
 
+    // Close resolves a Next that is waiting on the interval timer.
     ASSERT_TRUE(future.IsFinished());
     EXPECT_TRUE(std::holds_alternative<FDv2SourceResult::Shutdown>(
         future.GetResult()->value));
@@ -80,6 +82,7 @@ TEST(FDv2PollingSynchronizerTests, NextAfterCloseIsShutdown) {
     synchronizer.Close();
     auto future = synchronizer.Next(data_model::Selector{});
 
+    // A Next issued after Close resolves immediately as shutdown.
     ASSERT_TRUE(future.IsFinished());
     EXPECT_TRUE(std::holds_alternative<FDv2SourceResult::Shutdown>(
         future.GetResult()->value));
