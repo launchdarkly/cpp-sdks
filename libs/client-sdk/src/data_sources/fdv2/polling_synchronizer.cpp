@@ -12,8 +12,6 @@ namespace launchdarkly::client_side::data_sources {
 
 static char const* const kIdentity = "FDv2 polling synchronizer";
 
-// Floor on the polling interval, to prevent accidentally hammering the
-// service. The SDK has one such floor, which FDv1 polling uses too.
 static std::chrono::seconds MinPollInterval() {
     return config::shared::Defaults<config::shared::ClientSDK>::PollingConfig()
         .min_polling_interval;

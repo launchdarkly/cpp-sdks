@@ -126,11 +126,14 @@ static FDv2SourceResult ParseFDv2PollEvents(
         }
         if (auto* error = std::get_if<FDv2ProtocolHandler::Error>(&result)) {
             if (error->kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
-                auto const& id = error->server_error.value().id;
+                std::string id;
+                if (error->server_error) {
+                    id = error->server_error->id.value_or("");
+                }
                 std::string msg =
                     "An issue was encountered receiving updates for "
                     "payload '" +
-                    id.value_or("") + "' with reason: '" + error->message +
+                    id + "' with reason: '" + error->message +
                     "'. Automatic retry will occur.";
                 return FDv2SourceResult{FDv2SourceResult::Interrupted{
                     MakeError(ErrorKind::kErrorResponse, 0, std::move(msg))}};

@@ -21,8 +21,8 @@ enum class FDv2ContextTransport {
 
 /**
  * The parts of an FDv2 request that do not change between calls to a source.
- * The evaluation context is one of them, since a source is built for a
- * single context and replaced when the context changes.
+ * Evaluation context is included, because a source is built for a single
+ * context and replaced when the context changes.
  */
 struct FDv2RequestConfig {
     std::string base_url;
