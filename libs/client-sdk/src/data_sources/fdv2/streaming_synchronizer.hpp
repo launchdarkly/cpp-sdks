@@ -28,10 +28,6 @@ class FDv2StreamingSynchronizerTestPeer;
  * streaming endpoint, turning the push-based event stream into the pull-based
  * IFDv2Synchronizer::Next() interface.
  *
- * A `ping` event on the stream carries no data, so it is answered with a poll
- * for the current payload. The service sends either data events or pings on a
- * given stream, not both.
- *
  * Threading model:
  *   Next() should only be called once at a time.
  *   Close() may be called concurrently with Next().
