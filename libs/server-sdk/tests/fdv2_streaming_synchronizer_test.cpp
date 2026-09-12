@@ -115,9 +115,8 @@ config::shared::built::HttpProperties MakeHttpProperties() {
 // requiring a real network client.
 class MockSseClient : public sse::Client {
    public:
-    void async_connect() override { ++connect_count_; }
+    void async_connect() override {}
     void async_shutdown(std::function<void()> completion) override {
-        ++shutdown_count_;
         if (completion) {
             completion();
         }
@@ -127,8 +126,6 @@ class MockSseClient : public sse::Client {
         last_restart_reason_ = reason;
     }
 
-    int connect_count_ = 0;
-    int shutdown_count_ = 0;
     int restart_count_ = 0;
     std::string last_restart_reason_;
 };
@@ -833,9 +830,8 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithTtlHeaderParsesValue) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        "http://localhost", MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Server sends the directive with an explicit TTL.
@@ -862,9 +858,8 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithoutTtlHeaderUsesDefault) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        "http://localhost", MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Server sends the directive with no TTL header.

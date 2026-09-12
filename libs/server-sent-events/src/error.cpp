@@ -19,8 +19,11 @@ std::ostream& operator<<(std::ostream& out, NotRedirectable const&) {
 }
 
 std::ostream& operator<<(std::ostream& out, ReadTimeout const& err) {
-    out << "timed out reading response body (exceeded " << err.timeout->count()
-        << "ms) - will retry";
+    out << "timed out reading response body";
+    if (err.timeout) {
+        out << " (exceeded " << err.timeout->count() << "ms)";
+    }
+    out << " - will retry";
     return out;
 }
 
