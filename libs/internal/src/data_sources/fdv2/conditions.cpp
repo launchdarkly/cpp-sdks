@@ -1,15 +1,11 @@
-#include "conditions.hpp"
+#include <launchdarkly/data_sources/fdv2/conditions.hpp>
 
 #include <launchdarkly/async/timer.hpp>
 
 #include <algorithm>
 #include <utility>
-#include <variant>
 
-namespace launchdarkly::server_side::data_systems {
-
-using data_interfaces::FDv2SourceResult;
-using data_interfaces::IFDv2Condition;
+namespace launchdarkly::internal::data_sources {
 
 TimedCondition::TimedCondition(boost::asio::any_io_executor executor,
                                std::chrono::milliseconds timeout)
@@ -73,10 +69,10 @@ FallbackCondition::FallbackCondition(boost::asio::any_io_executor executor,
                                      std::chrono::milliseconds timeout)
     : TimedCondition(std::move(executor), timeout) {}
 
-void FallbackCondition::Inform(FDv2SourceResult const& result) {
-    if (std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+void FallbackCondition::Inform(SourceSignal signal) {
+    if (signal == SourceSignal::kChangeSet) {
         CancelTimer();
-    } else if (std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
+    } else if (signal == SourceSignal::kInterrupted) {
         ArmTimer();
     }
 }
@@ -87,7 +83,7 @@ RecoveryCondition::RecoveryCondition(boost::asio::any_io_executor executor,
     ArmTimer();
 }
 
-void RecoveryCondition::Inform(FDv2SourceResult const&) {}
+void RecoveryCondition::Inform(SourceSignal) {}
 
 FallbackConditionFactory::FallbackConditionFactory(
     boost::asio::any_io_executor executor,
@@ -211,9 +207,9 @@ async::Future<IFDv2Condition::Type> Conditions::GetFuture(
     return future;
 }
 
-void Conditions::Inform(FDv2SourceResult const& result) {
+void Conditions::Inform(SourceSignal signal) {
     for (auto const& condition : conditions_) {
-        condition->Inform(result);
+        condition->Inform(signal);
     }
 }
 
@@ -235,4 +231,4 @@ void Conditions::Close() {
     }
 }
 
-}  // namespace launchdarkly::server_side::data_systems
+}  // namespace launchdarkly::internal::data_sources
