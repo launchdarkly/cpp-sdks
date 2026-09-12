@@ -500,7 +500,7 @@ TEST(ClientFDv2StreamingSynchronizerTest, RecoverableSseErrorIsInterrupted) {
     StreamingFixture f;
 
     FDv2StreamingSynchronizerTestPeer::OnError(*f.synchronizer,
-                                               sse::errors::ReadTimeout{});
+                                               sse::errors::ReadTimeout{100ms});
     auto result = f.NextResult();
 
     ASSERT_TRUE(result.has_value());
