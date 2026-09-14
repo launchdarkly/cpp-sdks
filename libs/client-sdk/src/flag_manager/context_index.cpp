@@ -24,7 +24,7 @@ void ContextIndex::Notice(
 }
 
 std::optional<std::chrono::time_point<std::chrono::system_clock>>
-ContextIndex::TimestampFor(std::string const& id) const {
+ContextIndex::GetTimestamp(std::string const& id) const {
     for (auto const& entry : index_) {
         if (entry.id == id) {
             return entry.timestamp;

@@ -63,7 +63,7 @@ class ContextIndex {
      */
     [[nodiscard]] std::optional<
         std::chrono::time_point<std::chrono::system_clock>>
-    TimestampFor(std::string const& id) const;
+    GetTimestamp(std::string const& id) const;
 
     /**
      * Prune the index returning a list of the removed context keys

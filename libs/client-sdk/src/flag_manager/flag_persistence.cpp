@@ -136,13 +136,13 @@ void FlagPersistence::RecordFreshness(Context const& context) {
 }
 
 std::optional<std::chrono::time_point<std::chrono::system_clock>>
-FlagPersistence::FreshnessFor(Context const& context) {
+FlagPersistence::ReadFreshness(Context const& context) {
     if (!persistence_ || !context.Valid()) {
         return std::nullopt;
     }
 
     std::lock_guard lock(persistence_mutex_);
-    return ReadIndexAt(freshness_key_).TimestampFor(FreshnessId(context));
+    return ReadIndexAt(freshness_key_).GetTimestamp(FreshnessId(context));
 }
 
 void FlagPersistence::StoreCache(std::string const& context_id) {
