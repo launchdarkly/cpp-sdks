@@ -101,7 +101,7 @@ ModeSources BuildModeSources(FDv2Config const& config,
     // time this context was polled, which survives restarts so that repeated
     // launches cannot produce a burst of requests.
     auto const last_poll =
-        ToSteadyClock(params.cache->FreshnessFor(params.context));
+        ToSteadyClock(params.cache->ReadFreshness(params.context));
 
     for (auto const& entry : definition->second.synchronizers) {
         std::visit(
