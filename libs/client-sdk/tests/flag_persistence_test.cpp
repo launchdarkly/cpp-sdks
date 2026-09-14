@@ -246,7 +246,7 @@ TEST(FlagPersistenceTests, RecordsFreshnessOnAPayload) {
                 std::chrono::milliseconds{500}};
         });
 
-    EXPECT_FALSE(flag_persistence.FreshnessFor(context).has_value());
+    EXPECT_FALSE(flag_persistence.ReadFreshness(context).has_value());
 
     flag_persistence.Apply(
         context,
@@ -262,7 +262,7 @@ TEST(FlagPersistenceTests, RecordsFreshnessOnAPayload) {
 
     EXPECT_EQ(
         std::chrono::system_clock::time_point{std::chrono::milliseconds{500}},
-        flag_persistence.FreshnessFor(context));
+        flag_persistence.ReadFreshness(context));
 }
 
 // A "none" intent is the service confirming the SDK's data is current, which
@@ -287,7 +287,7 @@ TEST(FlagPersistenceTests, RecordsFreshnessOnANoneChangeSet) {
 
     EXPECT_EQ(
         std::chrono::system_clock::time_point{std::chrono::milliseconds{700}},
-        flag_persistence.FreshnessFor(context));
+        flag_persistence.ReadFreshness(context));
 }
 
 // The freshness record is keyed by the whole context, because changing an
@@ -313,8 +313,8 @@ TEST(FlagPersistenceTests, FreshnessIsPerContextAttributeSet) {
                            FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
                            /* from_cache= */ false);
 
-    EXPECT_TRUE(flag_persistence.FreshnessFor(plain).has_value());
-    EXPECT_FALSE(flag_persistence.FreshnessFor(with_attribute).has_value());
+    EXPECT_TRUE(flag_persistence.ReadFreshness(plain).has_value());
+    EXPECT_FALSE(flag_persistence.ReadFreshness(with_attribute).has_value());
 }
 
 // A stored context that has aged out of the cache should not keep a freshness
@@ -342,10 +342,10 @@ TEST(FlagPersistenceTests, PrunesFreshnessBeyondMaxContexts) {
         now++;
     }
 
-    EXPECT_FALSE(flag_persistence.FreshnessFor(first).has_value());
+    EXPECT_FALSE(flag_persistence.ReadFreshness(first).has_value());
     EXPECT_TRUE(
         flag_persistence
-            .FreshnessFor(ContextBuilder().Kind("user", "third").Build())
+            .ReadFreshness(ContextBuilder().Kind("user", "third").Build())
             .has_value());
 }
 
@@ -378,7 +378,7 @@ TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
     // Nothing is written back.
     EXPECT_TRUE(persistence->store_.empty());
     // Nor was it confirmed current by the service, so it is not freshness.
-    EXPECT_FALSE(flag_persistence.FreshnessFor(context).has_value());
+    EXPECT_FALSE(flag_persistence.ReadFreshness(context).has_value());
     // The data is still applied to the store, so evaluation can use it.
     ASSERT_TRUE(store.Get("flagA"));
 }
