@@ -75,7 +75,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
      */
     [[nodiscard]] std::optional<
         std::chrono::time_point<std::chrono::system_clock>>
-    FreshnessFor(Context const& context);
+    ReadFreshness(Context const& context);
 
    private:
     inline static std::string global_namespace_ = "LaunchDarkly";
