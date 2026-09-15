@@ -262,6 +262,8 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
             } else if constexpr (std::is_same_v<T, data_model::FDv2ChangeSet>) {
                 auto typed = TranslateChangeSet(r, logger_);
                 if (!typed) {
+                    // Discard the accepted-but-unstored payload.
+                    protocol_handler_.Reset();
                     std::string msg =
                         "FDv2 streaming changeset could not be translated";
                     LD_LOG(logger_, LogLevel::kError)
@@ -269,6 +271,10 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                     Notify(FDv2SourceResult{
                         FDv2SourceResult::Interrupted{MakeError(
                             ErrorKind::kInvalidData, 0, std::move(msg))}});
+                    std::lock_guard lock(mutex_);
+                    if (sse_client_) {
+                        sse_client_->async_restart("FDv2 translation error");
+                    }
                     return;
                 }
                 Notify(FDv2SourceResult{
