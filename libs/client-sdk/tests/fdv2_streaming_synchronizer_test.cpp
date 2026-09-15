@@ -385,7 +385,7 @@ TEST(ClientFDv2StreamingSynchronizerTest, UnparseableEventDataReconnects) {
 }
 
 TEST(ClientFDv2StreamingSynchronizerTest,
-     UntranslatableChangeSetIsInterrupted) {
+     UntranslatableChangeSetResetsTheHandlerAndReconnects) {
     StreamingFixture f;
 
     f.Push("server-intent", R"({"payloads":[{"id":"p1","target":1,)"
@@ -399,6 +399,19 @@ TEST(ClientFDv2StreamingSynchronizerTest,
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result->value));
+    // The connection is dropped and reconnected for a fresh basis.
+    EXPECT_EQ(1, f.client->restart_count_);
+
+    // A payload-transferred is only valid mid-transfer, i.e. after a
+    // server-intent. The reset ended the transfer, so this one is now a
+    // protocol error. Without the reset the handler would still be mid-transfer
+    // and would emit a partial changeset over the data we just discarded.
+    f.Push("payload-transferred", R"({"state":"def","version":8})");
+    auto after = f.NextResult();
+
+    ASSERT_TRUE(after.has_value());
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2SourceResult::Interrupted>(after->value));
 }
 
 TEST(ClientFDv2StreamingSynchronizerTest, UnrecognizedEventIsIgnored) {
