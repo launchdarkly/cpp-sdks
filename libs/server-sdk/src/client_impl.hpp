@@ -250,7 +250,7 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    data_components::DataSourceStatusManager status_manager_;
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager_;
 
     // This is the main polymorphic component that constitutes the
     // guts of how data is retrieved (polling, streaming, persistent stores,

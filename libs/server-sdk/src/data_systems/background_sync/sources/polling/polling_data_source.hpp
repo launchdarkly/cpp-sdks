@@ -12,6 +12,7 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <chrono>
+#include <memory>
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -21,13 +22,14 @@ class PollingDataSource
    public:
     PollingDataSource(boost::asio::any_io_executor const& ioc,
                       Logger const& logger,
-                      data_components::DataSourceStatusManager& status_manager,
+                      std::shared_ptr<data_components::DataSourceStatusManager>
+                          status_manager,
                       config::built::ServiceEndpoints const& endpoints,
                       config::built::BackgroundSyncConfig::PollingConfig const&
                           data_source_config,
                       config::built::HttpProperties const& http_properties);
 
-    void StartAsync(data_interfaces::IDestination* dest,
+    void StartAsync(std::shared_ptr<data_interfaces::IDestination> dest,
                     data_model::SDKDataSet const* bootstrap_data) override;
 
     void ShutdownAsync(std::function<void()> completion) override;
@@ -40,11 +42,8 @@ class PollingDataSource
 
     Logger const& logger_;
 
-    // Status manager is used to report the status of the data source. It must
-    // outlive the source. This source performs asynchronous
-    // operations, so a completion handler might invoke the status manager after
-    // it has been destroyed.
-    data_components::DataSourceStatusManager& status_manager_;
+    // Reports the status of the data source.
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager_;
 
     // Responsible for performing HTTP requests using boost::asio.
     network::AsioRequester requester_;
@@ -66,7 +65,7 @@ class PollingDataSource
     std::chrono::time_point<std::chrono::system_clock> last_poll_start_;
 
     // Destination for all data obtained via polling.
-    data_interfaces::IDestination* sink_;
+    std::weak_ptr<data_interfaces::IDestination> sink_;
 
     void StartPollingTimer();
 };
