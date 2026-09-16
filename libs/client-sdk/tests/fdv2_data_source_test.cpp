@@ -169,15 +169,20 @@ class MultiShotSynchronizerFactory : public IFDv2SynchronizerFactory {
     std::vector<std::unique_ptr<IFDv2Synchronizer>> sources_;
 };
 
-// Initializer whose Run() never resolves, so that orchestration can be
-// examined while it is in flight.
+// Initializer whose Run() stays pending until Deliver() resolves it, so
+// orchestration can be examined in flight.
 class StalledInitializer : public IFDv2Initializer {
    public:
-    explicit StalledInitializer(bool* closed_flag)
+    explicit StalledInitializer(bool* closed_flag = nullptr)
         : closed_flag_(closed_flag) {}
 
     async::Future<FDv2SourceResult> Run() override {
         return promise_.GetFuture();
+    }
+
+    // Resolves the pending Run() future with the given result.
+    void Deliver(FDv2SourceResult result) {
+        promise_.Resolve(std::move(result));
     }
 
     void Close() override {
@@ -352,6 +357,36 @@ TEST(ClientFDv2DataSourceTest, ShutdownClosesTheActiveInitializer) {
 
     EXPECT_TRUE(closed);
     EXPECT_TRUE(completed);
+}
+
+// A result delivered after shutdown must not reach the store or status, so an
+// identify restart cannot apply the old context over the new one.
+TEST(ClientFDv2DataSourceTest, ResultAfterShutdownIsNotApplied) {
+    Harness h;
+
+    auto stalled = std::make_unique<StalledInitializer>();
+    auto* stalled_ptr = stalled.get();
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(
+        std::make_unique<OneShotInitializerFactory>(std::move(stalled)));
+
+    auto source = h.MakeDataSource(std::move(initializers), {});
+    source->Start();
+    h.Context().run();
+
+    source->ShutdownAsync([] {});
+
+    // The initializer delivers a full basis after shutdown.
+    stalled_ptr->Deliver(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                            MakeSelector(1, "state-1")));
+    h.Context().restart();
+    h.Context().run();
+
+    EXPECT_TRUE(h.Applies().empty());
+    EXPECT_FALSE(h.Store().Get("flagA"));
+    EXPECT_NE(DataSourceStatus::DataSourceState::kValid, h.State());
 }
 
 // ============================================================================
