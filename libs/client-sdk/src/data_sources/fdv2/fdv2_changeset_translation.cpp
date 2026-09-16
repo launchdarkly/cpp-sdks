@@ -33,29 +33,34 @@ std::optional<FlagChangeSet> TranslateChangeSet(FDv2ChangeSet const& change_set,
             changes.push_back(FlagChange{
                 change.key,
                 ItemDescriptor{data_model::Tombstone{change.version}}});
-            continue;
-        }
+        } else if (change.change_type == FDv2Change::ChangeType::kPut) {
+            if (change.kind != kFlagEval) {
+                LD_LOG(logger, LogLevel::kWarn)
+                    << "FDv2: unknown kind '" << change.kind
+                    << "' in put-object, skipping";
+                continue;
+            }
 
-        if (change.kind != kFlagEval) {
+            auto result = ParseEvaluationResult(change.object, change.version);
+            if (!result) {
+                LD_LOG(logger, LogLevel::kError)
+                    << "FDv2: could not deserialize flag '" << change.key
+                    << "'";
+                return std::nullopt;
+            }
+            if (!result->has_value()) {
+                LD_LOG(logger, LogLevel::kWarn)
+                    << "FDv2: flag '" << change.key
+                    << "' object was null, skipping";
+                continue;
+            }
+            changes.push_back(
+                FlagChange{change.key, ItemDescriptor{std::move(**result)}});
+        } else {
             LD_LOG(logger, LogLevel::kWarn)
-                << "FDv2: unknown kind '" << change.kind
-                << "' in put-object, skipping";
-            continue;
+                << "FDv2: unrecognized change type "
+                << static_cast<int>(change.change_type) << ", skipping";
         }
-
-        auto result = ParseEvaluationResult(change.object, change.version);
-        if (!result) {
-            LD_LOG(logger, LogLevel::kError)
-                << "FDv2: could not deserialize flag '" << change.key << "'";
-            return std::nullopt;
-        }
-        if (!result->has_value()) {
-            LD_LOG(logger, LogLevel::kWarn) << "FDv2: flag '" << change.key
-                                            << "' object was null, skipping";
-            continue;
-        }
-        changes.push_back(
-            FlagChange{change.key, ItemDescriptor{std::move(**result)}});
     }
 
     return FlagChangeSet{change_set.type, std::move(changes),
