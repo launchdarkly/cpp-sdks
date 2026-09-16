@@ -146,6 +146,37 @@ TEST(FlagStoreApplyTests, PayloadWithoutASelectorDiscardsTheCurrentSelector) {
     EXPECT_FALSE(store.CurrentSelector().value.has_value());
 }
 
+// Init replaces the data from a source that carries no selector, so a selector
+// the store held from an earlier payload no longer describes the data.
+TEST(FlagStoreApplyTests, InitDiscardsTheCurrentSelector) {
+    FlagStore store;
+
+    store.Apply(FlagChangeSet{ChangeSetType::kFull,
+                              {FlagChange{"flagA", Flag(1, Value("a"))}},
+                              SelectorAt(3, "state-3")},
+                /* compute_changes= */ false);
+
+    store.Init(std::unordered_map<std::string, ItemDescriptor>{
+        {"flagA", Flag(2, Value("a2"))}});
+
+    EXPECT_FALSE(store.CurrentSelector().value.has_value());
+}
+
+// Upsert applies a single flag from a source that carries no selector, so it
+// discards the held selector for the same reason as Init.
+TEST(FlagStoreApplyTests, UpsertDiscardsTheCurrentSelector) {
+    FlagStore store;
+
+    store.Apply(FlagChangeSet{ChangeSetType::kFull,
+                              {FlagChange{"flagA", Flag(1, Value("a"))}},
+                              SelectorAt(3, "state-3")},
+                /* compute_changes= */ false);
+
+    store.Upsert("flagB", Flag(1, Value("b")));
+
+    EXPECT_FALSE(store.CurrentSelector().value.has_value());
+}
+
 // A "none" intent is not a payload. It confirms the data is current, so both
 // the flag data and the selector it was verified against still stand.
 TEST(FlagStoreApplyTests, NoneChangeSetLeavesDataAndSelectorUnchanged) {

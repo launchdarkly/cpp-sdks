@@ -61,12 +61,16 @@ void FlagStore::UpdateData(
         this->data_.emplace(item.first, std::make_shared<ItemDescriptor>(
                                             std::move(item.second)));
     }
+    // This data carries no selector, so drop any the store held.
+    selector_ = data_model::Selector{};
 }
 
 void FlagStore::Upsert(std::string const& key, ItemDescriptor item) {
     std::lock_guard lock{data_mutex_};
 
     data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
+    // This data carries no selector, so drop any the store held.
+    selector_ = data_model::Selector{};
 }
 
 std::vector<FlagValueChangeEvent> FlagStore::Apply(
