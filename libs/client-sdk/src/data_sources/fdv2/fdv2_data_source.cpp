@@ -492,6 +492,9 @@ void FDv2DataSource::ApplyResult(FDv2SourceResult::ChangeSet change_set,
         change_set.change_set.type != data_model::ChangeSetType::kNone;
     {
         std::lock_guard lock(mutex_);
+        if (closed_) {
+            return;
+        }
         if (environment_id) {
             environment_id_ = std::move(environment_id);
         }
