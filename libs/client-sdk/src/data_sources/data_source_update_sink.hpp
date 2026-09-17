@@ -50,7 +50,8 @@ class IDataSourceUpdateSink {
      * instead.
      *
      * @param from_cache Whether the changeset was loaded from the local
-     * cache, in which case it is not written back to it.
+     * cache. Cached data is not written back to the cache, and does not
+     * count as the service confirming the cache is current.
      */
     virtual void Apply(Context const& context,
                        FlagChangeSet change_set,
