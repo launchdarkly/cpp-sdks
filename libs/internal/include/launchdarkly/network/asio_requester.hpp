@@ -284,13 +284,13 @@ class AsioRequester {
     template <typename CompletionToken>
     auto Request(HttpRequest request, CompletionToken&& token) const {
         return boost::asio::async_initiate<CompletionToken, void(HttpResult)>(
-            [this](auto handler, HttpRequest req) {
+            [ctx = ctx_, ssl_ctx = ssl_ctx_](auto handler, HttpRequest req) {
                 InnerRequest(
-                    net::make_strand(ctx_), std::move(req),
+                    net::make_strand(ctx), std::move(req),
                     [h = std::move(handler)](HttpResult result) mutable {
                         std::move(h)(std::move(result));
                     },
-                    0);
+                    0, ssl_ctx);
             },
             token, std::move(request));
     }
@@ -304,10 +304,11 @@ class AsioRequester {
      */
     std::shared_ptr<ssl::context> ssl_ctx_;
 
-    void InnerRequest(boost::asio::any_io_executor exec,
-                      std::optional<HttpRequest> request,
-                      std::function<void(HttpResult)> callback,
-                      unsigned char redirect_count) const {
+    static void InnerRequest(boost::asio::any_io_executor exec,
+                             std::optional<HttpRequest> request,
+                             std::function<void(HttpResult)> callback,
+                             unsigned char redirect_count,
+                             std::shared_ptr<ssl::context> ssl_ctx) {
         if (redirect_count > kRedirectLimit) {
             boost::asio::post(exec, [callback, request]() mutable {
                 callback(
@@ -326,8 +327,8 @@ class AsioRequester {
             return;
         }
 
-        boost::asio::post(exec, [exec, callback, request, this,
-                                 redirect_count]() mutable {
+        boost::asio::post(exec, [exec, callback, request, redirect_count,
+                                 ssl_ctx]() mutable {
             auto beast_request = MakeBeastRequest(*request);
 
             auto const& properties = request->Properties();
@@ -337,16 +338,16 @@ class AsioRequester {
 
             std::shared_ptr<ssl::context> ssl;
             if (request->Https()) {
-                ssl = this->ssl_ctx_;
+                ssl = ssl_ctx;
             }
 
             std::make_shared<FoxyClient>(
                 exec, std::move(ssl), request->Host(), service, beast_request,
                 properties.ConnectTimeout(), properties.ResponseTimeout(),
-                [exec, callback, request, this, redirect_count](auto res) {
+                [exec, callback, request, redirect_count, ssl_ctx](auto res) {
                     NeedsRedirect(res)
                         ? InnerRequest(exec, MakeRedirectRequest(*request, res),
-                                       callback, redirect_count + 1)
+                                       callback, redirect_count + 1, ssl_ctx)
                         : callback(res);
                 })
                 ->Run();
