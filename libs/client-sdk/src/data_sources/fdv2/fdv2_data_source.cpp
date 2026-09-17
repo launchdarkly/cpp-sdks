@@ -100,25 +100,23 @@ std::optional<std::string> FDv2DataSource::EnvironmentId() const {
 }
 
 void FDv2DataSource::PublishState(DataSourceStatus::DataSourceState state) {
-    {
-        std::lock_guard lock(mutex_);
-        if (closed_) {
-            return;
-        }
+    auto promise = GuardShutdown();
+    if (!promise) {
+        return;
     }
     status_manager_->SetState(state);
+    promise->Resolve({});
 }
 
 void FDv2DataSource::PublishState(DataSourceStatus::DataSourceState state,
                                   DataSourceStatus::ErrorInfo::ErrorKind kind,
                                   std::string message) {
-    {
-        std::lock_guard lock(mutex_);
-        if (closed_) {
-            return;
-        }
+    auto promise = GuardShutdown();
+    if (!promise) {
+        return;
     }
     status_manager_->SetState(state, kind, std::move(message));
+    promise->Resolve({});
 }
 
 void FDv2DataSource::Start() {
@@ -195,8 +193,17 @@ void FDv2DataSource::ShutdownAsync(std::function<void()> completion) {
     // stops any further transitions from this source.
     PublishState(DataSourceStatus::DataSourceState::kInitializing);
     Close();
+
     if (completion) {
-        boost::asio::post(executor_, std::move(completion));
+        std::lock_guard lock(mutex_);
+        closing_.Then(
+            [completion](std::monostate _) {
+                completion();
+                return std::monostate{};
+            },
+            [executor = executor_](async::Continuation<void()> work) {
+                boost::asio::post(executor, std::move(work));
+            });
     }
 }
 
@@ -490,11 +497,12 @@ void FDv2DataSource::ApplyResult(FDv2SourceResult::ChangeSet change_set,
                                  bool from_cache) {
     bool const carries_data =
         change_set.change_set.type != data_model::ChangeSetType::kNone;
+    auto promise = GuardShutdown();
+    if (!promise) {
+        return;
+    }
     {
         std::lock_guard lock(mutex_);
-        if (closed_) {
-            return;
-        }
         if (environment_id) {
             environment_id_ = std::move(environment_id);
         }
@@ -502,6 +510,22 @@ void FDv2DataSource::ApplyResult(FDv2SourceResult::ChangeSet change_set,
     }
     sink_->Apply(context_, std::move(change_set.change_set), from_cache);
     PublishState(DataSourceStatus::DataSourceState::kValid);
+    promise->Resolve({});
+}
+
+std::optional<async::Promise<std::monostate>> FDv2DataSource::GuardShutdown() {
+    std::lock_guard lock(mutex_);
+    if (closed_) {
+        return std::nullopt;
+    }
+    async::Promise<std::monostate> promise;
+    auto future = promise.GetFuture();
+    closing_ =
+        closing_.Then([future](std::monostate _) { return future; },
+                      [executor = executor_](async::Continuation<void()> work) {
+                          boost::asio::post(executor, std::move(work));
+                      });
+    return promise;
 }
 
 }  // namespace launchdarkly::client_side::data_sources
