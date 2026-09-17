@@ -173,6 +173,12 @@ class FDv2DataSource final
     void OnSynchronizerResult(FDv2SourceResult result);
     void OnConditionFired(IFDv2Condition::Type type);
 
+    // Checks for closed_ and queues up a promise for any work being done.
+    // Returns nullopt if closed_ already.
+    // Otherwise, returns a Promise that should be resolved when the current
+    // work is done and it's safe to signal ShutdownAsync complete.
+    std::optional<async::Promise<std::monostate>> GuardShutdown();
+
     // Builds the conditions to apply to the currently active synchronizer.
     // Must be called with mutex_ held. Reads source_manager_.
     std::unique_ptr<Conditions> BuildActiveConditions() const;
@@ -224,6 +230,9 @@ class FDv2DataSource final
     std::unique_ptr<IFDv2Initializer> active_initializer_;
     std::unique_ptr<IFDv2Synchronizer> active_synchronizer_;
     std::unique_ptr<Conditions> active_conditions_;
+    // Any outstanding work to complete before signaling shutdown complete.
+    async::Future<std::monostate> closing_ =
+        async::MakeFuture<std::monostate>({});
 };
 
 }  // namespace launchdarkly::client_side::data_sources
