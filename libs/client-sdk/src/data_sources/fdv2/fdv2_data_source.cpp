@@ -123,6 +123,12 @@ void FDv2DataSource::Start() {
     bool const already_called = start_called_.exchange(true);
     assert(!already_called && "Start() must be called at most once");
 
+    // Don't let ShutdownAsync call its callback while Start() is in progress.
+    auto promise = GuardShutdown();
+    if (!promise) {
+        return;
+    }
+
     PublishState(DataSourceStatus::DataSourceState::kInitializing);
 
     LD_LOG(logger_, LogLevel::kInfo) << "fdv2: starting";
@@ -131,18 +137,19 @@ void FDv2DataSource::Start() {
         // Nothing is configured to supply data, so an empty store is the
         // canonical state.
         PublishState(DataSourceStatus::DataSourceState::kValid);
-        return;
+    } else {
+        // Evaluation can use cached flags as soon as Start() returns, the way
+        // it could when the client loaded the cache in its constructor.
+        RunCacheInitializers();
+
+        boost::asio::post(executor_, [weak = weak_from_this()]() {
+            if (auto self = weak.lock()) {
+                self->RunNextInitializer();
+            }
+        });
     }
 
-    // Evaluation can use cached flags as soon as Start() returns, the way it
-    // could when the client loaded the cache in its constructor.
-    RunCacheInitializers();
-
-    boost::asio::post(executor_, [weak = weak_from_this()]() {
-        if (auto self = weak.lock()) {
-            self->RunNextInitializer();
-        }
-    });
+    promise->Resolve({});
 }
 
 void FDv2DataSource::RunCacheInitializers() {
