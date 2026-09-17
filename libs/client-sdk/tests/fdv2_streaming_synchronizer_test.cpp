@@ -233,7 +233,6 @@ TEST(ClientFDv2StreamingSynchronizerTest, CloseUnblocksAPendingNext) {
 TEST(ClientFDv2StreamingSynchronizerTest, GetTargetCarriesTheEncodedContext) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;
-    auto client = std::make_shared<MockSseClient>();
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger,
