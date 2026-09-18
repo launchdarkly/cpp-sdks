@@ -30,6 +30,10 @@ using FlagChangeSet = data_model::ChangeSet<FlagChangeSetData>;
 
 /**
  * Interface for handling updates from LaunchDarkly.
+ *
+ * Implementations must be thread-safe. A data source calls these from
+ * whichever thread it runs on, concurrently with flag evaluation and listener
+ * registration on the application's threads.
  */
 class IDataSourceUpdateSink {
    public:
@@ -38,6 +42,19 @@ class IDataSourceUpdateSink {
     virtual void Upsert(Context const& context,
                         std::string key,
                         ItemDescriptor item) = 0;
+
+    /**
+     * Applies a changeset as a single unit. Unlike Upsert, this path does not
+     * order or reject updates by version. FDv2 reserves the per-flag version
+     * for event tracking and manages payload consistency through selectors
+     * instead.
+     *
+     * @param from_cache Whether the changeset was loaded from the local
+     * cache, in which case it is not written back to it.
+     */
+    virtual void Apply(Context const& context,
+                       FlagChangeSet change_set,
+                       bool from_cache) = 0;
 
     IDataSourceUpdateSink(IDataSourceUpdateSink const& item) = delete;
     IDataSourceUpdateSink(IDataSourceUpdateSink&& item) = delete;

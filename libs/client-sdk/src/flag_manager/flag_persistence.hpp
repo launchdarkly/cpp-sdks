@@ -39,6 +39,10 @@ class FlagPersistence : public IDataSourceUpdateSink {
                 std::string key,
                 ItemDescriptor item) override;
 
+    void Apply(Context const& context,
+               FlagChangeSet change_set,
+               bool from_cache) override;
+
     void LoadCached(Context const& context);
 
    private:
