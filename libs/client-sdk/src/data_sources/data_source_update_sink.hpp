@@ -4,16 +4,29 @@
 #include <ostream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
+#include <launchdarkly/data_model/change_set.hpp>
 #include <launchdarkly/data_model/item_descriptor.hpp>
 
 namespace launchdarkly::client_side {
 
 using ItemDescriptor = data_model::ItemDescriptor<EvaluationResult>;
+
+// One flag's new state: an evaluation result, or an empty descriptor
+// (tombstone) if the flag was deleted.
+struct FlagChange {
+    std::string key;
+    ItemDescriptor item;
+};
+
+using FlagChangeSetData = std::vector<FlagChange>;
+
+using FlagChangeSet = data_model::ChangeSet<FlagChangeSetData>;
 
 /**
  * Interface for handling updates from LaunchDarkly.

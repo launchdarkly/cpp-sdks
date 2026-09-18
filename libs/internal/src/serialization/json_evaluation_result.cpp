@@ -8,12 +8,9 @@
 #include <boost/json.hpp>
 
 namespace launchdarkly {
-tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<std::optional<EvaluationResult>, JsonError>> const& unused,
-    boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-
+tl::expected<std::optional<EvaluationResult>, JsonError> ParseEvaluationResult(
+    boost::json::value const& json_value,
+    std::optional<std::uint64_t> version_override) {
     if (json_value.is_null()) {
         return std::nullopt;
     }
@@ -23,7 +20,9 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     auto const& json_obj = json_value.as_object();
 
     auto* version_iter = json_obj.find("version");
-    auto version_opt = ValueAsOpt<uint64_t>(version_iter, json_obj.end());
+    auto version_opt = version_override.has_value()
+                           ? version_override
+                           : ValueAsOpt<uint64_t>(version_iter, json_obj.end());
     if (!version_opt.has_value()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
@@ -96,7 +95,8 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
                 track_reason,
                 debug_events_until_date,
                 EvaluationDetailInternal(std::move(value), variation,
-                                         std::make_optional(reason.value()))};
+                                         std::make_optional(reason.value())),
+                prerequisites};
         }
         // We could not parse the reason.
         return tl::unexpected(JsonError::kSchemaFailure);
@@ -111,6 +111,14 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
         debug_events_until_date,
         EvaluationDetailInternal(std::move(value), variation, std::nullopt),
         prerequisites};
+}
+
+tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<std::optional<EvaluationResult>, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+    return ParseEvaluationResult(json_value, std::nullopt);
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
