@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.12.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.11.4...launchdarkly-cpp-client-v3.12.0) (2026-09-18)
+
+
+### Features
+
+* Add FDv2 initializer and synchronizer interfaces to the client ([#609](https://github.com/launchdarkly/cpp-sdks/issues/609)) ([d6c7fe2](https://github.com/launchdarkly/cpp-sdks/commit/d6c7fe2ac6df6840039ed93b45428774181d9768))
+* Apply FDv2 changesets to the client flag store transactionally ([#607](https://github.com/launchdarkly/cpp-sdks/issues/607)) ([5fb0c75](https://github.com/launchdarkly/cpp-sdks/commit/5fb0c7581d3bdef2922df323ed132072c4dfabed))
+* Translate FDv2 changesets into client flag changes ([#606](https://github.com/launchdarkly/cpp-sdks/issues/606)) ([61a248f](https://github.com/launchdarkly/cpp-sdks/commit/61a248f0c547d3e2ecb29f97b45d611a5bb78ad0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-internal bumped from 0.14.2 to 0.15.0
+
 ## [3.11.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.11.3...launchdarkly-cpp-client-v3.11.4) (2026-08-04)
 
 
