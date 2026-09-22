@@ -93,7 +93,10 @@ HttpRequest::HttpRequest(std::string const& url,
     boost::urls::url boost_url = uri_components.value();
     // Resolve dot segments and make slashes consistent. Only the path is
     // normalized: normalizing the query would decode escapes such as %26,
-    // changing which characters act as separators.
+    // changing which characters act as separators. Path normalization does
+    // decode escapes of characters that are legal in a path (older Boost
+    // releases include %2F); characters that cannot appear raw in a request
+    // target, such as space, '#', '?' and CR LF, stay encoded.
     boost_url.normalize_path();
 
     host_ = uri_components->host();

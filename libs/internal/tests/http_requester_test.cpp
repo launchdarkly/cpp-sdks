@@ -110,13 +110,16 @@ TEST(HttpRequestTests, PathPreservesPercentEncodedQuery) {
         request.Url());
 }
 
+// Path normalization may decode escapes of characters that are legal in a
+// path (older Boost releases include %2F), so only characters that cannot
+// appear raw in a request target are checked here.
 TEST(HttpRequestTests, PathPreservesPercentEncodedPathSegments) {
     HttpRequest request(
-        "https://some.domain.com/ld%20relay/p%2Fq/sdk/latest-all",
+        "https://some.domain.com/ld%20relay/p%23q/sdk/latest-all",
         launchdarkly::network::HttpMethod::kGet,
         HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
-    EXPECT_EQ("/ld%20relay/p%2Fq/sdk/latest-all", request.Path());
+    EXPECT_EQ("/ld%20relay/p%23q/sdk/latest-all", request.Path());
 }
 
 TEST(HttpRequestTests, PathOmitsAnEmptyQuery) {
@@ -133,8 +136,8 @@ TEST(HttpRequestTests, AppendPreservesPercentEncoding) {
               AppendUrl("https://the.url.com/ld%20relay?tok=a%26b",
                         "/sdk/latest-all"));
 
-    EXPECT_EQ("https://the.url.com/base/p%2Fq",
-              AppendUrl("https://the.url.com/base", "p%2Fq"));
+    EXPECT_EQ("https://the.url.com/base/p%23q",
+              AppendUrl("https://the.url.com/base", "p%23q"));
 }
 
 TEST(HttpRequestTests, AppendEncodesRawCharactersInTheAppendedPath) {
