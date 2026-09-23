@@ -192,9 +192,9 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
         path.append(to_append, 1, to_append.length() - 1);
     }
 
-    // The appended path may itself be percent-encoded (a base64url context,
-    // a redirect Location). Keep those escapes, encode anything else that is
-    // not allowed in a path, and reject malformed escapes.
+    // The appended path may itself be percent-encoded, as a redirect Location
+    // can be. Keep those escapes, encode anything else that is not allowed in
+    // a path, and reject malformed escapes.
     auto const encoded_path = boost::urls::make_pct_string_view(path);
     if (!encoded_path) {
         return std::nullopt;
