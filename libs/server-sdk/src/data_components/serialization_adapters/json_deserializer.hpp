@@ -53,26 +53,28 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
 
         auto const json_val = boost::json::parse(descriptor.serializedItem);
 
-        if (auto item_result = boost::json::value_to<
-                tl::expected<std::optional<Item>, JsonError>>(json_val)) {
-            auto item = *item_result;
-            if (!item) {
-                return tl::make_unexpected("item invalid: value is null");
+        // A keyed tombstone parses as a valid item, so test as tombstone first.
+        if (auto tombstone_result = boost::json::value_to<
+                tl::expected<std::optional<data_model::Tombstone>, JsonError>>(
+                json_val)) {
+            auto tombstone = *tombstone_result;
+            if (!tombstone) {
+                return tl::make_unexpected("tombstone invalid: value is null");
             }
-            return data_model::ItemDescriptor<Item>(std::move(*item));
+            return data_model::ItemDescriptor<Item>(*tombstone);
         }
 
-        auto tombstone = boost::json::value_to<
-            tl::expected<std::optional<data_model::Tombstone>, JsonError>>(
-            json_val);
-        if (!tombstone) {
-            return tl::make_unexpected(ErrorToString(tombstone.error()));
+        auto item =
+            boost::json::value_to<tl::expected<std::optional<Item>, JsonError>>(
+                json_val);
+        if (!item) {
+            return tl::make_unexpected(ErrorToString(item.error()));
         }
-        auto tombstone_result = *tombstone;
-        if (!tombstone_result) {
-            return tl::make_unexpected("tombstone invalid: value is null");
+        auto item_result = *item;
+        if (!item_result) {
+            return tl::make_unexpected("item invalid: value is null");
         }
-        return data_model::ItemDescriptor<Item>(*tombstone_result);
+        return data_model::ItemDescriptor<Item>(std::move(*item_result));
     }
 
     template <typename DataModel, typename DataKind>
