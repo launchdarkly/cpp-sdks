@@ -36,12 +36,9 @@
 .vscode
 
 # For cmake
-build
-build-static
-build-dynamic
-build-static-debug
-build-dynamic-debug
-cmake-build-*
+build/
+build-*/
+cmake-build-*/
 .cache
 
 # For Macs..
