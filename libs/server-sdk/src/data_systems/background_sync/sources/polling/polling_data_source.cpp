@@ -10,6 +10,7 @@
 
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
+#include "../../../environment_id_header.hpp"
 #include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
 
 #include <boost/json.hpp>
@@ -150,6 +151,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
 
             if (poll_result.has_value()) {
+                poll_result->environment_id = ReadEnvironmentId(res.Headers());
                 sink_->Init(std::move(*poll_result));
                 status_manager_.SetState(
                     DataSourceStatus::DataSourceState::kValid);

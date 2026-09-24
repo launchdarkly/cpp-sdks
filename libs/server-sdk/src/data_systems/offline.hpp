@@ -22,6 +22,7 @@ class OfflineSystem final : public data_interfaces::IDataSystem {
     [[nodiscard]] bool Initialized() const override;
     [[nodiscard]] std::string const& Identity() const override;
     void Initialize() override;
+    [[nodiscard]] std::optional<std::string> EnvironmentId() const override;
 
    private:
     data_components::DataSourceStatusManager& status_manager_;

@@ -378,8 +378,9 @@ void ClientImpl::TrackInternal(Context const& ctx,
     // In this SDK the data is type-safe, and will be enqueued, so it makes
     // minimal functional difference.
     if (!config_.Hooks().empty()) {
-        hooks::TrackSeriesContext series_context(
-            ctx, event_name, metric_value, data, hook_context, std::nullopt);
+        hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
+                                                 data, hook_context,
+                                                 data_system_->EnvironmentId());
         hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
 
@@ -487,7 +488,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     if (!config_.Hooks().empty()) {
         hooks::EvaluationSeriesContext series_context(
             key, context, default_value, method_name, hook_context,
-            std::nullopt);
+            data_system_->EnvironmentId());
         // Executor only created if there are hooks.
         executor.emplace(config_.Hooks(), logger_);
         executor->BeforeEvaluation(series_context);
@@ -501,7 +502,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
                 key, context, default_value, method_name, hook_context,
-                std::nullopt);
+                data_system_->EnvironmentId());
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -523,7 +524,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
                 key, context, default_value, method_name, hook_context,
-                std::nullopt);
+                data_system_->EnvironmentId());
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -539,7 +540,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     if (executor) {
         hooks::EvaluationSeriesContext series_context(
             key, context, default_value, method_name, hook_context,
-            std::nullopt);
+            data_system_->EnvironmentId());
         executor->AfterEvaluation(series_context, detail);
     }
 
