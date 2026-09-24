@@ -91,17 +91,25 @@ HttpRequest::HttpRequest(std::string const& url,
     }
 
     boost::urls::url boost_url = uri_components.value();
-    // Make paths absolute and slashes consistent.
-    boost_url.normalize();
+    // Resolve dot segments and make slashes consistent. Only the path is
+    // normalized: normalizing the query would decode escapes such as %26,
+    // changing which characters act as separators. Path normalization does
+    // decode escapes of characters that are legal in a path (older Boost
+    // releases include %2F); characters that cannot appear raw in a request
+    // target, such as space, '#', '?' and CR LF, stay encoded.
+    boost_url.normalize_path();
 
     host_ = uri_components->host();
-    // The c_str here is to remove extra nulls from normalizing the path.
-    // Clang calls this redundant, but it is very much required.
-    path_ =
-        boost_url.path().c_str();  // NOLINT(readability-redundant-string-cstr)
-    if (!boost_url.query().empty()) {
+    // Keep the percent-encoding. The Beast backend sends this string as the
+    // request target verbatim, so a decoded space, '#', '&' or CR LF coming
+    // from a server-supplied value (for example the FDv2 "basis" selector
+    // state) would corrupt the request line.
+    path_ = std::string(boost_url.encoded_path());
+    auto const encoded_query = uri_components->encoded_query();
+    if (!encoded_query.empty()) {
         // For a boost beast request we need the query string in the path.
-        path_ = path_ + "?" + uri_components->query();
+        path_ += "?";
+        path_ += std::string(encoded_query);
     }
 
     is_https_ = uri_components->scheme_id() == boost::urls::scheme::https;
@@ -156,16 +164,15 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
     }
 
     boost::urls::url url = uri_components.value();
-    url.normalize();
-    // The c_str here is to remove extra nulls from normalizing the path.
-    // Clang calls this redundant, but it is very much required.
-    std::string path =
-        url.path().c_str();  // NOLINT(readability-redundant-string-cstr)
+    // Normalize only the path (dot segments, slashes). The query is left as
+    // written so its percent-encoding survives.
+    url.normalize_path();
+    std::string path(url.encoded_path());
 
     // This sizing may not be perfect, but should be close enough on average.
     // The extra to is to account for a '/' and possible a '?'.
-    path.reserve(url.path().size() + to_append.size() + url.query().length() +
-                 2);
+    path.reserve(url.encoded_path().size() + to_append.size() +
+                 url.encoded_query().size() + 2);
 
     // We want a single '/' between things.
     bool path_has_trailing_slash =
@@ -185,9 +192,33 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
         path.append(to_append, 1, to_append.length() - 1);
     }
 
-    url.set_path(path);
-    url.normalize();
-    return url.c_str();
+    // The appended path may itself be percent-encoded, as a redirect Location
+    // can be. Keep those escapes, encode anything else that is not allowed in
+    // a path, and reject malformed escapes.
+    auto const encoded_path = boost::urls::make_pct_string_view(path);
+    if (!encoded_path) {
+        return std::nullopt;
+    }
+    url.set_encoded_path(*encoded_path);
+    url.normalize_path();
+    return std::string(url.buffer());
+}
+
+std::optional<std::string> AppendQueryParam(std::optional<std::string> url_in,
+                                            std::string const& key,
+                                            std::string const& value) {
+    if (!url_in) {
+        return std::nullopt;
+    }
+
+    auto uri_components = boost::urls::parse_uri(*url_in);
+    if (!uri_components) {
+        return std::nullopt;
+    }
+
+    boost::urls::url url = uri_components.value();
+    url.params().append({key, value});
+    return std::string(url.buffer());
 }
 
 }  // namespace launchdarkly::network

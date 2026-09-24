@@ -3,8 +3,8 @@
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 
-#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/detail/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
@@ -39,7 +39,8 @@ static network::HttpRequest MakeRequest(
 
     if (polling_config.filter_key && url) {
         if (detail::ValidateFilterKey(*polling_config.filter_key)) {
-            url->append("?filter=" + *polling_config.filter_key);
+            url = network::AppendQueryParam(url, "filter",
+                                            *polling_config.filter_key);
             LD_LOG(logger, LogLevel::kDebug)
                 << "using payload filter '" << *polling_config.filter_key
                 << "'";

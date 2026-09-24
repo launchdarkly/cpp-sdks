@@ -135,9 +135,12 @@ bool IsRecoverableStatus(HttpResult::StatusCode status);
 
 /**
  * Append a path to a URL. This will account for query parameters on the
- * original URL. This will also normalize the URL.
+ * original URL, and will normalize the path (resolving dot segments and
+ * making slashes consistent). Percent-encoding in the URL and in the appended
+ * path is preserved; characters not allowed in a path are percent-encoded.
  *
- * If the input URL doesn't parse, then std::nullopt will be returned.
+ * If the input URL doesn't parse, or the appended path contains a malformed
+ * percent-escape, then std::nullopt will be returned.
  *
  * @param url_in Input URL, if std::nullopt, the method will return
  * std::nullopt. This is to facilitate multiple appends without having to check
@@ -148,5 +151,23 @@ bool IsRecoverableStatus(HttpResult::StatusCode status);
  */
 std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
                                      std::string const& to_append);
+
+/**
+ * Append a query parameter to a URL. The key and value are percent-encoded as
+ * needed, and the parameter is joined with '&' when the URL already carries a
+ * query, so a base URL that has its own parameters keeps them.
+ *
+ * If the input URL doesn't parse, then std::nullopt will be returned.
+ *
+ * @param url_in Input URL, if std::nullopt, the method will return
+ * std::nullopt.
+ * @param key The parameter name.
+ * @param value The parameter value.
+ * @return The URL with the parameter appended, or std::nullopt if the URL
+ * could not be parsed.
+ */
+std::optional<std::string> AppendQueryParam(std::optional<std::string> url_in,
+                                            std::string const& key,
+                                            std::string const& value);
 
 }  // namespace launchdarkly::network
