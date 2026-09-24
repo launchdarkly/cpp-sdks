@@ -8,6 +8,7 @@
 #include <boost/json.hpp>
 #include <boost/url/parse.hpp>
 
+#include <array>
 #include <utility>
 
 namespace launchdarkly::client_side::data_sources {
@@ -15,6 +16,10 @@ namespace launchdarkly::client_side::data_sources {
 static char const* const kIdentity = "FDv2 streaming synchronizer";
 
 static char const* const kPingEvent = "ping";
+
+// Path segments for the FDv2 client evaluation stream endpoint.
+static constexpr std::array<char const*, 3> kStreamPathSegments = {
+    "sdk", "stream", "eval"};
 
 // Read-idle timeout for the long-lived stream, larger than the service
 // heartbeat so a live connection is not declared dead.
@@ -81,9 +86,9 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
     if (!segments.empty() && segments.back().empty()) {
         segments.pop_back();
     }
-    segments.push_back("sdk");
-    segments.push_back("stream");
-    segments.push_back("eval");
+    for (auto const* segment : kStreamPathSegments) {
+        segments.push_back(segment);
+    }
     if (!post) {
         segments.push_back(
             encoding::Base64UrlEncode(stream_config_.serialized_context));
