@@ -10,9 +10,12 @@ BackgroundSync::BackgroundSync(
     config::built::BackgroundSyncConfig const& background_sync_config,
     config::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
-    data_components::DataSourceStatusManager& status_manager,
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager,
     Logger const& logger)
-    : store_(), change_notifier_(store_, store_), synchronizer_() {
+    : store_(),
+      change_notifier_(
+          std::make_shared<data_components::ChangeNotifier>(store_, store_)),
+      synchronizer_() {
     std::visit(
         [&](auto&& method_config) {
             using T = std::decay_t<decltype(method_config)>;
@@ -34,7 +37,7 @@ BackgroundSync::BackgroundSync(
 }
 
 void BackgroundSync::Initialize() {
-    synchronizer_->StartAsync(&change_notifier_,
+    synchronizer_->StartAsync(change_notifier_,
                               nullptr /* no bootstrap data supported yet */);
 }
 
