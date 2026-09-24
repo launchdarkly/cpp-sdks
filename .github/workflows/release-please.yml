@@ -25,7 +25,6 @@ jobs:
       # release-please-action v5+ (release-please >= 17) honors `force-tag-creation`
       # for draft releases by creating the tag ref via the GitHub API before the
       # release object, so a single invocation handles both releases and PRs.
-      # https://github.com/googleapis/release-please-action/releases/tag/v5.0.0
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
@@ -44,8 +43,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-client
         name: Full release of libs/client-sdk
         uses: ./.github/actions/sdk-release
@@ -71,7 +69,6 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -86,8 +83,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-client
         name: Full release of libs/client-sdk (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -104,7 +100,6 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -123,8 +118,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-server
         name: Full release of libs/server-sdk
         uses: ./.github/actions/sdk-release
@@ -150,7 +144,6 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -165,8 +158,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-server
         name: Full release of libs/server-sdk (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -183,7 +175,6 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -202,8 +193,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source
         uses: ./.github/actions/sdk-release
@@ -229,7 +219,6 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -244,8 +233,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -262,7 +250,6 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -281,8 +268,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-server-dynamodb
         name: Full release of libs/server-sdk-dynamodb-source
         uses: ./.github/actions/sdk-release
@@ -308,7 +294,6 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -323,8 +308,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      # https://github.com/actions/checkout/releases/tag/v7.0.1
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: release-server-dynamodb
         name: Full release of libs/server-sdk-dynamodb-source (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -341,7 +325,6 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
-      # https://github.com/actions/attest/releases/tag/v4.2.1
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
