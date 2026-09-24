@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.7.1...launchdarkly-cpp-sse-client-v0.8.0) (2026-09-24)
+
+
+### Features
+
+* Add the FDv2 streaming synchronizer to the client SDK ([#611](https://github.com/launchdarkly/cpp-sdks/issues/611)) ([edf0e4f](https://github.com/launchdarkly/cpp-sdks/commit/edf0e4f68af8095e2102b3419ebad06824034970))
+
 ## [0.7.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.7.0...launchdarkly-cpp-sse-client-v0.7.1) (2026-08-04)
 
 
