@@ -21,7 +21,7 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -41,7 +41,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
       SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -64,7 +64,7 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -85,7 +85,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
       SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -105,7 +105,7 @@ jobs:
   build-test-server:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -114,7 +114,7 @@ jobs:
   build-test-server-curl:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -124,7 +124,7 @@ jobs:
   build-test-server-mac:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -134,7 +134,7 @@ jobs:
   build-test-server-mac-curl:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -145,7 +145,7 @@ jobs:
   build-test-server-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       - uses: ./.github/actions/ci
         with:
@@ -157,7 +157,7 @@ jobs:
   build-test-server-windows-curl:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       - uses: ./.github/actions/ci
         with:
