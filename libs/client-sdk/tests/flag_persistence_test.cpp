@@ -276,12 +276,26 @@ TEST(FlagPersistenceTests, RecordsFreshnessOnANoneChangeSet) {
         std::make_shared<TestPersistence>(TestPersistence::StoreType());
     auto logger = launchdarkly::logging::NullLogger();
 
+    uint64_t now = 500;
     FlagPersistence flag_persistence(
-        "the-key", updater, store, persistence, logger, 5, []() {
+        "the-key", updater, store, persistence, logger, 5, [&now]() {
             return std::chrono::system_clock::time_point{
-                std::chrono::milliseconds{700}};
+                std::chrono::milliseconds{now}};
         });
 
+    auto item = ItemDescriptor{EvaluationResult{
+        1, std::nullopt, false, false, std::nullopt,
+        EvaluationDetailInternal{Value("test"), std::nullopt, std::nullopt}}};
+
+    // A payload caches the data and its freshness.
+    flag_persistence.Apply(
+        context,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagA", item}}, Selector{}},
+        /* from_cache= */ false);
+
+    // A later "none" advances the freshness to when it arrived.
+    now = 700;
     flag_persistence.Apply(context,
                            FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
                            /* from_cache= */ false);
@@ -306,13 +320,19 @@ TEST(FlagPersistenceTests, FreshnessIsPerContextAttributeSet) {
                 std::chrono::milliseconds{500}};
         });
 
+    auto item = ItemDescriptor{EvaluationResult{
+        1, std::nullopt, false, false, std::nullopt,
+        EvaluationDetailInternal{Value("test"), std::nullopt, std::nullopt}}};
+
     auto plain = ContextBuilder().Kind("user", "user-key").Build();
     auto with_attribute =
         ContextBuilder().Kind("user", "user-key").Set("country", "US").Build();
 
-    flag_persistence.Apply(plain,
-                           FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
-                           /* from_cache= */ false);
+    flag_persistence.Apply(
+        plain,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagA", item}}, Selector{}},
+        /* from_cache= */ false);
 
     EXPECT_TRUE(flag_persistence.ReadFreshness(plain).has_value());
     EXPECT_FALSE(flag_persistence.ReadFreshness(with_attribute).has_value());
@@ -334,11 +354,16 @@ TEST(FlagPersistenceTests, PrunesFreshnessBeyondMaxContexts) {
                 std::chrono::milliseconds{now}};
         });
 
+    auto item = ItemDescriptor{EvaluationResult{
+        1, std::nullopt, false, false, std::nullopt,
+        EvaluationDetailInternal{Value("test"), std::nullopt, std::nullopt}}};
+
     auto first = ContextBuilder().Kind("user", "first").Build();
     for (auto const& key : {"first", "second", "third"}) {
         flag_persistence.Apply(
             ContextBuilder().Kind("user", key).Build(),
-            FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+            FlagChangeSet{
+                ChangeSetType::kFull, {FlagChange{"flagA", item}}, Selector{}},
             /* from_cache= */ false);
         now++;
     }
@@ -348,6 +373,67 @@ TEST(FlagPersistenceTests, PrunesFreshnessBeyondMaxContexts) {
         flag_persistence
             .ReadFreshness(ContextBuilder().Kind("user", "third").Build())
             .has_value());
+}
+
+// A freshness timestamp must not outlive the flag data it describes. The
+// freshness and flag-data indexes prune independently, and a "none" intent
+// advances only the freshness entry, so a context's flag data can age out while
+// its freshness lingers. Reporting that timestamp would make a poll wait on
+// data that is no longer cached.
+TEST(FlagPersistenceTests, DoesNotReportFreshnessAfterFlagDataEvicted) {
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    uint64_t now = 0;
+    // Room for only two contexts, so caching a third is what orphans an entry.
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 2, [&now]() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{now}};
+        });
+
+    auto item = ItemDescriptor{EvaluationResult{
+        1, std::nullopt, false, false, std::nullopt,
+        EvaluationDetailInternal{Value("test"), std::nullopt, std::nullopt}}};
+
+    auto a = ContextBuilder().Kind("user", "a").Build();
+    auto b = ContextBuilder().Kind("user", "b").Build();
+    auto c = ContextBuilder().Kind("user", "c").Build();
+
+    flag_persistence.Apply(
+        a,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagA", item}}, Selector{}},
+        /* from_cache= */ false);
+    now = 1;
+    flag_persistence.Apply(
+        b,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagB", item}}, Selector{}},
+        /* from_cache= */ false);
+    // A "none" refreshes only a's freshness entry, reordering the freshness
+    // index against the flag-data index.
+    now = 2;
+    flag_persistence.Apply(a,
+                           FlagChangeSet{ChangeSetType::kNone, {}, Selector{}},
+                           /* from_cache= */ false);
+    // Caching a third context evicts the oldest of each index: a's flag data,
+    // but b's freshness. a is left with a freshness entry and no flag data.
+    now = 3;
+    flag_persistence.Apply(
+        c,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagC", item}}, Selector{}},
+        /* from_cache= */ false);
+
+    // a's flag data was evicted, so its freshness must not be reported.
+    EXPECT_FALSE(flag_persistence.ReadCached(a).has_value());
+    EXPECT_FALSE(flag_persistence.ReadFreshness(a).has_value());
+    // b still has flag data behind it.
+    EXPECT_TRUE(flag_persistence.ReadCached(b).has_value());
 }
 
 // Data read out of the cache was never confirmed current by the service, so
