@@ -64,7 +64,8 @@ class FlagPersistence : public IDataSourceUpdateSink {
 
     /**
      * Returns the time the service last confirmed the flag data for this
-     * context was current, or nullopt if it never has.
+     * context was current. Returns nullopt if the service never confirmed it,
+     * or if no flag data is cached for the context now.
      *
      * Keyed by the context's whole set of attributes, not just its key,
      * because changing an attribute can change how flags evaluate.

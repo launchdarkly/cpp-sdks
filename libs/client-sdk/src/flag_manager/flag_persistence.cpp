@@ -142,6 +142,10 @@ FlagPersistence::ReadFreshness(Context const& context) {
     }
 
     std::lock_guard lock(persistence_mutex_);
+    // Freshness must not outlive the flag data it describes.
+    if (!ReadCached(context)) {
+        return std::nullopt;
+    }
     return ReadIndexAt(freshness_key_).GetTimestamp(FreshnessId(context));
 }
 
