@@ -11,9 +11,7 @@ namespace launchdarkly::client_side::flag_manager {
 /**
  * Owns the flag store and the update pipeline that feeds it.
  *
- * Thread-safe to the extent its parts are: the store, the updater, and the
- * persistence layer each carry their own lock. The accessors hand out
- * references to those parts and take no lock of their own.
+ * Thread-safe: each part it exposes is itself thread-safe.
  */
 class FlagManager {
    public:
@@ -25,10 +23,7 @@ class FlagManager {
     IFlagNotifier& Notifier();
     FlagStore const& Store() const;
 
-    /**
-     * The local cache the SDK persists flag data to, and which the FDv2 cache
-     * initializer reads from.
-     */
+    /** Returns the local cache the SDK persists flag data to. */
     FlagPersistence& Cache();
 
     void LoadCache(Context const& context);

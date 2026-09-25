@@ -21,10 +21,8 @@ namespace launchdarkly::client_side::flag_manager {
  * 1. a context identifier (hashed fully-qualified key) and
  * 2. timestamp when it was last accessed, to support an LRU
  * eviction pattern.
- */
-/**
- * Not thread-safe. Instances are short-lived values read out of persistence,
- * modified, and written back by a caller holding its own lock.
+ *
+ * Not thread-safe.
  */
 class ContextIndex {
    public:
@@ -57,10 +55,7 @@ class ContextIndex {
 
     [[nodiscard]] Index const& Entries() const;
 
-    /**
-     * The timestamp recorded for the given id, or nullopt if the id is not in
-     * the index.
-     */
+    /** Returns the timestamp recorded for the id, or nullopt if absent. */
     [[nodiscard]] std::optional<
         std::chrono::time_point<std::chrono::system_clock>>
     GetTimestamp(std::string const& id) const;
