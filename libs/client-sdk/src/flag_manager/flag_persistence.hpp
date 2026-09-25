@@ -22,10 +22,7 @@ std::string PersistenceEncodeKey(std::string const& input);
  * Mirrors data source updates into the persistent store on their way to the
  * next sink, and reads them back when a context is loaded.
  *
- * Thread-safe. The methods that touch the store take persistence_mutex_,
- * which makes each stored index read-modify-write atomic. It does not span
- * the call to the downstream sink, so an update reaches the store and the
- * cache at slightly different times.
+ * Thread-safe: concurrent reads and updates are serialized.
  */
 class FlagPersistence : public IDataSourceUpdateSink {
    public:
@@ -57,21 +54,20 @@ class FlagPersistence : public IDataSourceUpdateSink {
     void LoadCached(Context const& context);
 
     /**
-     * The flag data stored for the given context, or nullopt when nothing is
-     * stored for it and when persistence is disabled. An empty map means an
-     * environment with no flags was stored, which is distinct from nothing
+     * Returns the flag data stored for the given context, or nullopt when
+     * nothing is stored for it or persistence is disabled. An empty map means
+     * an environment with no flags was stored, which is distinct from nothing
      * being stored at all.
      */
     [[nodiscard]] std::optional<std::unordered_map<std::string, ItemDescriptor>>
     ReadCached(Context const& context);
 
     /**
-     * When the service last confirmed the flag data for this context was
-     * current, or nullopt if it never has.
+     * Returns the time the service last confirmed the flag data for this
+     * context was current, or nullopt if it never has.
      *
-     * Keyed by the context's whole set of attributes rather than its key,
-     * because changing an attribute can change how flags evaluate, and the
-     * answer for the old attributes says nothing about the new ones.
+     * Keyed by the context's whole set of attributes, not just its key,
+     * because changing an attribute can change how flags evaluate.
      */
     [[nodiscard]] std::optional<
         std::chrono::time_point<std::chrono::system_clock>>
@@ -98,11 +94,11 @@ class FlagPersistence : public IDataSourceUpdateSink {
 
     void StoreCache(std::string const& context_id);
 
-    // Records that the service confirmed this context's data is current, as
-    // of now.
+    // Records that the service just confirmed this context's data is current.
     void RecordFreshness(Context const& context);
 
-    // Must be called with persistence_mutex_ held.
+    // Reads the stored index at the given key, or an empty index if none is
+    // stored. Must be called with persistence_mutex_ held.
     ContextIndex ReadIndexAt(std::string const& key);
 };
 
