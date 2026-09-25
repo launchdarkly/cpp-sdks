@@ -260,6 +260,7 @@ TEST(FlagPersistenceTests, RecordsFreshnessOnAPayload) {
             Selector{}},
         /* from_cache= */ false);
 
+    // The apply records the clock's time as freshness.
     EXPECT_EQ(
         std::chrono::system_clock::time_point{std::chrono::milliseconds{500}},
         flag_persistence.ReadFreshness(context));
@@ -377,7 +378,7 @@ TEST(FlagPersistenceTests, ApplyFromCacheDoesNotWriteTheCache) {
 
     // Nothing is written back.
     EXPECT_TRUE(persistence->store_.empty());
-    // Nor was it confirmed current by the service, so it is not freshness.
+    // Nor did the service confirm it current, so no freshness is recorded.
     EXPECT_FALSE(flag_persistence.ReadFreshness(context).has_value());
     // The data is still applied to the store, so evaluation can use it.
     ASSERT_TRUE(store.Get("flagA"));

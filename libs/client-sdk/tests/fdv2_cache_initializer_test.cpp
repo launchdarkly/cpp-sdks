@@ -70,6 +70,7 @@ TEST(FDv2CacheInitializerTest, CacheHitProducesAFullDataSet) {
     ASSERT_TRUE(future.IsFinished());
     auto result = future.GetResult();
 
+    // The result is a full change set carrying the cached flag.
     auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
     ASSERT_NE(nullptr, change_set);
     EXPECT_EQ(ChangeSetType::kFull, change_set->change_set.type);
@@ -77,24 +78,9 @@ TEST(FDv2CacheInitializerTest, CacheHitProducesAFullDataSet) {
     EXPECT_EQ("flagA", change_set->change_set.data[0].key);
     EXPECT_EQ(Value("test"),
               change_set->change_set.data[0].item.item->Detail().Value());
-}
 
-// Asking the service for a delta against unverified cached data could corrupt
-// the store silently, so the cache never supplies a basis.
-TEST(FDv2CacheInitializerTest, CachedDataCarriesNoSelector) {
-    auto context = ContextBuilder().Kind("user", "user-key").Build();
-    auto logger = launchdarkly::logging::NullLogger();
-    auto persistence =
-        std::make_shared<TestPersistence>(TestPersistence::StoreType{
-            {kEnvironment,
-             {{kContextId, R"({"flagA":{"version":1,"value":"test"}})"}}}});
-    FlagManager flag_manager("the-key", logger, 5, persistence);
-
-    FDv2CacheInitializer initializer(&flag_manager.Cache(), context, logger);
-    auto result = initializer.Run().GetResult();
-
-    auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
-    ASSERT_NE(nullptr, change_set);
+    // A delta against unverified cached data could silently corrupt the store,
+    // so the cache supplies no selector.
     EXPECT_FALSE(change_set->change_set.selector.value.has_value());
 }
 
@@ -128,6 +114,7 @@ TEST(FDv2CacheInitializerTest, NoPersistenceConfiguredProducesANoneIntent) {
     ASSERT_TRUE(future.IsFinished());
     auto result = future.GetResult();
 
+    // Not configuring persistence acts like a cache miss, not an error.
     auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
     ASSERT_NE(nullptr, change_set);
     EXPECT_EQ(ChangeSetType::kNone, change_set->change_set.type);

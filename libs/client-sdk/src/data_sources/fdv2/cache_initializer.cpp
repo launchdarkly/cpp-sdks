@@ -16,8 +16,7 @@ async::Future<FDv2SourceResult> FDv2CacheInitializer::Run() {
     if (!data) {
         LD_LOG(logger_, LogLevel::kDebug)
             << kIdentity << ": no cached data for this context";
-        // A miss leaves the data set unchanged and lets initialization
-        // continue, which is what a "none" intent means.
+        // A miss leaves the data set unchanged so initialization can continue.
         return async::MakeFuture(FDv2SourceResult{FDv2SourceResult::ChangeSet{
             FlagChangeSet{data_model::ChangeSetType::kNone,
                           {},
