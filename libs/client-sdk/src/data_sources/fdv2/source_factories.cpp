@@ -1,5 +1,7 @@
 #include "source_factories.hpp"
 
+#include "../polling_data_source.hpp"
+#include "fdv1_adapter_synchronizer.hpp"
 #include "polling_initializer.hpp"
 #include "polling_synchronizer.hpp"
 #include "streaming_synchronizer.hpp"
@@ -54,6 +56,31 @@ std::unique_ptr<IFDv2Synchronizer> FDv2StreamingSynchronizerFactory::Build() {
     return std::make_unique<FDv2StreamingSynchronizer>(
         executor_, logger_, stream_config_, poll_config_,
         initial_reconnect_delay_);
+}
+
+FDv1PollingAdapterFactory::FDv1PollingAdapterFactory(
+    boost::asio::any_io_executor executor,
+    Logger logger,
+    config::shared::built::ServiceEndpoints endpoints,
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK>
+        data_source_config,
+    config::shared::built::HttpProperties http_properties,
+    Context context)
+    : executor_(std::move(executor)),
+      logger_(std::move(logger)),
+      endpoints_(std::move(endpoints)),
+      data_source_config_(std::move(data_source_config)),
+      http_properties_(std::move(http_properties)),
+      context_(std::move(context)) {}
+
+std::unique_ptr<IFDv2Synchronizer> FDv1PollingAdapterFactory::Build() {
+    return std::make_unique<FDv1AdapterSynchronizer>(
+        [this](IDataSourceUpdateSink* sink,
+               DataSourceStatusManager* status_manager) {
+            return std::make_shared<PollingDataSource>(
+                endpoints_, data_source_config_, http_properties_, executor_,
+                context_, *sink, *status_manager, logger_);
+        });
 }
 
 }  // namespace launchdarkly::client_side::data_sources
