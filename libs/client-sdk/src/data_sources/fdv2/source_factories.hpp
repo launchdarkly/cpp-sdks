@@ -4,6 +4,10 @@
 #include "ifdv2_initializer_factory.hpp"
 #include "ifdv2_synchronizer_factory.hpp"
 
+#include <launchdarkly/config/shared/built/data_source_config.hpp>
+#include <launchdarkly/config/shared/built/service_endpoints.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/context.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
@@ -91,6 +95,42 @@ class FDv2StreamingSynchronizerFactory final : public IFDv2SynchronizerFactory {
     FDv2RequestConfig const stream_config_;
     FDv2RequestConfig const poll_config_;
     std::chrono::milliseconds const initial_reconnect_delay_;
+};
+
+/**
+ * Builds fresh FDv1AdapterSynchronizer instances wrapping a freshly-built
+ * FDv1 polling source.
+ *
+ * The synchronizers it builds report themselves as the FDv1 tier, which the
+ * orchestrator keeps in reserve until the service directs the SDK away from
+ * FDv2.
+ *
+ * Thread-safe: Build() may be called from any thread, and the
+ * configuration it hands to each source is fixed at construction.
+ */
+class FDv1PollingAdapterFactory final : public IFDv2SynchronizerFactory {
+   public:
+    FDv1PollingAdapterFactory(
+        boost::asio::any_io_executor executor,
+        Logger logger,
+        config::shared::built::ServiceEndpoints endpoints,
+        config::shared::built::DataSourceConfig<config::shared::ClientSDK>
+            data_source_config,
+        config::shared::built::HttpProperties http_properties,
+        Context context);
+
+    std::unique_ptr<IFDv2Synchronizer> Build() override;
+
+    [[nodiscard]] bool IsFDv1Fallback() const override { return true; }
+
+   private:
+    boost::asio::any_io_executor const executor_;
+    Logger const logger_;
+    config::shared::built::ServiceEndpoints const endpoints_;
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK> const
+        data_source_config_;
+    config::shared::built::HttpProperties const http_properties_;
+    Context const context_;
 };
 
 }  // namespace launchdarkly::client_side::data_sources
