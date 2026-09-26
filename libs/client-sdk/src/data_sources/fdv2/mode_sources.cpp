@@ -33,20 +33,14 @@ FDv2RequestConfig MakeRequestConfig(std::string base_url,
                              params.with_reasons};
 }
 
-// The poll interval is measured on the monotonic clock, but the last poll was
-// recorded on the wall clock so that it could be persisted. An instant in the
-// future means the wall clock moved backwards since it was written, which
-// says nothing usable about when the last poll happened.
-std::optional<std::chrono::steady_clock::time_point> ToSteadyClock(
-    std::optional<std::chrono::system_clock::time_point> instant) {
-    if (!instant) {
-        return std::nullopt;
-    }
+// Maps a wall-clock instant onto the monotonic clock the poll interval is timed
+// against. steady_clock is used while running (for monotonicity) but cannot
+// persist across a restart, so the last poll is stored as system_clock and
+// mapped back here.
+std::chrono::steady_clock::time_point ToSteadyClock(
+    std::chrono::system_clock::time_point instant) {
     auto const now = std::chrono::system_clock::now();
-    if (*instant > now) {
-        return std::nullopt;
-    }
-    return std::chrono::steady_clock::now() - (now - *instant);
+    return std::chrono::steady_clock::now() - (now - instant);
 }
 
 }  // namespace
@@ -68,17 +62,6 @@ ModeSources BuildModeSources(FDv2Config const& config,
     auto const serialized_context =
         boost::json::serialize(boost::json::value_from(params.context));
 
-    auto polling_config = [&](FDv2Config::PollingConfig const& polling) {
-        return MakeRequestConfig(
-            polling.base_url_override.value_or(params.polling_base_url), params,
-            serialized_context, config.use_post);
-    };
-    auto streaming_config = [&](FDv2Config::StreamingConfig const& streaming) {
-        return MakeRequestConfig(
-            streaming.base_url_override.value_or(params.streaming_base_url),
-            params, serialized_context, config.use_post);
-    };
-
     for (auto const& entry : definition->second.initializers) {
         std::visit(
             overloaded{
@@ -91,7 +74,10 @@ ModeSources BuildModeSources(FDv2Config const& config,
                     sources.initializers.push_back(
                         std::make_unique<FDv2PollingInitializerFactory>(
                             params.executor, params.logger,
-                            polling_config(polling)));
+                            MakeRequestConfig(
+                                polling.base_url_override.value_or(
+                                    params.polling_base_url),
+                                params, serialized_context, config.use_post)));
                 },
             },
             entry);
@@ -100,8 +86,10 @@ ModeSources BuildModeSources(FDv2Config const& config,
     // The interval a poll is rate limited against is measured from the last
     // time this context was polled, which survives restarts so that repeated
     // launches cannot produce a burst of requests.
-    auto const last_poll =
-        ToSteadyClock(params.cache->ReadFreshness(params.context));
+    std::optional<std::chrono::steady_clock::time_point> last_poll;
+    if (auto const freshness = params.cache->ReadFreshness(params.context)) {
+        last_poll = ToSteadyClock(*freshness);
+    }
 
     for (auto const& entry : definition->second.synchronizers) {
         std::visit(
@@ -110,16 +98,23 @@ ModeSources BuildModeSources(FDv2Config const& config,
                     sources.synchronizers.push_back(
                         std::make_unique<FDv2PollingSynchronizerFactory>(
                             params.executor, params.logger,
-                            polling_config(polling), polling.poll_interval,
-                            last_poll));
+                            MakeRequestConfig(
+                                polling.base_url_override.value_or(
+                                    params.polling_base_url),
+                                params, serialized_context, config.use_post),
+                            polling.poll_interval, last_poll));
                 },
                 [&](FDv2Config::StreamingConfig const& streaming) {
                     sources.synchronizers.push_back(
                         std::make_unique<FDv2StreamingSynchronizerFactory>(
                             params.executor, params.logger,
-                            streaming_config(streaming),
-                            polling_config(FDv2Config::PollingConfig{
-                                std::chrono::seconds::zero(), std::nullopt}),
+                            MakeRequestConfig(
+                                streaming.base_url_override.value_or(
+                                    params.streaming_base_url),
+                                params, serialized_context, config.use_post),
+                            MakeRequestConfig(params.polling_base_url, params,
+                                              serialized_context,
+                                              config.use_post),
                             streaming.initial_reconnect_delay));
                 },
             },
