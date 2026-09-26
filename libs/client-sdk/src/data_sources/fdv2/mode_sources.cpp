@@ -3,6 +3,7 @@
 #include "cache_initializer.hpp"
 #include "source_factories.hpp"
 
+#include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
 #include <boost/json.hpp>
@@ -41,6 +42,37 @@ std::chrono::steady_clock::time_point ToSteadyClock(
     std::chrono::system_clock::time_point instant) {
     auto const now = std::chrono::system_clock::now();
     return std::chrono::steady_clock::now() - (now - instant);
+}
+
+// The FDv1 fallback reuses the client's own FDv1 polling source, which is
+// already pointed at the client SDK's FDv1 endpoints.
+std::unique_ptr<IFDv2SynchronizerFactory> MakeFDv1Fallback(
+    FDv2Config::FDv1FallbackConfig const& fallback,
+    ModeSourceParams const& params) {
+    auto const defaults =
+        config::shared::Defaults<config::shared::ClientSDK>::PollingConfig();
+
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK> const
+        fdv1_config{
+            config::shared::built::PollingConfig<config::shared::ClientSDK>{
+                fallback.poll_interval, defaults.polling_get_path,
+                defaults.polling_report_path, defaults.min_polling_interval},
+            params.with_reasons,
+            // FDv2 supersedes the REPORT transport, so the option is
+            // ignored when both are configured.
+            /* use_report= */ false};
+
+    auto endpoints =
+        fallback.base_url_override
+            ? config::shared::built::
+                  ServiceEndpoints{*fallback.base_url_override,
+                                   params.endpoints.StreamingBaseUrl(),
+                                   params.endpoints.EventsBaseUrl()}
+            : params.endpoints;
+
+    return std::make_unique<FDv1PollingAdapterFactory>(
+        params.executor, params.logger, std::move(endpoints), fdv1_config,
+        params.http_properties, params.context);
 }
 
 }  // namespace
@@ -119,6 +151,10 @@ ModeSources BuildModeSources(FDv2Config const& config,
                 },
             },
             entry);
+    }
+
+    if (auto const& fallback = definition->second.fdv1_fallback) {
+        sources.synchronizers.push_back(MakeFDv1Fallback(*fallback, params));
     }
 
     return sources;

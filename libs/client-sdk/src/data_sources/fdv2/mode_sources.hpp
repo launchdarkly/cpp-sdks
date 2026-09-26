@@ -7,6 +7,7 @@
 
 #include <launchdarkly/config/shared/built/fdv2_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
@@ -38,6 +39,11 @@ struct ModeSourceParams {
     std::string polling_base_url;
     std::string streaming_base_url;
     config::shared::built::HttpProperties http_properties;
+    /**
+     * Where the FDv1 fallback source sends its requests. FDv2 sources use
+     * the resolved base URLs above instead.
+     */
+    config::shared::built::ServiceEndpoints endpoints;
     Context context;
     /** Whether the application asked for evaluation reasons. */
     bool with_reasons;
@@ -52,6 +58,11 @@ struct ModeSourceParams {
 /**
  * Assembles the factories the given mode calls for. Returns empty lists if
  * the configuration does not define the mode.
+ *
+ * A mode that configures an FDv1 fallback gets its synchronizer appended to
+ * the list. The orchestrator holds that tier in reserve rather than using it
+ * in rotation. It is started only while the service has directed the SDK away
+ * from FDv2.
  */
 ModeSources BuildModeSources(FDv2Config const& config,
                              ConnectionMode mode,
