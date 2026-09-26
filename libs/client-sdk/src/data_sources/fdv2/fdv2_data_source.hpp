@@ -8,6 +8,7 @@
 
 #include "../../flag_manager/flag_store.hpp"
 
+#include <chrono>
 #include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data_sources/fdv2/conditions.hpp>
@@ -193,6 +194,15 @@ class FDv2DataSource final
     // reflects why.
     void ReportExhausted(bool any_synchronizers_configured);
 
+    // Moves the synchronizer list onto the FDv1 tier and schedules the
+    // attempt to return to FDv2. Called with mutex_ held. Returns true if an
+    // FDv1 synchronizer is available to start.
+    bool EngageFDv1FallbackLocked(FDv1FallbackDirective const& directive);
+
+    // Switches the synchronizer list back to FDv2 and restarts the
+    // synchronizer phase.
+    void OnFDv2RetryTimer();
+
     // Logger is itself thread-safe and cheap to copy.
     Logger logger_;
 
@@ -233,6 +243,10 @@ class FDv2DataSource final
     // Any outstanding work to complete before signaling shutdown complete.
     async::Future<std::monostate> closing_ =
         async::MakeFuture<std::monostate>({});
+    // Cancelled in Close() to abort a pending attempt to return to FDv2, and
+    // replaced when a new attempt is scheduled. The replacement is why this
+    // needs mutex_ despite the source being internally synchronized.
+    async::CancellationSource fdv2_retry_cancel_;
 };
 
 }  // namespace launchdarkly::client_side::data_sources

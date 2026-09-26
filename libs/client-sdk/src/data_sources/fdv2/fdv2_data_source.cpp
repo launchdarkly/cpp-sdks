@@ -1,6 +1,7 @@
 #include "fdv2_data_source.hpp"
 
 #include <launchdarkly/async/promise.hpp>
+#include <launchdarkly/async/timer.hpp>
 
 #include <boost/asio/post.hpp>
 
@@ -10,6 +11,10 @@
 #include <variant>
 
 namespace launchdarkly::client_side::data_sources {
+
+static char const* const kNoFDv1FallbackConfigured =
+    "the service directed the SDK to FDv1, but no FDv1 fallback is "
+    "configured";
 
 namespace {
 
@@ -83,6 +88,7 @@ FDv2DataSource::~FDv2DataSource() {
 void FDv2DataSource::Close() {
     std::lock_guard lock(mutex_);
     closed_ = true;
+    fdv2_retry_cancel_.Cancel();
     if (active_initializer_) {
         active_initializer_->Close();
     }
@@ -291,14 +297,31 @@ void FDv2DataSource::OnInitializerResult(FDv2SourceResult result) {
         },
         result.value);
 
+    bool disconnected = false;
     {
         std::lock_guard lock(mutex_);
         active_initializer_.reset();
         if (closed_ || got_shutdown) {
             return;
         }
+        if (result.fdv1_fallback) {
+            if (EngageFDv1FallbackLocked(*result.fdv1_fallback)) {
+                // No basis yet, but the FDv1 tier can supply one, so hand off
+                // to the synchronizer phase rather than continuing the chain.
+                got_basis = true;
+            } else {
+                disconnected = true;
+            }
+        }
     }
 
+    if (disconnected) {
+        status_manager_->SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+            kNoFDv1FallbackConfigured);
+        return;
+    }
     if (got_basis) {
         StartSynchronizers();
     } else {
@@ -478,6 +501,7 @@ void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
         },
         result.value);
 
+    bool disconnected = false;
     {
         std::lock_guard lock(mutex_);
         if (closed_ || got_shutdown) {
@@ -485,18 +509,89 @@ void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
             active_conditions_.reset();
             return;
         }
-        if (advance) {
+        if (result.fdv1_fallback &&
+            !source_manager_.IsCurrentSynchronizerFDv1Fallback()) {
+            active_synchronizer_.reset();
+            active_conditions_.reset();
+            if (EngageFDv1FallbackLocked(*result.fdv1_fallback)) {
+                advance = true;
+            } else {
+                advance = false;
+                disconnected = true;
+            }
+        } else if (advance) {
             source_manager_.BlockCurrentSynchronizer();
             active_synchronizer_.reset();
             active_conditions_.reset();
         }
     }
 
+    if (disconnected) {
+        status_manager_->SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+            kNoFDv1FallbackConfigured);
+        return;
+    }
     if (advance) {
         StartSynchronizers();
     } else {
         RunSynchronizerNext();
     }
+}
+
+bool FDv2DataSource::EngageFDv1FallbackLocked(
+    FDv1FallbackDirective const& directive) {
+    source_manager_.SwitchToFDv1Fallback();
+
+    // Cancel any attempt already scheduled and start fresh. A
+    // CancellationSource is one-shot, so reusing it would leak the prior
+    // timer.
+    fdv2_retry_cancel_.Cancel();
+    fdv2_retry_cancel_ = async::CancellationSource{};
+    LD_LOG(logger_, LogLevel::kInfo)
+        << "fdv2: will attempt FDv2 again in " << directive.ttl.count() << "s";
+    async::Delay(executor_, directive.ttl, fdv2_retry_cancel_.GetToken())
+        .Then(
+            [weak = weak_from_this()](bool const& fired) -> std::monostate {
+                if (!fired) {
+                    return {};
+                }
+                if (auto self = weak.lock()) {
+                    self->OnFDv2RetryTimer();
+                }
+                return {};
+            },
+            [executor = executor_](async::Continuation<void()> work) {
+                boost::asio::post(executor, std::move(work));
+            });
+
+    bool const available = source_manager_.AvailableSynchronizerCount() > 0;
+    if (available) {
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "fdv2: falling back to the FDv1 synchronizer";
+    } else {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "fdv2: " << kNoFDv1FallbackConfigured;
+    }
+    return available;
+}
+
+void FDv2DataSource::OnFDv2RetryTimer() {
+    {
+        std::lock_guard lock(mutex_);
+        if (closed_) {
+            return;
+        }
+        LD_LOG(logger_, LogLevel::kInfo) << "fdv2: re-attempting FDv2";
+        source_manager_.SwitchBackToFDv2();
+        if (active_synchronizer_) {
+            active_synchronizer_->Close();
+            active_synchronizer_.reset();
+        }
+        active_conditions_.reset();
+    }
+    StartSynchronizers();
 }
 
 void FDv2DataSource::ApplyResult(FDv2SourceResult::ChangeSet change_set,
