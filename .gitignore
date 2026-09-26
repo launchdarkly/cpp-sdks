@@ -32,6 +32,8 @@
 *.app
 
 # IDEs
+.env
+.claude
 .idea
 .vscode
 
