@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,8 @@ namespace launchdarkly::client_side::flag_manager {
  * 1. a context identifier (hashed fully-qualified key) and
  * 2. timestamp when it was last accessed, to support an LRU
  * eviction pattern.
+ *
+ * Not thread-safe.
  */
 class ContextIndex {
    public:
@@ -51,6 +54,11 @@ class ContextIndex {
                 std::chrono::time_point<std::chrono::system_clock> timestamp);
 
     [[nodiscard]] Index const& Entries() const;
+
+    /** Returns the timestamp recorded for the id, or nullopt if absent. */
+    [[nodiscard]] std::optional<
+        std::chrono::time_point<std::chrono::system_clock>>
+    GetTimestamp(std::string const& id) const;
 
     /**
      * Prune the index returning a list of the removed context keys

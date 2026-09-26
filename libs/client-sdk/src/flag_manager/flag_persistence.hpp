@@ -3,6 +3,8 @@
 #include <chrono>
 #include <functional>
 #include <mutex>
+#include <optional>
+#include <unordered_map>
 
 #include "../data_sources/data_source_update_sink.hpp"
 #include "context_index.hpp"
@@ -16,6 +18,12 @@ namespace launchdarkly::client_side::flag_manager {
 
 std::string PersistenceEncodeKey(std::string const& input);
 
+/**
+ * Mirrors data source updates into the persistent store on their way to the
+ * next sink, and reads them back when a context is loaded.
+ *
+ * Thread-safe: concurrent reads and updates are serialized.
+ */
 class FlagPersistence : public IDataSourceUpdateSink {
    public:
     using TimeStampsource =
@@ -45,23 +53,54 @@ class FlagPersistence : public IDataSourceUpdateSink {
 
     void LoadCached(Context const& context);
 
+    /**
+     * Returns the flag data stored for the given context, or nullopt when
+     * nothing is stored for it or persistence is disabled. An empty map means
+     * an environment with no flags was stored, which is distinct from nothing
+     * being stored at all.
+     */
+    [[nodiscard]] std::optional<std::unordered_map<std::string, ItemDescriptor>>
+    ReadCached(Context const& context);
+
+    /**
+     * Returns the time the service last confirmed the flag data for this
+     * context was current. Returns nullopt if the service never confirmed it,
+     * or if no flag data is cached for the context now.
+     *
+     * Keyed by the context's whole set of attributes, not just its key,
+     * because changing an attribute can change how flags evaluate.
+     */
+    [[nodiscard]] std::optional<
+        std::chrono::time_point<std::chrono::system_clock>>
+    ReadFreshness(Context const& context);
+
    private:
     inline static std::string global_namespace_ = "LaunchDarkly";
     inline static std::string index_key_ = "ContextIndex";
+    inline static std::string freshness_key_ = "ContextFreshness";
 
     Logger& logger_;
     std::size_t max_cached_contexts_;
 
     IDataSourceUpdateSink& sink_;
-    std::shared_ptr<IPersistence> persistence_;
-    mutable std::recursive_mutex persistence_mutex_;
     FlagStore& flag_store_;
+
+    // Serializes the read-modify-write of the stored index and flag data, so
+    // that two contexts being cached at once cannot lose an index entry.
+    mutable std::recursive_mutex persistence_mutex_;
+    std::shared_ptr<IPersistence> persistence_;
 
     std::string environment_namespace_;
     TimeStampsource time_stamper_;
 
-    ContextIndex GetIndex();
     void StoreCache(std::string const& context_id);
+
+    // Records that the service just confirmed this context's data is current.
+    void RecordFreshness(Context const& context);
+
+    // Reads the stored index at the given key, or an empty index if none is
+    // stored. Must be called with persistence_mutex_ held.
+    ContextIndex ReadIndexAt(std::string const& key);
 };
 
 }  // namespace launchdarkly::client_side::flag_manager
