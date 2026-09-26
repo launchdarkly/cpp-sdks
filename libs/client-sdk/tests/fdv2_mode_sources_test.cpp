@@ -36,6 +36,8 @@ class ModeSourcesFixture : public ::testing::Test {
             "https://streaming.example.com",
             launchdarkly::config::shared::Defaults<
                 launchdarkly::config::shared::ClientSDK>::HttpProperties(),
+            launchdarkly::config::shared::Defaults<
+                launchdarkly::config::shared::ClientSDK>::ServiceEndpoints(),
             ContextBuilder().Kind("user", "user-key").Build(),
             /* with_reasons= */ false,
             &flag_manager_.Cache()};
@@ -64,7 +66,7 @@ TEST_F(ModeSourcesFixture, StreamingModeFallsBackToPolling) {
     auto sources =
         BuildModeSources(Defaults(), ConnectionMode::kStreaming, Params());
 
-    ASSERT_EQ(2u, sources.synchronizers.size());
+    ASSERT_EQ(3u, sources.synchronizers.size());
     EXPECT_EQ("FDv2 streaming synchronizer",
               sources.synchronizers[0]->Build()->Identity());
     EXPECT_EQ("FDv2 polling synchronizer",
@@ -77,7 +79,7 @@ TEST_F(ModeSourcesFixture, PollingModeInitializesFromCacheOnly) {
 
     ASSERT_EQ(1u, sources.initializers.size());
     EXPECT_TRUE(sources.initializers[0]->IsFromCache());
-    ASSERT_EQ(1u, sources.synchronizers.size());
+    ASSERT_EQ(2u, sources.synchronizers.size());
     EXPECT_EQ("FDv2 polling synchronizer",
               sources.synchronizers[0]->Build()->Identity());
 }
@@ -157,4 +159,23 @@ TEST(FDv2ConfigTest, ModesThatMakeRequestsConfigureAnFDv1Fallback) {
         config.modes.at(ConnectionMode::kPolling).fdv1_fallback.has_value());
     EXPECT_FALSE(
         config.modes.at(ConnectionMode::kOffline).fdv1_fallback.has_value());
+}
+
+// The FDv1 tier is appended last, and the orchestrator keeps it blocked until
+// the service directs the SDK away from FDv2.
+TEST_F(ModeSourcesFixture, ModesWithAFallbackAppendTheFDv1Tier) {
+    auto sources =
+        BuildModeSources(Defaults(), ConnectionMode::kStreaming, Params());
+
+    ASSERT_FALSE(sources.synchronizers.empty());
+    auto const& last = sources.synchronizers.back();
+    EXPECT_TRUE(last->IsFDv1Fallback());
+    EXPECT_EQ("FDv1 fallback adapter", last->Build()->Identity());
+}
+
+TEST_F(ModeSourcesFixture, ModesWithNoFallbackAppendNothing) {
+    auto sources =
+        BuildModeSources(Defaults(), ConnectionMode::kOffline, Params());
+
+    EXPECT_TRUE(sources.synchronizers.empty());
 }
