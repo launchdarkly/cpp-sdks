@@ -1,6 +1,0 @@
-<map id="launchdarkly::server_side::data_interfaces::IFDv2Synchronizer" name="launchdarkly::server_side::data_interfaces::IFDv2Synchronizer">
-<area shape="rect" id="node1" title=" " alt="" coords="5,85,171,141"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer.html" title=" " alt="" coords="227,5,417,61"/>
-<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer.html" title=" " alt="" coords="230,85,414,141"/>
-<area shape="rect" id="node4" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer.html" title=" " alt="" coords="219,165,425,221"/>
-</map>
