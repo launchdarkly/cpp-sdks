@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.14.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.13.1...launchdarkly-cpp-server-v3.14.0) (2026-09-24)
+
+
+### Features
+
+* Add the FDv2 streaming synchronizer to the client SDK ([#611](https://github.com/launchdarkly/cpp-sdks/issues/611)) ([edf0e4f](https://github.com/launchdarkly/cpp-sdks/commit/edf0e4f68af8095e2102b3419ebad06824034970))
+
+
+### Bug Fixes
+
+* allow lazy load evaluations when $inited key is not set ([#508](https://github.com/launchdarkly/cpp-sdks/issues/508)) ([120b79a](https://github.com/launchdarkly/cpp-sdks/commit/120b79aa0fe52a28477035702f23fbc2dc95df12))
+* Read keyed tombstones as deleted, not as live items ([#615](https://github.com/launchdarkly/cpp-sdks/issues/615)) ([c2d54e1](https://github.com/launchdarkly/cpp-sdks/commit/c2d54e18598c240ad8c8def1dbcc0835bd5e2b45))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-internal bumped from 0.14.2 to 0.15.0
+    * @launchdarkly/cpp-sse-client bumped from 0.7.1 to 0.8.0
+
 ## [3.13.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.13.0...launchdarkly-cpp-server-v3.13.1) (2026-08-04)
 
 
