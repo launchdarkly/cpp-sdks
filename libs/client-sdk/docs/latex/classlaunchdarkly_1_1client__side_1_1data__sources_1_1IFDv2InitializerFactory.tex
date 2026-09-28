@@ -1,0 +1,45 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::IFDv2\+Initializer\+Factory Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}\index{launchdarkly::client\_side::data\_sources::IFDv2InitializerFactory@{launchdarkly::client\_side::data\_sources::IFDv2InitializerFactory}}
+
+
+{\ttfamily \#include $<$ifdv2\+\_\+initializer\+\_\+factory.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a1dbd37a249e51a9233ff07c2d6e1cfc8}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a1dbd37a249e51a9233ff07c2d6e1cfc8}} 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} $>$ {\bfseries Build} ()=0
+\item 
+virtual bool \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a999ce41b19e24d3171c1900e95556a87}{Is\+From\+Cache}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a90040046317b4197ce0c440a88d6cc39}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a90040046317b4197ce0c440a88d6cc39}} 
+{\bfseries IFDv2\+Initializer\+Factory} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a9024fb80df65aa45c564bd7cdd6bd5bd}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a9024fb80df65aa45c564bd7cdd6bd5bd}} 
+{\bfseries IFDv2\+Initializer\+Factory} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a7035940bb835b8411ff6a48fa8066cc7}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a7035940bb835b8411ff6a48fa8066cc7}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a6fc54955834fb58f3db31df3a062ab39}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a6fc54955834fb58f3db31df3a062ab39}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builds new \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} instances on demand. Each call to Build() produces a fresh initializer that has not yet been started.
+
+Implementations must be thread-\/safe. Build() and \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a999ce41b19e24d3171c1900e95556a87}{Is\+From\+Cache()}} may be called from any thread. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a999ce41b19e24d3171c1900e95556a87}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a999ce41b19e24d3171c1900e95556a87}} 
+\index{launchdarkly::client\_side::data\_sources::IFDv2InitializerFactory@{launchdarkly::client\_side::data\_sources::IFDv2InitializerFactory}!IsFromCache@{IsFromCache}}
+\index{IsFromCache@{IsFromCache}!launchdarkly::client\_side::data\_sources::IFDv2InitializerFactory@{launchdarkly::client\_side::data\_sources::IFDv2InitializerFactory}}
+\doxysubsubsection{\texorpdfstring{IsFromCache()}{IsFromCache()}}
+{\footnotesize\ttfamily virtual bool launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer\+Factory\+::\+Is\+From\+Cache (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+Whether the initializers this factory builds read from the local cache rather than the network. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/ifdv2\+\_\+initializer\+\_\+factory.\+hpp\end{DoxyCompactItemize}

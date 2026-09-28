@@ -1,0 +1,81 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions}{}\doxysection{launchdarkly\+::config\+::shared\+::built\+::Proxy\+Options Class Reference}
+\label{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions}\index{launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}}
+
+
+{\ttfamily \#include $<$http\+\_\+properties.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_a905a9bfd48d99c263147096c42e06eb7}{Proxy\+Options}} (std\+::optional$<$ std\+::string $>$ url)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_ac18ed9c5c0a6b593ed4d8088bba4a4dc}{Proxy\+Options}} ()
+\item 
+std\+::optional$<$ std\+::string $>$ const  \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_aea2e9d03eabe023cc3d5c59b48d54b95}{Url}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Proxy configuration for HTTP requests.
+
+When using CURL networking (LD\+\_\+\+CURL\+\_\+\+NETWORKING=ON), this controls proxy behavior\+:
+\begin{DoxyItemize}
+\item std\+::nullopt (default)\+: CURL uses environment variables (ALL\+\_\+\+PROXY, HTTP\+\_\+\+PROXY, HTTPS\+\_\+\+PROXY)
+\item Non-\/empty string\+: Explicitly configured proxy URL takes precedence over environment variables
+\item Empty string\+: Explicitly disables proxy, preventing environment variable usage
+\end{DoxyItemize}
+
+The empty string is forwarded to the networking implementation (CURL) which interprets it as \char`\"{}do not use any proxy, even if environment variables are set.\char`\"{}
+
+When CURL networking is disabled, attempting to configure a proxy will throw an error. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_a905a9bfd48d99c263147096c42e06eb7}\label{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_a905a9bfd48d99c263147096c42e06eb7}} 
+\index{launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}!ProxyOptions@{ProxyOptions}}
+\index{ProxyOptions@{ProxyOptions}!launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}}
+\doxysubsubsection{\texorpdfstring{ProxyOptions()}{ProxyOptions()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily launchdarkly\+::config\+::shared\+::built\+::\+Proxy\+Options\+::\+Proxy\+Options (\begin{DoxyParamCaption}\item[{std\+::optional$<$ std\+::string $>$}]{url }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Construct proxy options with a proxy URL.
+
+
+\begin{DoxyParams}{Parameters}
+{\em url} & Proxy URL or configuration\+:
+\begin{DoxyItemize}
+\item std\+::nullopt\+: Use environment variables (default)
+\item \char`\"{}socks5\+://user\+:pass@proxy.\+example.\+com\+:1080\char`\"{}\+: SOCKS5 proxy with auth
+\item \char`\"{}socks5h\+://proxy\+:1080\char`\"{}\+: SOCKS5 proxy with DNS resolution through proxy
+\item \char`\"{}http\+://proxy.\+example.\+com\+:8080\char`\"{}\+: HTTP proxy
+\item \char`\"{}\char`\"{}\+: Empty string explicitly disables proxy (overrides environment variables)
+\end{DoxyItemize}\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::runtime\+\_\+error} & if proxy URL is non-\/empty and CURL networking is not enabled \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_ac18ed9c5c0a6b593ed4d8088bba4a4dc}\label{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_ac18ed9c5c0a6b593ed4d8088bba4a4dc}} 
+\index{launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}!ProxyOptions@{ProxyOptions}}
+\index{ProxyOptions@{ProxyOptions}!launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}}
+\doxysubsubsection{\texorpdfstring{ProxyOptions()}{ProxyOptions()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily launchdarkly\+::config\+::shared\+::built\+::\+Proxy\+Options\+::\+Proxy\+Options (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Default constructor. Uses environment variables for proxy configuration. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_aea2e9d03eabe023cc3d5c59b48d54b95}\label{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ProxyOptions_aea2e9d03eabe023cc3d5c59b48d54b95}} 
+\index{launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}!Url@{Url}}
+\index{Url@{Url}!launchdarkly::config::shared::built::ProxyOptions@{launchdarkly::config::shared::built::ProxyOptions}}
+\doxysubsubsection{\texorpdfstring{Url()}{Url()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::string $>$ const  \& launchdarkly\+::config\+::shared\+::built\+::\+Proxy\+Options\+::\+Url (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get the configured proxy URL. \begin{DoxyReturn}{Returns}
+Proxy URL if configured, or std\+::nullopt to use environment variables. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/built/http\+\_\+properties.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/config/http\+\_\+properties.\+cpp\end{DoxyCompactItemize}

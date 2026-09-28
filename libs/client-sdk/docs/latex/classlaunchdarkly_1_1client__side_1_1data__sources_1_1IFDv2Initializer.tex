@@ -1,0 +1,85 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::IFDv2\+Initializer Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}\index{launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}}
+
+
+{\ttfamily \#include $<$ifdv2\+\_\+initializer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::IFDv2\+Initializer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}{Run}} ()=0
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3ba4036d82984698fb82fce698306543}{Close}} ()=0
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3e1f73970a88ebb65f2cac2f6630abcc}{Identity}} () const =0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a09a930b8a983046777edbf460a718b17}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a09a930b8a983046777edbf460a718b17}} 
+{\bfseries IFDv2\+Initializer} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aecc95383d965d9f937f183f0277e88a8}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aecc95383d965d9f937f183f0277e88a8}} 
+{\bfseries IFDv2\+Initializer} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a8561dbc78ea6cdd946a602d965452a04}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a8561dbc78ea6cdd946a602d965452a04}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_ae44a81625e99ca85104bf7bda9153013}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_ae44a81625e99ca85104bf7bda9153013}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A one-\/shot data source that runs to completion and returns a single result, used to load a basis before handing off to an \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}}.
+
+Implementations must be thread-\/safe to the extent this contract needs\+: \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}{Run()}} is called at most once, and \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3ba4036d82984698fb82fce698306543}{Close()}} may be called concurrently with it from another thread. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3ba4036d82984698fb82fce698306543}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3ba4036d82984698fb82fce698306543}} 
+\index{launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}{Run()}} call, causing it to return \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Polling\+Initializer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3e1f73970a88ebb65f2cac2f6630abcc}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3e1f73970a88ebb65f2cac2f6630abcc}} 
+\index{launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the initializer. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_ae7abe0589849a7a12f1a0b817cde9109}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Polling\+Initializer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}} 
+\index{launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}!Run@{Run}}
+\index{Run@{Run}!launchdarkly::client\_side::data\_sources::IFDv2Initializer@{launchdarkly::client\_side::data\_sources::IFDv2Initializer}}
+\doxysubsubsection{\texorpdfstring{Run()}{Run()}}
+{\footnotesize\ttfamily virtual async\+::\+Future$<$\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult}{FDv2\+Source\+Result}}$>$ launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer\+::\+Run (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns a Future that resolves with the result once the initializer completes. Called at most once per instance.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3ba4036d82984698fb82fce698306543}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}{Run()}}, in which case the future resolves with \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Polling\+Initializer}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/ifdv2\+\_\+initializer.\+hpp\end{DoxyCompactItemize}

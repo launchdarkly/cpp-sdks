@@ -1,0 +1,69 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{}\doxysection{launchdarkly\+::client\+\_\+side\+::IData\+Source\+Update\+Sink Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}\index{launchdarkly::client\_side::IDataSourceUpdateSink@{launchdarkly::client\_side::IDataSourceUpdateSink}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+update\+\_\+sink.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::IData\+Source\+Update\+Sink\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_ac9082ead33493b650d6e49e497edc8d6}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_ac9082ead33493b650d6e49e497edc8d6}} 
+virtual void {\bfseries Init} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::unordered\+\_\+map$<$ std\+::string, Item\+Descriptor $>$ data)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_a8c43275a447a4520d32459439cd843c0}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_a8c43275a447a4520d32459439cd843c0}} 
+virtual void {\bfseries Upsert} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::string key, Item\+Descriptor item)=0
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_ad2c8bc6cc0f28dc72fe80285e6ea808e}{Apply}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, Flag\+Change\+Set change\+\_\+set, bool from\+\_\+cache)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_a1e077018feb9494abf1feb723deaca55}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_a1e077018feb9494abf1feb723deaca55}} 
+{\bfseries IData\+Source\+Update\+Sink} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_a5a7c56b4bb39b222351b8bdfda2b5a9d}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_a5a7c56b4bb39b222351b8bdfda2b5a9d}} 
+{\bfseries IData\+Source\+Update\+Sink} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_aa7ad9a249b0399d8cd57678748da11ed}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_aa7ad9a249b0399d8cd57678748da11ed}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_aa588d5823277dbd64a85da7f23f4cd17}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_aa588d5823277dbd64a85da7f23f4cd17}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface for handling updates from Launch\+Darkly.
+
+Implementations must be thread-\/safe. A data source calls these from whichever thread it runs on, concurrently with flag evaluation and listener registration on the application\textquotesingle{}s threads. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_ad2c8bc6cc0f28dc72fe80285e6ea808e}\label{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_ad2c8bc6cc0f28dc72fe80285e6ea808e}} 
+\index{launchdarkly::client\_side::IDataSourceUpdateSink@{launchdarkly::client\_side::IDataSourceUpdateSink}!Apply@{Apply}}
+\index{Apply@{Apply}!launchdarkly::client\_side::IDataSourceUpdateSink@{launchdarkly::client\_side::IDataSourceUpdateSink}}
+\doxysubsubsection{\texorpdfstring{Apply()}{Apply()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::client\+\_\+side\+::\+IData\+Source\+Update\+Sink\+::\+Apply (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&}]{context,  }\item[{Flag\+Change\+Set}]{change\+\_\+set,  }\item[{bool}]{from\+\_\+cache }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Applies a changeset as a single unit. Unlike Upsert, this path does not order or reject updates by version. FDv2 reserves the per-\/flag version for event tracking and manages payload consistency through selectors instead.
+
+
+\begin{DoxyParams}{Parameters}
+{\em from\+\_\+cache} & Whether the changeset was loaded from the local cache, in which case it is not written back to it. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a6e3c0f907b24537134554945488da595}{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Updater}}, and \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5e3f2b535362ad584a6d60f7a85af499}{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Persistence}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/data\+\_\+source\+\_\+update\+\_\+sink.\+hpp\end{DoxyCompactItemize}

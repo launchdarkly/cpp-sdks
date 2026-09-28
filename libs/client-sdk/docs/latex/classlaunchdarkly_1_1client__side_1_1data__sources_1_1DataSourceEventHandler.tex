@@ -1,0 +1,68 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Data\+Source\+Event\+Handler Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler}\index{launchdarkly::client\_side::data\_sources::DataSourceEventHandler@{launchdarkly::client\_side::data\_sources::DataSourceEventHandler}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+event\+\_\+handler.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_1_1DeleteData}{Delete\+Data}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_1_1PatchData}{Patch\+Data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a0e7e6ce1ed9d60efa9e47f44b346dd0a}{Message\+Status}} \{ {\bfseries k\+Message\+Handled}
+, {\bfseries k\+Invalid\+Message}
+, {\bfseries k\+Unhandled\+Verb}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a79812e1e69d43701d8d352f2e271eb65}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a79812e1e69d43701d8d352f2e271eb65}} 
+{\bfseries Data\+Source\+Event\+Handler} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&handler, Logger const \&logger, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{Data\+Source\+Status\+Manager}} \&status\+\_\+manager)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a0e7e6ce1ed9d60efa9e47f44b346dd0a}{Message\+Status}} \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_ae0816ae6b6b8b03037cfe46615d51269}{Handle\+Message}} (std\+::string const \&type, std\+::string const \&data)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This class handles Launch\+Darkly events, parses them, and then uses a \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} to process the parsed events.
+
+This can be used for streaming or for polling. For polling only \char`\"{}put\char`\"{} events will be used. 
+
+\doxysubsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a0e7e6ce1ed9d60efa9e47f44b346dd0a}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a0e7e6ce1ed9d60efa9e47f44b346dd0a}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceEventHandler@{launchdarkly::client\_side::data\_sources::DataSourceEventHandler}!MessageStatus@{MessageStatus}}
+\index{MessageStatus@{MessageStatus}!launchdarkly::client\_side::data\_sources::DataSourceEventHandler@{launchdarkly::client\_side::data\_sources::DataSourceEventHandler}}
+\doxysubsubsection{\texorpdfstring{MessageStatus}{MessageStatus}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a0e7e6ce1ed9d60efa9e47f44b346dd0a}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Event\+Handler\+::\+Message\+Status}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Status indicating if the message was processed, or if there was an issue encountered. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_ae0816ae6b6b8b03037cfe46615d51269}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_ae0816ae6b6b8b03037cfe46615d51269}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceEventHandler@{launchdarkly::client\_side::data\_sources::DataSourceEventHandler}!HandleMessage@{HandleMessage}}
+\index{HandleMessage@{HandleMessage}!launchdarkly::client\_side::data\_sources::DataSourceEventHandler@{launchdarkly::client\_side::data\_sources::DataSourceEventHandler}}
+\doxysubsubsection{\texorpdfstring{HandleMessage()}{HandleMessage()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler_a0e7e6ce1ed9d60efa9e47f44b346dd0a}{Data\+Source\+Event\+Handler\+::\+Message\+Status}} launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Event\+Handler\+::\+Handle\+Message (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{type,  }\item[{std\+::string const \&}]{data }\end{DoxyParamCaption})}
+
+Handles an event from the Launch\+Darkly service. 
+\begin{DoxyParams}{Parameters}
+{\em type} & The type of the event. \char`\"{}put\char`\"{}/\char`\"{}patch\char`\"{}/\char`\"{}delete\char`\"{}. \\
+\hline
+{\em data} & The content of the evnet. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A status indicating if the message could be handled. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/data\+\_\+source\+\_\+event\+\_\+handler.\+hpp\item 
+src/data\+\_\+sources/data\+\_\+source\+\_\+event\+\_\+handler.\+cpp\end{DoxyCompactItemize}
