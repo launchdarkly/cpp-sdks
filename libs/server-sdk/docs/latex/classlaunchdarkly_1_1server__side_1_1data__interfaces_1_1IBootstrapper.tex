@@ -1,0 +1,64 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IBootstrapper Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}\index{launchdarkly::server\_side::data\_interfaces::IBootstrapper@{launchdarkly::server\_side::data\_interfaces::IBootstrapper}}
+
+
+{\ttfamily \#include $<$ibootstrapper.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_1_1Error}{Error}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual tl\+::expected$<$ data\+\_\+model\+::\+SDKData\+Set, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_1_1Error}{Error}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a5110e385fef79aa53ef532ee04ef388d}{Fetch\+All}} (std\+::chrono\+::milliseconds timeout\+\_\+hint)=0
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a19d207cf4d0595ce043bf883a597d40e}{Identity}} () const =0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_ae57afdbdeb55ff482bc290309df1e374}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_ae57afdbdeb55ff482bc290309df1e374}} 
+{\bfseries IBootstrapper} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{IBootstrapper}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a8e0f201bd4f4abf7729efba09eb24b4b}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a8e0f201bd4f4abf7729efba09eb24b4b}} 
+{\bfseries IBootstrapper} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{IBootstrapper}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a43743b07888d0b8f1f0166cb0f1dde59}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a43743b07888d0b8f1f0166cb0f1dde59}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{IBootstrapper}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{IBootstrapper}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_ac4dd9e9fb041b3365d066f4e2926ff1b}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_ac4dd9e9fb041b3365d066f4e2926ff1b}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{IBootstrapper}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper}{IBootstrapper}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a component that can fetch a complete dataset for use in a Data System. Bootstrapping takes place when the SDK starts, and is responsible for provisioning the initial data that an SDK uses before it can begin the on-\/going synchronization process. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a5110e385fef79aa53ef532ee04ef388d}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a5110e385fef79aa53ef532ee04ef388d}} 
+\index{launchdarkly::server\_side::data\_interfaces::IBootstrapper@{launchdarkly::server\_side::data\_interfaces::IBootstrapper}!FetchAll@{FetchAll}}
+\index{FetchAll@{FetchAll}!launchdarkly::server\_side::data\_interfaces::IBootstrapper@{launchdarkly::server\_side::data\_interfaces::IBootstrapper}}
+\doxysubsubsection{\texorpdfstring{FetchAll()}{FetchAll()}}
+{\footnotesize\ttfamily virtual tl\+::expected$<$data\+\_\+model\+::\+SDKData\+Set, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_1_1Error}{Error}}$>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IBootstrapper\+::\+Fetch\+All (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{timeout\+\_\+hint }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Fetch a complete dataset. This method must invokable multiple times. 
+\begin{DoxyParams}{Parameters}
+{\em timeout\+\_\+hint} & amount of time to spend fetching data. If the time limit is reached, return Error\+::\+Timeout. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A complete SDKData\+Set on success, or an error indicating why it couldn\textquotesingle{}t be retrieved. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a19d207cf4d0595ce043bf883a597d40e}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IBootstrapper_a19d207cf4d0595ce043bf883a597d40e}} 
+\index{launchdarkly::server\_side::data\_interfaces::IBootstrapper@{launchdarkly::server\_side::data\_interfaces::IBootstrapper}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::IBootstrapper@{launchdarkly::server\_side::data\_interfaces::IBootstrapper}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IBootstrapper\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the bootstrapper. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/bootstrapper/ibootstrapper.\+hpp\end{DoxyCompactItemize}

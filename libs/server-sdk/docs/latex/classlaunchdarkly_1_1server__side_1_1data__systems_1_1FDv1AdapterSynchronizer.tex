@@ -1,0 +1,117 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Adapter\+Synchronizer Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer}\index{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}}
+
+
+{\ttfamily \#include $<$fdv1\+\_\+adapter\+\_\+synchronizer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Adapter\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=223pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Adapter\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=223pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_aad6902a1f0b2c4e04b005ac9de770c47}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_aad6902a1f0b2c4e04b005ac9de770c47}} 
+using {\bfseries Source\+Builder} = std\+::function$<$ std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{data\+\_\+interfaces\+::\+IData\+Synchronizer}} $>$(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\+\_\+components\+::\+Data\+Source\+Status\+Manager}} \&)$>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a88f730976e465fd9f0a8232b2b8a38f9}{FDv1\+Adapter\+Synchronizer}} (Source\+Builder source\+\_\+builder)
+\item 
+async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{data\+\_\+interfaces\+::\+FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}{Next}} (data\+\_\+model\+::\+Selector selector) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a04f0e51ab406791c4498bae6b9c79986}{Close}} () override
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a8b51f83f349b44eb178e834d2a6122a5}{Identity}} () const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Adapts an FDv1 IData\+Synchronizer to the IFDv2\+Synchronizer interface.
+
+FDv1 Init/\+Upsert callbacks delivered through an internal IDestination are translated into FDv2\+Source\+Result\+::\+Change\+Set results, with empty selectors and fdv1\+\_\+fallback = false (the directive does not re-\/fire from FDv1 data).
+
+Threading\+: \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}{Next()}} and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a04f0e51ab406791c4498bae6b9c79986}{Close()}} may be called from any thread; only one \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}{Next()}} may be outstanding at a time. Member declaration order ensures the wrapped FDv1 source destructs before destination\+\_\+ and state\+\_\+, so any in-\/flight FDv1 callbacks land on live objects during teardown. This relies on the wrapped IData\+Synchronizer blocking on its in-\/flight work in its destructor. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a88f730976e465fd9f0a8232b2b8a38f9}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a88f730976e465fd9f0a8232b2b8a38f9}} 
+\index{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}!FDv1AdapterSynchronizer@{FDv1AdapterSynchronizer}}
+\index{FDv1AdapterSynchronizer@{FDv1AdapterSynchronizer}!launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}}
+\doxysubsubsection{\texorpdfstring{FDv1AdapterSynchronizer()}{FDv1AdapterSynchronizer()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer\+::\+FDv1\+Adapter\+Synchronizer (\begin{DoxyParamCaption}\item[{Source\+Builder}]{source\+\_\+builder }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em source\+\_\+builder} & Called once during construction with the adapter\textquotesingle{}s status manager. Returns the wrapped FDv1 source, which must be constructed against the provided manager as its status sink. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a04f0e51ab406791c4498bae6b9c79986}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a04f0e51ab406791c4498bae6b9c79986}} 
+\index{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}{Next()}} call, causing it to return FDv2\+Source\+Result\+::\+Shutdown, and releases underlying resources. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a8b51f83f349b44eb178e834d2a6122a5}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a8b51f83f349b44eb178e834d2a6122a5}} 
+\index{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the synchronizer. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a524cf4899f10535da622a3d1e4dab7f3}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}} 
+\index{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}!Next@{Next}}
+\index{Next@{Next}!launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer@{launchdarkly::server\_side::data\_systems::FDv1AdapterSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Next()}{Next()}}
+{\footnotesize\ttfamily async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer\+::\+Next (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+Selector}]{selector }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a Future that resolves with the next result once it is available.
+
+On the first call, the synchronizer starts its underlying connection. Subsequent calls continue reading from the same connection.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a04f0e51ab406791c4498bae6b9c79986}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}{Next()}}, in which case the future resolves with FDv2\+Source\+Result\+::\+Shutdown.
+
+
+\begin{DoxyParams}{Parameters}
+{\em selector} & The selector to send with the request, reflecting any changesets applied since the previous call. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/fdv1\+\_\+adapter\+\_\+synchronizer.\+hpp\item 
+src/data\+\_\+systems/fdv2/fdv1\+\_\+adapter\+\_\+synchronizer.\+cpp\end{DoxyCompactItemize}

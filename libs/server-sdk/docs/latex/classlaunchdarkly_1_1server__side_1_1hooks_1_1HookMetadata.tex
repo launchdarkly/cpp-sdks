@@ -1,0 +1,54 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata}{}\doxysection{launchdarkly\+::server\+\_\+side\+::hooks\+::Hook\+Metadata Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata}\index{launchdarkly::server\_side::hooks::HookMetadata@{launchdarkly::server\_side::hooks::HookMetadata}}
+
+
+{\ttfamily \#include $<$hook.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata_a2c9ef07a71a8bbd01e5344c520169a97}{Hook\+Metadata}} (std\+::string name)
+\item 
+std\+::string\+\_\+view \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata_a3f74954b953a8a52ea5d7dadf9cf94cc}{Name}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Metadata about a hook implementation.
+
+Lifetime\+: Objects of this type are owned by the hook and remain valid for the lifetime of the hook. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata_a2c9ef07a71a8bbd01e5344c520169a97}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata_a2c9ef07a71a8bbd01e5344c520169a97}} 
+\index{launchdarkly::server\_side::hooks::HookMetadata@{launchdarkly::server\_side::hooks::HookMetadata}!HookMetadata@{HookMetadata}}
+\index{HookMetadata@{HookMetadata}!launchdarkly::server\_side::hooks::HookMetadata@{launchdarkly::server\_side::hooks::HookMetadata}}
+\doxysubsubsection{\texorpdfstring{HookMetadata()}{HookMetadata()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+Metadata\+::\+Hook\+Metadata (\begin{DoxyParamCaption}\item[{std\+::string}]{name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Constructs hook metadata. 
+\begin{DoxyParams}{Parameters}
+{\em name} & The name of the hook. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata_a3f74954b953a8a52ea5d7dadf9cf94cc}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata_a3f74954b953a8a52ea5d7dadf9cf94cc}} 
+\index{launchdarkly::server\_side::hooks::HookMetadata@{launchdarkly::server\_side::hooks::HookMetadata}!Name@{Name}}
+\index{Name@{Name}!launchdarkly::server\_side::hooks::HookMetadata@{launchdarkly::server\_side::hooks::HookMetadata}}
+\doxysubsubsection{\texorpdfstring{Name()}{Name()}}
+{\footnotesize\ttfamily std\+::string\+\_\+view launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+Metadata\+::\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the name of the hook.
+
+Lifetime\+: The returned string\+\_\+view is valid only for the lifetime of this metadata object. If you need the name beyond the immediate call, copy it to a std\+::string.
+
+\begin{DoxyReturn}{Returns}
+The hook name as a string\+\_\+view (immutable). 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/hooks/hook.\+hpp\item 
+src/hooks/hook.\+cpp\end{DoxyCompactItemize}

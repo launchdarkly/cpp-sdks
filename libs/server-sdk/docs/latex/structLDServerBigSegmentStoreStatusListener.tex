@@ -1,0 +1,45 @@
+\hypertarget{structLDServerBigSegmentStoreStatusListener}{}\doxysection{LDServer\+Big\+Segment\+Store\+Status\+Listener Struct Reference}
+\label{structLDServerBigSegmentStoreStatusListener}\index{LDServerBigSegmentStoreStatusListener@{LDServerBigSegmentStoreStatusListener}}
+
+
+{\ttfamily \#include $<$sdk.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Server\+Big\+Segment\+Store\+Status\+Callback\+Fn \mbox{\hyperlink{structLDServerBigSegmentStoreStatusListener_a67c34d89ce7428a27ea7449b7632bf8c}{Status\+Changed}}
+\item 
+void $\ast$ \mbox{\hyperlink{structLDServerBigSegmentStoreStatusListener_ae7233c5fd2e84d2c4b02e1af2808370a}{User\+Data}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a Big Segment store status listener which may be used to listen for changes to the Big Segment store status. The struct should be initialized using LDServer\+Big\+Segment\+Store\+Status\+Listener\+\_\+\+Init before use. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structLDServerBigSegmentStoreStatusListener_a67c34d89ce7428a27ea7449b7632bf8c}\label{structLDServerBigSegmentStoreStatusListener_a67c34d89ce7428a27ea7449b7632bf8c}} 
+\index{LDServerBigSegmentStoreStatusListener@{LDServerBigSegmentStoreStatusListener}!StatusChanged@{StatusChanged}}
+\index{StatusChanged@{StatusChanged}!LDServerBigSegmentStoreStatusListener@{LDServerBigSegmentStoreStatusListener}}
+\doxysubsubsection{\texorpdfstring{StatusChanged}{StatusChanged}}
+{\footnotesize\ttfamily Server\+Big\+Segment\+Store\+Status\+Callback\+Fn LDServer\+Big\+Segment\+Store\+Status\+Listener\+::\+Status\+Changed}
+
+Callback function which is invoked for Big Segment store status changes.
+
+The provided pointers are only valid for the duration of the function call (excluding User\+Data, whose lifetime is controlled by the caller).
+
+
+\begin{DoxyParams}{Parameters}
+{\em status} & The updated Big Segment store status. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structLDServerBigSegmentStoreStatusListener_ae7233c5fd2e84d2c4b02e1af2808370a}\label{structLDServerBigSegmentStoreStatusListener_ae7233c5fd2e84d2c4b02e1af2808370a}} 
+\index{LDServerBigSegmentStoreStatusListener@{LDServerBigSegmentStoreStatusListener}!UserData@{UserData}}
+\index{UserData@{UserData}!LDServerBigSegmentStoreStatusListener@{LDServerBigSegmentStoreStatusListener}}
+\doxysubsubsection{\texorpdfstring{UserData}{UserData}}
+{\footnotesize\ttfamily void$\ast$ LDServer\+Big\+Segment\+Store\+Status\+Listener\+::\+User\+Data}
+
+User\+Data is forwarded into callback functions. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/bindings/c/\mbox{\hyperlink{sdk_8h}{sdk.\+h}}\end{DoxyCompactItemize}

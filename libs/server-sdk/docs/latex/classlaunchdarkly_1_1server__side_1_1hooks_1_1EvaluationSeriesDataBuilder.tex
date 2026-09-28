@@ -1,0 +1,104 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder}{}\doxysection{launchdarkly\+::server\+\_\+side\+::hooks\+::Evaluation\+Series\+Data\+Builder Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder}\index{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}}
+
+
+{\ttfamily \#include $<$hook.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a00f0be52e2395574ab60ea4f4da9870a}{Evaluation\+Series\+Data\+Builder}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} const \&data)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a073bb9d7313cf75bc90731ad16e4d002}{Evaluation\+Series\+Data\+Builder}} ()
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder}{Evaluation\+Series\+Data\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a470726b31d507e007109d2f08bdfcafe}{Set}} (std\+::string key, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} value)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder}{Evaluation\+Series\+Data\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a5585f9f3b710b7e0090215095208f54c}{Set\+Shared}} (std\+::string key, std\+::shared\+\_\+ptr$<$ std\+::any $>$ value)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a42ef7c8a3e3f90f24d3d86a615cdea1e}{Build}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builder for creating evaluation series data. Allows hook stages to add data to be passed to subsequent stages. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a00f0be52e2395574ab60ea4f4da9870a}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a00f0be52e2395574ab60ea4f4da9870a}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}!EvaluationSeriesDataBuilder@{EvaluationSeriesDataBuilder}}
+\index{EvaluationSeriesDataBuilder@{EvaluationSeriesDataBuilder}!launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}}
+\doxysubsubsection{\texorpdfstring{EvaluationSeriesDataBuilder()}{EvaluationSeriesDataBuilder()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+Builder\+::\+Evaluation\+Series\+Data\+Builder (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} const \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Creates a new builder from existing data. 
+\begin{DoxyParams}{Parameters}
+{\em data} & The existing data to copy. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a073bb9d7313cf75bc90731ad16e4d002}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a073bb9d7313cf75bc90731ad16e4d002}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}!EvaluationSeriesDataBuilder@{EvaluationSeriesDataBuilder}}
+\index{EvaluationSeriesDataBuilder@{EvaluationSeriesDataBuilder}!launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}}
+\doxysubsubsection{\texorpdfstring{EvaluationSeriesDataBuilder()}{EvaluationSeriesDataBuilder()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+Builder\+::\+Evaluation\+Series\+Data\+Builder (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+Creates a new empty builder. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a42ef7c8a3e3f90f24d3d86a615cdea1e}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a42ef7c8a3e3f90f24d3d86a615cdea1e}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}!Build@{Build}}
+\index{Build@{Build}!launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}}
+\doxysubsubsection{\texorpdfstring{Build()}{Build()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+Builder\+::\+Build (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Builds the immutable series data. \begin{DoxyReturn}{Returns}
+The built data. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a470726b31d507e007109d2f08bdfcafe}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a470726b31d507e007109d2f08bdfcafe}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}!Set@{Set}}
+\index{Set@{Set}!launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}}
+\doxysubsubsection{\texorpdfstring{Set()}{Set()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder}{Evaluation\+Series\+Data\+Builder}} \& launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+Builder\+::\+Set (\begin{DoxyParamCaption}\item[{std\+::string}]{key,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}}]{value }\end{DoxyParamCaption})}
+
+Sets a \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} in the series data. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to set. \\
+\hline
+{\em value} & The value to associate with the key. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder for chaining. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a5585f9f3b710b7e0090215095208f54c}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder_a5585f9f3b710b7e0090215095208f54c}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}!SetShared@{SetShared}}
+\index{SetShared@{SetShared}!launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder@{launchdarkly::server\_side::hooks::EvaluationSeriesDataBuilder}}
+\doxysubsubsection{\texorpdfstring{SetShared()}{SetShared()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesDataBuilder}{Evaluation\+Series\+Data\+Builder}} \& launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+Builder\+::\+Set\+Shared (\begin{DoxyParamCaption}\item[{std\+::string}]{key,  }\item[{std\+::shared\+\_\+ptr$<$ std\+::any $>$}]{value }\end{DoxyParamCaption})}
+
+Sets a shared\+\_\+ptr to any type in the series data.
+
+Use this for storing arbitrary objects like Open\+Telemetry spans that need to be passed from before\+Evaluation to after\+Evaluation.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{auto} span = std::make\_shared<std::any>(MySpan\{\});}
+\DoxyCodeLine{builder.SetShared(\textcolor{stringliteral}{"{}span"{}}, span);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to set. \\
+\hline
+{\em value} & The shared\+\_\+ptr to associate with the key. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder for chaining. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/hooks/hook.\+hpp\item 
+src/hooks/hook.\+cpp\end{DoxyCompactItemize}

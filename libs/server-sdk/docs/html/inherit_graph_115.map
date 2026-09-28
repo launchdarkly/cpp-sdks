@@ -1,0 +1,4 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataReader.html" title="IDataReader obtains data on&#45;demand. Calls to obtain data may fail, so the getter methods use tl::expe..." alt="" coords="5,5,171,61"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDeserializer.html" title=" " alt="" coords="219,5,399,61"/>
+</map>

@@ -1,0 +1,112 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IData\+Synchronizer Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}\index{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}}
+
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} obtains data via a background synchronization mechanism, updating an \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} whenever changes arrive from upstream.  
+
+
+
+
+{\ttfamily \#include $<$idata\+\_\+synchronizer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IData\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a4a29361abb48987f400f1dc0f620b29e}{Start\+Async}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} $\ast$destination, data\+\_\+model\+::\+SDKData\+Set const $\ast$bootstrap\+\_\+data)=0
+\begin{DoxyCompactList}\small\item\em Starts synchronizing data into the given \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a80f940e3f01259d0aac10648749c8db8}{Shutdown\+Async}} (std\+::function$<$ void()$>$ complete)=0
+\begin{DoxyCompactList}\small\item\em Stops the synchronization mechanism. Stop will be called only once after Start\+Async. Stop should not block, but should invoke the completion function once shutdown. \end{DoxyCompactList}\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a9438f6b4cb884268a2a10ac8465bb946}{Identity}} () const =0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a96b101a9ea379d6db8e907fda2ff8f33}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a96b101a9ea379d6db8e907fda2ff8f33}} 
+{\bfseries IData\+Synchronizer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_ad19e8e686ce34cde2368b5c9d6d83c66}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_ad19e8e686ce34cde2368b5c9d6d83c66}} 
+{\bfseries IData\+Synchronizer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_ad350d564377504d4dd14f64eb8ea5ce4}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_ad350d564377504d4dd14f64eb8ea5ce4}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a426ab2dd449e69f21235aebcd5e26e8a}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a426ab2dd449e69f21235aebcd5e26e8a}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} obtains data via a background synchronization mechanism, updating an \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} whenever changes arrive from upstream. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a9438f6b4cb884268a2a10ac8465bb946}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a9438f6b4cb884268a2a10ac8465bb946}} 
+\index{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the synchronizer. Used in logs. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource_a27eb2c2564ee0a1b9585490b2e667cfc}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Streaming\+Data\+Source}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a2595758b566de384295e5ea6a22e8500}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Polling\+Data\+Source}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a80f940e3f01259d0aac10648749c8db8}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a80f940e3f01259d0aac10648749c8db8}} 
+\index{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}!ShutdownAsync@{ShutdownAsync}}
+\index{ShutdownAsync@{ShutdownAsync}!launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}}
+\doxysubsubsection{\texorpdfstring{ShutdownAsync()}{ShutdownAsync()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer\+::\+Shutdown\+Async (\begin{DoxyParamCaption}\item[{std\+::function$<$ void()$>$}]{complete }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Stops the synchronization mechanism. Stop will be called only once after Start\+Async. Stop should not block, but should invoke the completion function once shutdown. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em complete} & A callback to be invoked on completion. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource_a9a05aad6d9edfa5752c9173ba7e12d90}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Streaming\+Data\+Source}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a3e37d0a7417f413179b9f4dd5528c3e3}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Polling\+Data\+Source}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a4a29361abb48987f400f1dc0f620b29e}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a4a29361abb48987f400f1dc0f620b29e}} 
+\index{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}!StartAsync@{StartAsync}}
+\index{StartAsync@{StartAsync}!launchdarkly::server\_side::data\_interfaces::IDataSynchronizer@{launchdarkly::server\_side::data\_interfaces::IDataSynchronizer}}
+\doxysubsubsection{\texorpdfstring{StartAsync()}{StartAsync()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer\+::\+Start\+Async (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} $\ast$}]{destination,  }\item[{data\+\_\+model\+::\+SDKData\+Set const $\ast$}]{bootstrap\+\_\+data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Starts synchronizing data into the given \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}. 
+
+The second parameter, boostrap\+\_\+data, may be nullptr meaning no bootstrap data is present in the SDK and a full synchronization must be initiated.
+
+If bootstrap\+\_\+data is not nullptr, then it contains data obtained by the SDK during the bootstrap process. The pointer is valid only for this call.
+
+The data may be used to optimize the synchronization process, e.\+g. by obtaining a diff rather than a full dataset.
+
+
+\begin{DoxyParams}{Parameters}
+{\em destination} & The destination to synchronize data into. Pointer is invalid after the Shutdown\+Async completion handler is called. \\
+\hline
+{\em bootstrap\+\_\+data} & Optional bootstrap data. Pointer is valid only for this call. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource_a12af921b47c558c05f1f21cf0c8839f3}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Streaming\+Data\+Source}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_ad51e7083f7b7f12d30f44dd93968d5a4}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Polling\+Data\+Source}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/source/idata\+\_\+synchronizer.\+hpp\end{DoxyCompactItemize}

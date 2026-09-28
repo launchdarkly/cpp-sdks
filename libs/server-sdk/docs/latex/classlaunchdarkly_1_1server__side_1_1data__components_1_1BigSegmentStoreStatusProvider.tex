@@ -1,0 +1,83 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Big\+Segment\+Store\+Status\+Provider Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider}\index{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider@{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider}}
+
+
+Adapts a \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{Big\+Segment\+Store\+Wrapper}} to the public \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IBigSegmentStoreStatusProvider}{IBig\+Segment\+Store\+Status\+Provider}}, converting the internal status struct to the public type.  
+
+
+
+
+{\ttfamily \#include $<$big\+\_\+segment\+\_\+store\+\_\+status\+\_\+provider.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Big\+Segment\+Store\+Status\+Provider\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=259pt]{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Big\+Segment\+Store\+Status\+Provider\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=259pt]{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_ad5edd868e2b3f294ddc7a6cd3415c49d}{Big\+Segment\+Store\+Status\+Provider}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{Big\+Segment\+Store\+Wrapper}} $>$ wrapper)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus}{server\+\_\+side\+::\+Big\+Segment\+Store\+Status}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_a705be66a3665ab25265f5c8b0d52c9f9}{Status}} () const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_ae4cded39e7e41fe55344c31672ebb9dd}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_ae4cded39e7e41fe55344c31672ebb9dd}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} $>$ {\bfseries On\+Big\+Segment\+Store\+Status\+Change} (std\+::function$<$ void(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus}{server\+\_\+side\+::\+Big\+Segment\+Store\+Status}} status)$>$ handler) override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Adapts a \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{Big\+Segment\+Store\+Wrapper}} to the public \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IBigSegmentStoreStatusProvider}{IBig\+Segment\+Store\+Status\+Provider}}, converting the internal status struct to the public type. 
+
+Holds a null wrapper when Big Segments are not configured; in that case it reports the store as unavailable and not stale, and registered listeners never fire.
+
+Thread-\/safe\+: delegates to the wrapper, which is itself thread-\/safe.
+
+Note\+: the public status type \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus}{server\+\_\+side\+::\+Big\+Segment\+Store\+Status}} is qualified throughout, since this namespace also has an internal struct of the same name. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_ad5edd868e2b3f294ddc7a6cd3415c49d}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_ad5edd868e2b3f294ddc7a6cd3415c49d}} 
+\index{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider@{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider}!BigSegmentStoreStatusProvider@{BigSegmentStoreStatusProvider}}
+\index{BigSegmentStoreStatusProvider@{BigSegmentStoreStatusProvider}!launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider@{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider}}
+\doxysubsubsection{\texorpdfstring{BigSegmentStoreStatusProvider()}{BigSegmentStoreStatusProvider()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Big\+Segment\+Store\+Status\+Provider\+::\+Big\+Segment\+Store\+Status\+Provider (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{Big\+Segment\+Store\+Wrapper}} $>$}]{wrapper }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em wrapper} & The wrapper to delegate to, or nullptr if Big Segments are not configured. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_a705be66a3665ab25265f5c8b0d52c9f9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreStatusProvider_a705be66a3665ab25265f5c8b0d52c9f9}} 
+\index{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider@{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider}!Status@{Status}}
+\index{Status@{Status}!launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider@{launchdarkly::server\_side::data\_components::BigSegmentStoreStatusProvider}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus}{server\+\_\+side\+::\+Big\+Segment\+Store\+Status}} launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Big\+Segment\+Store\+Status\+Provider\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+The current status of the Big Segments store. If no store is configured, reports unavailable and not stale. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IBigSegmentStoreStatusProvider_af5f6f94be487b8892efd13edb100cc77}{launchdarkly\+::server\+\_\+side\+::\+IBig\+Segment\+Store\+Status\+Provider}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+components/big\+\_\+segments/big\+\_\+segment\+\_\+store\+\_\+status\+\_\+provider.\+hpp\item 
+src/data\+\_\+components/big\+\_\+segments/big\+\_\+segment\+\_\+store\+\_\+status\+\_\+provider.\+cpp\end{DoxyCompactItemize}

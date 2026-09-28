@@ -1,0 +1,47 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Streaming\+Adapter\+Factory Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory}\index{launchdarkly::server\_side::data\_systems::FDv1StreamingAdapterFactory@{launchdarkly::server\_side::data\_systems::FDv1StreamingAdapterFactory}}
+
+
+{\ttfamily \#include $<$synchronizer\+\_\+factories.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Streaming\+Adapter\+Factory\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=246pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Streaming\+Adapter\+Factory\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=246pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory_a687fca7cf275233458d2149b32d5fc7c}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory_a687fca7cf275233458d2149b32d5fc7c}} 
+{\bfseries FDv1\+Streaming\+Adapter\+Factory} (boost\+::asio\+::any\+\_\+io\+\_\+executor executor, Logger logger, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config\+::built\+::\+Service\+Endpoints}} endpoints, \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{config\+::built\+::\+FDv2\+Config\+::\+FDv1\+Streaming\+Config}} streaming, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} http\+\_\+properties)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory_aca0687b3e1ed36430348caa4438e37e0}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory_aca0687b3e1ed36430348caa4438e37e0}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}} $>$ {\bfseries Build} () override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory_a9bf06ccc204432f84547e47e42de0f9b}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1StreamingAdapterFactory_a9bf06ccc204432f84547e47e42de0f9b}} 
+bool {\bfseries Is\+FDv1\+Fallback} () const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builds fresh \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer}{FDv1\+Adapter\+Synchronizer}} instances wrapping a freshly-\/built FDv1 \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource}{Streaming\+Data\+Source}}. Reports Is\+FDv1\+Fallback() = true. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/synchronizer\+\_\+factories.\+hpp\item 
+src/data\+\_\+systems/fdv2/synchronizer\+\_\+factories.\+cpp\end{DoxyCompactItemize}

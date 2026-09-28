@@ -1,0 +1,69 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Fallback\+Condition Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition}\index{launchdarkly::server\_side::data\_systems::FallbackCondition@{launchdarkly::server\_side::data\_systems::FallbackCondition}}
+
+
+{\ttfamily \#include $<$conditions.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Fallback\+Condition\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Fallback\+Condition\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_a9e24201e7c6d3e582c36a0d320be982a}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_a9e24201e7c6d3e582c36a0d320be982a}} 
+{\bfseries Fallback\+Condition} (boost\+::asio\+::any\+\_\+io\+\_\+executor executor, std\+::chrono\+::milliseconds timeout)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_a5ae1e9d28ea80d59ece097989b08c7a6}{Inform}} (\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{data\+\_\+interfaces\+::\+FDv2\+Source\+Result}} const \&result) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Condition_ac480aff84dbfb08c21137fe9b088e175}{Type}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_afc5aae481c28430adfe9968e05841b4c}{Get\+Type}} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Detailed Description}
+Fires after the active synchronizer has been continuously interrupted for the configured timeout. Each CHANGE\+\_\+\+SET result cancels any pending timer; the next Interrupted status re-\/arms it. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_afc5aae481c28430adfe9968e05841b4c}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_afc5aae481c28430adfe9968e05841b4c}} 
+\index{launchdarkly::server\_side::data\_systems::FallbackCondition@{launchdarkly::server\_side::data\_systems::FallbackCondition}!GetType@{GetType}}
+\index{GetType@{GetType}!launchdarkly::server\_side::data\_systems::FallbackCondition@{launchdarkly::server\_side::data\_systems::FallbackCondition}}
+\doxysubsubsection{\texorpdfstring{GetType()}{GetType()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Condition_ac480aff84dbfb08c21137fe9b088e175}{Type}} launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Fallback\+Condition\+::\+Get\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the condition\textquotesingle{}s role in the orchestrator. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Condition_a9eaddbfc83bb42bc4343e742906f134a}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Condition}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_a5ae1e9d28ea80d59ece097989b08c7a6}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FallbackCondition_a5ae1e9d28ea80d59ece097989b08c7a6}} 
+\index{launchdarkly::server\_side::data\_systems::FallbackCondition@{launchdarkly::server\_side::data\_systems::FallbackCondition}!Inform@{Inform}}
+\index{Inform@{Inform}!launchdarkly::server\_side::data\_systems::FallbackCondition@{launchdarkly::server\_side::data\_systems::FallbackCondition}}
+\doxysubsubsection{\texorpdfstring{Inform()}{Inform()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Fallback\+Condition\+::\+Inform (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{data\+\_\+interfaces\+::\+FDv2\+Source\+Result}} const \&}]{result }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Pushes a synchronizer result into the condition so it can update any internal state (e.\+g., arm or cancel a timer). 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Condition_aee8983da07be4fa3606597084ab7ff06}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Condition}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/conditions.\+hpp\item 
+src/data\+\_\+systems/fdv2/conditions.\+cpp\end{DoxyCompactItemize}

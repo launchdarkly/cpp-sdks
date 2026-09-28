@@ -1,0 +1,4 @@
+<map id="launchdarkly::server_side::data_interfaces::IDataReader" name="launchdarkly::server_side::data_interfaces::IDataReader">
+<area shape="rect" id="node1" title="IDataReader obtains data on&#45;demand. Calls to obtain data may fail, so the getter methods use tl::expe..." alt="" coords="13,5,178,61"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDeserializer.html" title=" " alt="" coords="5,109,185,165"/>
+</map>
