@@ -122,6 +122,15 @@ TEST(HttpRequestTests, PathPreservesPercentEncodedPathSegments) {
     EXPECT_EQ("/ld%20relay/p%23q/sdk/latest-all", request.Path());
 }
 
+TEST(HttpRequestTests, PathOmitsAnEmptyQuery) {
+    HttpRequest request("https://some.domain.com/potato?",
+                        launchdarkly::network::HttpMethod::kGet,
+                        HttpPropertiesBuilder<ClientSDK>().Build(),
+                        std::nullopt);
+
+    EXPECT_EQ("/potato", request.Path());
+}
+
 TEST(HttpRequestTests, AppendKeepsTheEncodingOfTheUrl) {
     EXPECT_EQ("https://the.url.com/ld%20relay/sdk/latest-all?tok=a%26b",
               AppendUrl("https://the.url.com/ld%20relay?tok=a%26b",

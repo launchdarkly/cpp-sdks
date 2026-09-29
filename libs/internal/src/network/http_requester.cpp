@@ -97,8 +97,15 @@ HttpRequest::HttpRequest(std::string const& url,
 
     host_ = uri_components->host();
     // The target is the percent-encoded path and query. The Beast backend
-    // sends it as the request target without changes.
-    path_ = std::string(boost_url.encoded_target());
+    // sends it as the request target without changes. The path and query are
+    // joined here because encoded_target() asserts on older Boost releases
+    // after the path was normalized.
+    path_ = std::string(boost_url.encoded_path());
+    auto const encoded_query = uri_components->encoded_query();
+    if (!encoded_query.empty()) {
+        path_ += "?";
+        path_ += std::string(encoded_query);
+    }
 
     is_https_ = uri_components->scheme_id() == boost::urls::scheme::https;
     if (uri_components->has_port()) {
