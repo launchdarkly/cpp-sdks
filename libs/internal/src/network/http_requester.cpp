@@ -91,26 +91,14 @@ HttpRequest::HttpRequest(std::string const& url,
     }
 
     boost::urls::url boost_url = uri_components.value();
-    // Resolve dot segments and make slashes consistent. Only the path is
-    // normalized: normalizing the query would decode escapes such as %26,
-    // changing which characters act as separators. Path normalization does
-    // decode escapes of characters that are legal in a path (older Boost
-    // releases include %2F); characters that cannot appear raw in a request
-    // target, such as space, '#', '?' and CR LF, stay encoded.
+    // Resolve dot segments in the path. The query is not normalized, so its
+    // percent-encoding stays as written.
     boost_url.normalize_path();
 
     host_ = uri_components->host();
-    // Keep the percent-encoding. The Beast backend sends this string as the
-    // request target verbatim, so a decoded space, '#', '&' or CR LF coming
-    // from a server-supplied value (for example the FDv2 "basis" selector
-    // state) would corrupt the request line.
-    path_ = std::string(boost_url.encoded_path());
-    auto const encoded_query = uri_components->encoded_query();
-    if (!encoded_query.empty()) {
-        // For a boost beast request we need the query string in the path.
-        path_ += "?";
-        path_ += std::string(encoded_query);
-    }
+    // The target is the percent-encoded path and query. The Beast backend
+    // sends it as the request target without changes.
+    path_ = std::string(boost_url.encoded_target());
 
     is_https_ = uri_components->scheme_id() == boost::urls::scheme::https;
     if (uri_components->has_port()) {
@@ -158,48 +146,33 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
     }
 
     auto uri_components = boost::urls::parse_uri(*url_in);
-
     if (!uri_components) {
         return std::nullopt;
     }
 
     boost::urls::url url = uri_components.value();
-    // Normalize only the path (dot segments, slashes). The query is left as
-    // written so its percent-encoding survives.
-    url.normalize_path();
-    std::string path(url.encoded_path());
-
-    // This sizing may not be perfect, but should be close enough on average.
-    // The extra to is to account for a '/' and possible a '?'.
-    path.reserve(url.encoded_path().size() + to_append.size() +
-                 url.encoded_query().size() + 2);
-
-    // We want a single '/' between things.
-    bool path_has_trailing_slash =
-        !path.empty() && path[path.length() - 1] == '/';
-    bool append_has_leading_slash = to_append[0] == '/';
-
-    // One other the other already has a '/', so we can just append them.
-    if ((path_has_trailing_slash && !append_has_leading_slash) ||
-        (!path_has_trailing_slash && append_has_leading_slash)) {
-        path.append(to_append);
-    } else if (!path_has_trailing_slash && !append_has_leading_slash) {
-        // Neither had a '/', so we need to add one.
-        path.append("/");
-        path.append(to_append);
-    } else {
-        // Both have a '/' so append the second starting after the '/'.
-        path.append(to_append, 1, to_append.length() - 1);
+    auto segments = url.segments();
+    // A trailing '/' on the URL is an empty last segment. Remove it so that a
+    // single '/' separates the URL from the appended path.
+    if (!segments.empty() && segments.back().empty()) {
+        segments.pop_back();
     }
 
-    // The appended path may itself be percent-encoded, as a redirect Location
-    // can be. Keep those escapes, encode anything else that is not allowed in
-    // a path, and reject malformed escapes.
-    auto const encoded_path = boost::urls::make_pct_string_view(path);
-    if (!encoded_path) {
-        return std::nullopt;
+    // Each part between '/' characters is one segment. The URL library
+    // percent-encodes the characters that are not allowed in a segment.
+    std::size_t start = 0;
+    while (start <= to_append.size()) {
+        std::size_t end = to_append.find('/', start);
+        if (end == std::string::npos) {
+            end = to_append.size();
+        }
+        if (end > start) {
+            segments.push_back(to_append.substr(start, end - start));
+        }
+        start = end + 1;
     }
-    url.set_encoded_path(*encoded_path);
+
+    // Resolve dot segments such as "..".
     url.normalize_path();
     return std::string(url.buffer());
 }
@@ -217,7 +190,14 @@ std::optional<std::string> AppendQueryParam(std::optional<std::string> url_in,
     }
 
     boost::urls::url url = uri_components.value();
-    url.params().append({key, value});
+    // Percent-encode every character outside the unreserved set. The URL
+    // library's own parameter encoding differs between releases, so the
+    // result must not depend on it.
+    auto const encoded_key =
+        boost::urls::encode(key, boost::urls::unreserved_chars);
+    auto const encoded_value =
+        boost::urls::encode(value, boost::urls::unreserved_chars);
+    url.encoded_params().append({encoded_key, encoded_value});
     return std::string(url.buffer());
 }
 

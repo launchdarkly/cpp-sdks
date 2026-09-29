@@ -13,6 +13,7 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/core/ignore_unused.hpp>
+#include <boost/url.hpp>
 
 #include "foxy/client_session.hpp"
 
@@ -34,10 +35,6 @@ namespace launchdarkly::network {
 using TlsOptions = config::shared::built::TlsOptions;
 
 static unsigned char const kRedirectLimit = 20;
-
-static bool IsAbsolute(std::string_view str) {
-    return str.find("://") != std::string::npos || str.find("//") == 0;
-}
 
 static bool NeedsRedirect(HttpResult const& res) {
     // 300, multiple choices. Not actionable.
@@ -103,18 +100,20 @@ static std::optional<HttpRequest> MakeRedirectRequest(HttpRequest const& req,
     // Location should be verified to be present before attempting to
     // make the redirect request.
     assert(location != res.Headers().end());
+    // A Location header is a URI reference. It can be absolute or relative,
+    // so resolve it against the URL of the request that was redirected.
+    auto base = boost::urls::parse_uri(req.Url());
+    auto reference = boost::urls::parse_uri_reference(location->second);
+    if (!base || !reference) {
+        return std::nullopt;
+    }
+    boost::urls::url resolved;
+    if (!boost::urls::resolve(*base, *reference, resolved)) {
+        return std::nullopt;
+    }
     // Start the request over with the new URL.
-    if (IsAbsolute(location->second)) {
-        return HttpRequest(location->second, req.Method(), req.Properties(),
-                           req.Body());
-    }
-    auto new_url = AppendUrl(req.Url(), location->second);
-    if (new_url) {
-        return HttpRequest(*new_url, req.Method(), req.Properties(),
-                           req.Body());
-    }
-
-    return std::nullopt;
+    return HttpRequest(std::string(resolved.buffer()), req.Method(),
+                       req.Properties(), req.Body());
 }
 
 static boost::optional<net::ssl::context&> ToOptRef(
