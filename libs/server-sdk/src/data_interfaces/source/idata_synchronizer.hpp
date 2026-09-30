@@ -3,6 +3,7 @@
 #include <launchdarkly/data_model/sdk_data_set.hpp>
 
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -30,12 +31,11 @@ class IDataSynchronizer {
      * The data may be used to optimize the synchronization process, e.g. by
      * obtaining a diff rather than a full dataset.
      *
-     * @param destination The destination to synchronize data into. Pointer is
-     * invalid after the ShutdownAsync completion handler is called.
+     * @param destination The destination to synchronize data into.
      * @param bootstrap_data Optional bootstrap data.
      * Pointer is valid only for this call.
      */
-    virtual void StartAsync(IDestination* destination,
+    virtual void StartAsync(std::shared_ptr<IDestination> destination,
                             data_model::SDKDataSet const* bootstrap_data) = 0;
 
     /**

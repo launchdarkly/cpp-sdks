@@ -25,19 +25,15 @@ namespace launchdarkly::server_side::data_systems {
  * translated into FDv2SourceResult::ChangeSet results, with empty selectors
  * and fdv1_fallback = false (the directive does not re-fire from FDv1 data).
  *
- * Threading: Next() and Close() may be called from any thread; only one
- * Next() may be outstanding at a time. Member declaration order ensures
- * the wrapped FDv1 source destructs before destination_ and state_, so any
- * in-flight FDv1 callbacks land on live objects during teardown. This
- * relies on the wrapped IDataSynchronizer blocking on its in-flight work
- * in its destructor.
+ * Threading: Next() and Close() may be called from any thread. Only one
+ * Next() may be outstanding at a time.
  */
 class FDv1AdapterSynchronizer final
     : public data_interfaces::IFDv2Synchronizer {
    public:
     using SourceBuilder =
         std::function<std::shared_ptr<data_interfaces::IDataSynchronizer>(
-            data_components::DataSourceStatusManager&)>;
+            std::shared_ptr<data_components::DataSourceStatusManager>)>;
 
     /**
      * @param source_builder Called once during construction with the
@@ -110,9 +106,9 @@ class FDv1AdapterSynchronizer final
     // shared_ptr so async callbacks that may fire after this is destroyed
     // can hold their own reference.
     std::shared_ptr<State> const state_;
-    std::unique_ptr<ConvertingDestination> const destination_;
+    std::shared_ptr<ConvertingDestination> const destination_;
 
-    std::unique_ptr<data_components::DataSourceStatusManager> const
+    std::shared_ptr<data_components::DataSourceStatusManager> const
         status_manager_;
     std::unique_ptr<IConnection> const status_subscription_;
 

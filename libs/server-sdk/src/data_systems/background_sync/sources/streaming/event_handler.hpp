@@ -11,6 +11,7 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <cstdint>
+#include <memory>
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -103,9 +104,10 @@ class DataSourceEventHandler {
     };
 
     DataSourceEventHandler(
-        data_interfaces::IDestination& handler,
+        std::weak_ptr<data_interfaces::IDestination> handler,
         Logger const& logger,
-        data_components::DataSourceStatusManager& status_manager);
+        std::shared_ptr<data_components::DataSourceStatusManager>
+            status_manager);
 
     /**
      * Handles an event from the LaunchDarkly service.
@@ -117,8 +119,8 @@ class DataSourceEventHandler {
                                 std::string const& data);
 
    private:
-    data_interfaces::IDestination& handler_;
+    std::weak_ptr<data_interfaces::IDestination> handler_;
     Logger const& logger_;
-    data_components::DataSourceStatusManager& status_manager_;
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager_;
 };
 }  // namespace launchdarkly::server_side::data_systems
