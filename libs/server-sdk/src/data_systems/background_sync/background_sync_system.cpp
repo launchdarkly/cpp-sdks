@@ -47,6 +47,10 @@ std::string const& BackgroundSync::Identity() const {
     return id;
 }
 
+std::optional<std::string> BackgroundSync::EnvironmentId() const {
+    return store_.EnvironmentId();
+}
+
 std::shared_ptr<data_model::FlagDescriptor> BackgroundSync::GetFlag(
     std::string const& key) const {
     return store_.GetFlag(key);
