@@ -10,8 +10,8 @@
 
 #include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/context.hpp>
-#include <launchdarkly/data_sources/fdv2/conditions.hpp>
-#include <launchdarkly/data_sources/fdv2/source_manager.hpp>
+#include <launchdarkly/data_systems/fdv2/conditions.hpp>
+#include <launchdarkly/data_systems/fdv2/source_manager.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
@@ -27,15 +27,15 @@
 namespace launchdarkly::client_side::data_sources {
 
 // The orchestration primitives the client and server SDKs share.
-using internal::data_sources::Conditions;
-using internal::data_sources::FallbackConditionFactory;
-using internal::data_sources::IFDv2Condition;
-using internal::data_sources::IFDv2ConditionFactory;
-using internal::data_sources::RecoveryConditionFactory;
-using internal::data_sources::SourceSignal;
+using internal::data_systems::Conditions;
+using internal::data_systems::FallbackConditionFactory;
+using internal::data_systems::IFDv2Condition;
+using internal::data_systems::IFDv2ConditionFactory;
+using internal::data_systems::RecoveryConditionFactory;
+using internal::data_systems::SourceSignal;
 
 using SourceManager =
-    internal::data_sources::SourceManager<IFDv2SynchronizerFactory>;
+    internal::data_systems::SourceManager<IFDv2SynchronizerFactory>;
 
 /**
  * The FDv2 data source. It runs a sequence of initializers to load flag data

@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace launchdarkly::internal::data_sources {
+namespace launchdarkly::internal::data_systems {
 
 /**
  * What the orchestrator observed from the active synchronizer, reduced to the
@@ -116,4 +116,4 @@ class IFDv2ConditionFactory {
     IFDv2ConditionFactory() = default;
 };
 
-}  // namespace launchdarkly::internal::data_sources
+}  // namespace launchdarkly::internal::data_systems
