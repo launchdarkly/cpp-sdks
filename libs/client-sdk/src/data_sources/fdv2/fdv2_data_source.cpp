@@ -216,6 +216,7 @@ void FDv2DataSource::ShutdownAsync(std::function<void()> completion) {
 
 void FDv2DataSource::RunNextInitializer() {
     bool exhausted = false;
+    bool received_data = false;
     {
         std::lock_guard lock(mutex_);
         if (closed_) {
@@ -223,6 +224,7 @@ void FDv2DataSource::RunNextInitializer() {
         }
         if (initializer_index_ >= initializer_factories_.size()) {
             exhausted = true;
+            received_data = received_data_;
         } else {
             auto& factory = initializer_factories_[initializer_index_++];
             active_initializer_from_cache_ = factory->IsFromCache();
@@ -244,6 +246,10 @@ void FDv2DataSource::RunNextInitializer() {
     }
 
     if (exhausted) {
+        if (received_data) {
+            // No initializer produced a selector, so this data completes init.
+            PublishState(DataSourceStatus::DataSourceState::kValid);
+        }
         StartSynchronizers();
     }
 }
@@ -267,6 +273,7 @@ void FDv2DataSource::OnInitializerResult(FDv2SourceResult result) {
                 if (has_selector) {
                     LD_LOG(logger_, LogLevel::kInfo)
                         << "fdv2: initializer succeeded";
+                    PublishState(DataSourceStatus::DataSourceState::kValid);
                     got_basis = true;
                 }
             },
@@ -453,6 +460,8 @@ void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
                 last_logged_synchronizer_interrupted_.store(false);
                 ApplyResult(std::move(cs), std::move(result.environment_id),
                             /* from_cache= */ false);
+                // A synchronizer completes init with or without a selector.
+                PublishState(DataSourceStatus::DataSourceState::kValid);
             },
             [&](FDv2SourceResult::Shutdown&) { got_shutdown = true; },
             [&](FDv2SourceResult::Interrupted const& iv) {
@@ -516,7 +525,6 @@ void FDv2DataSource::ApplyResult(FDv2SourceResult::ChangeSet change_set,
         received_data_ = received_data_ || carries_data;
     }
     sink_->Apply(context_, std::move(change_set.change_set), from_cache);
-    PublishState(DataSourceStatus::DataSourceState::kValid);
     promise->Resolve({});
 }
 

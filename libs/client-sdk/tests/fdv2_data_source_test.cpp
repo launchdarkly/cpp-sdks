@@ -499,7 +499,9 @@ TEST(ClientFDv2DataSourceTest, CachedDataIsAppliedBeforeStartReturns) {
     auto const flag = h.Store().Get("flagA");
     ASSERT_TRUE(flag);
     EXPECT_EQ(Value("cached"), flag->item->Detail().Value());
-    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid, h.State());
+
+    // Cached data has no selector, so it does not complete initialization.
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing, h.State());
 }
 
 // In offline mode the cache is the only thing that could ever supply data,
@@ -538,9 +540,94 @@ TEST(ClientFDv2DataSourceTest, NetworkOnlyNoneResultDoesNotCountAsSuccess) {
     EXPECT_EQ(DataSourceStatus::DataSourceState::kShutdown, h.State());
 }
 
+// StartAsync resolves on the first state that is not initializing, so a
+// "none" result must not pass through valid on its way to shutdown.
+TEST(ClientFDv2DataSourceTest, NoneResultNeverReportsValid) {
+    Harness h;
+
+    std::optional<DataSourceStatus::DataSourceState> first_settled;
+    auto connection = h.StatusManager().OnDataSourceStatusChangeEx(
+        [&first_settled](DataSourceStatus const& status) {
+            if (status.State() ==
+                DataSourceStatus::DataSourceState::kInitializing) {
+                return false;
+            }
+            first_settled = status.State();
+            return true;
+        });
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(std::make_unique<OneShotInitializerFactory>(
+        std::make_unique<MockInitializer>(MakeChangeSetResult(
+            data_model::ChangeSetType::kNone, {}, data_model::Selector{}))));
+
+    auto source = h.MakeDataSource(std::move(initializers), {});
+    source->Start();
+    h.Context().run();
+
+    ASSERT_TRUE(first_settled.has_value());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kShutdown, *first_settled);
+}
+
+// Selector-less initializer data completes initialization once the chain
+// terminates, since no later initializer produced a selector.
+TEST(ClientFDv2DataSourceTest,
+     SelectorLessInitializerDataIsValidOnceChainEnds) {
+    Harness h;
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(std::make_unique<OneShotInitializerFactory>(
+        std::make_unique<MockInitializer>(MakeChangeSetResult(
+            data_model::ChangeSetType::kFull,
+            {FlagChange{"flagA", MakeFlag(1, Value("cached"))}},
+            data_model::Selector{})),
+        /* from_cache= */ true));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{},
+                                           /* closed_flag= */ nullptr,
+                                           /* next_calls= */ nullptr,
+                                           /* stall_after_results= */ true)));
+
+    auto source =
+        h.MakeDataSource(std::move(initializers), std::move(synchronizers));
+    source->Start();
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing, h.State());
+
+    h.Context().run();
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid, h.State());
+}
+
 // ============================================================================
 // Synchronizer phase
 // ============================================================================
+
+// A synchronizer completes initialization even without a selector.
+TEST(ClientFDv2DataSourceTest, SelectorLessSynchronizerDataIsImmediatelyValid) {
+    Harness h;
+
+    std::vector<FDv2SourceResult> results;
+    results.push_back(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                            data_model::Selector{}));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::make_unique<MockSynchronizer>(std::move(results),
+                                           /* closed_flag= */ nullptr,
+                                           /* next_calls= */ nullptr,
+                                           /* stall_after_results= */ true)));
+
+    auto source = h.MakeDataSource({}, std::move(synchronizers));
+    source->Start();
+    h.Context().run();
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid, h.State());
+}
 
 TEST(ClientFDv2DataSourceTest, SynchronizerChangeSetsAreApplied) {
     Harness h;
