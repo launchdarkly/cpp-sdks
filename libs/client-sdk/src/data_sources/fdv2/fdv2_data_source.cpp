@@ -70,7 +70,6 @@ FDv2DataSource::FDv2DataSource(
       closed_(false),
       received_data_(false),
       initializer_index_(0),
-      active_initializer_from_cache_(false),
       source_manager_(std::move(synchronizer_factories)),
       active_initializer_(nullptr),
       active_synchronizer_(nullptr),
@@ -227,15 +226,15 @@ void FDv2DataSource::RunNextInitializer() {
             received_data = received_data_;
         } else {
             auto& factory = initializer_factories_[initializer_index_++];
-            active_initializer_from_cache_ = factory->IsFromCache();
+            bool const from_cache = factory->IsFromCache();
             active_initializer_ = factory->Build();
             LD_LOG(logger_, LogLevel::kInfo) << "fdv2: starting initializer "
                                              << active_initializer_->Identity();
             active_initializer_->Run().Then(
-                [weak = weak_from_this()](
-                    FDv2SourceResult const& result) -> std::monostate {
+                [weak = weak_from_this(),
+                 from_cache](FDv2SourceResult const& result) -> std::monostate {
                     if (auto self = weak.lock()) {
-                        self->OnInitializerResult(result);
+                        self->OnInitializerResult(result, from_cache);
                     }
                     return {};
                 },
@@ -254,14 +253,10 @@ void FDv2DataSource::RunNextInitializer() {
     }
 }
 
-void FDv2DataSource::OnInitializerResult(FDv2SourceResult result) {
+void FDv2DataSource::OnInitializerResult(FDv2SourceResult result,
+                                         bool from_cache) {
     bool got_basis = false;
     bool got_shutdown = false;
-    bool from_cache = false;
-    {
-        std::lock_guard lock(mutex_);
-        from_cache = active_initializer_from_cache_;
-    }
 
     std::visit(
         overloaded{
