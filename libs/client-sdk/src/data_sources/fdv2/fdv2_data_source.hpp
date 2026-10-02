@@ -167,7 +167,7 @@ class FDv2DataSource final
     void RunCacheInitializers();
 
     void RunNextInitializer();
-    void OnInitializerResult(FDv2SourceResult result);
+    void OnInitializerResult(FDv2SourceResult result, bool from_cache);
     void StartSynchronizers();
     void RunSynchronizerNext();
     void OnSynchronizerResult(FDv2SourceResult result);
@@ -224,8 +224,6 @@ class FDv2DataSource final
     bool received_data_;
     std::optional<std::string> environment_id_;
     std::size_t initializer_index_;
-    // Whether active_initializer_ reads from the local cache.
-    bool active_initializer_from_cache_;
     SourceManager source_manager_;
     std::unique_ptr<IFDv2Initializer> active_initializer_;
     std::unique_ptr<IFDv2Synchronizer> active_synchronizer_;
