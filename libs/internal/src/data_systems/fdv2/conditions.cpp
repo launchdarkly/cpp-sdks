@@ -1,11 +1,11 @@
-#include <launchdarkly/data_sources/fdv2/conditions.hpp>
+#include <launchdarkly/data_systems/fdv2/conditions.hpp>
 
 #include <launchdarkly/async/timer.hpp>
 
 #include <algorithm>
 #include <utility>
 
-namespace launchdarkly::internal::data_sources {
+namespace launchdarkly::internal::data_systems {
 
 TimedCondition::TimedCondition(boost::asio::any_io_executor executor,
                                std::chrono::milliseconds timeout)
@@ -231,4 +231,4 @@ void Conditions::Close() {
     }
 }
 
-}  // namespace launchdarkly::internal::data_sources
+}  // namespace launchdarkly::internal::data_systems

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <launchdarkly/data_sources/fdv2/ifdv2_condition.hpp>
+#include <launchdarkly/data_systems/fdv2/ifdv2_condition.hpp>
 
 #include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/async/promise.hpp>
@@ -14,7 +14,7 @@
 #include <optional>
 #include <vector>
 
-namespace launchdarkly::internal::data_sources {
+namespace launchdarkly::internal::data_systems {
 
 /**
  * Base class for conditions that fire after a duration elapses on the
@@ -197,4 +197,4 @@ class Conditions final {
     std::shared_ptr<State> const state_;
 };
 
-}  // namespace launchdarkly::internal::data_sources
+}  // namespace launchdarkly::internal::data_systems

@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-namespace launchdarkly::internal::data_sources {
+namespace launchdarkly::internal::data_systems {
 
 /**
  * Manages a list of synchronizer factories together with per-factory state
@@ -177,4 +177,4 @@ class SourceManager {
     int current_factory_index_ = -1;
 };
 
-}  // namespace launchdarkly::internal::data_sources
+}  // namespace launchdarkly::internal::data_systems

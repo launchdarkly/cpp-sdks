@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/data_sources/fdv2/source_manager.hpp>
+#include <launchdarkly/data_systems/fdv2/source_manager.hpp>
 
 #include <memory>
 #include <string>
@@ -41,7 +41,7 @@ class FDv1FallbackFactory : public CountingFactory {
 }  // namespace
 
 using SourceManager =
-    launchdarkly::internal::data_sources::SourceManager<StubFactory>;
+    launchdarkly::internal::data_systems::SourceManager<StubFactory>;
 
 TEST(SourceManagerTest, EmptyManagerReportsZeroAvailable) {
     SourceManager mgr({});

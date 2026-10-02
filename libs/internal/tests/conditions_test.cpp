@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/data_sources/fdv2/conditions.hpp>
+#include <launchdarkly/data_systems/fdv2/conditions.hpp>
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -8,7 +8,7 @@
 #include <chrono>
 #include <thread>
 
-using namespace launchdarkly::internal::data_sources;
+using namespace launchdarkly::internal::data_systems;
 using namespace std::chrono_literals;
 
 using launchdarkly::async::CancellationToken;
