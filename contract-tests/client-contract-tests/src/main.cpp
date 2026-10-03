@@ -49,6 +49,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("client-prereq-events");
         srv.add_capability("client-prereq-cycle-detection");
         srv.add_capability("wrapper");
+        // The FDv2 data system honors the service's FDv1 fallback directive.
+        srv.add_capability("fdv1-fallback");
         // Proxies are supported only with CURL networking.
 #ifdef LD_CURL_NETWORKING
         srv.add_capability("http-proxy");

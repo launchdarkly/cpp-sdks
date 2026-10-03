@@ -1,0 +1,19 @@
+# In the C++ client a fallback directive schedules a return to FDv2 rather
+# than ending the data system.
+# These two scenarios assert the older terminal semantics, and the server SDK
+# suppresses the same pair for the same reason. Tracked in SDK-2527.
+#
+# Both are currently skipped for other reasons anyway. One needs the
+# "client-event-source-http-errors" capability and the other needs
+# -enable-long-running-tests. These entries are a guard for when either
+# changes rather than something the suite exercises today.
+streaming/fdv2/FDv1 fallback directive/directive without FDv1 fallback configured halts the data system
+streaming/fdv2/FDv1 fallback directive/directed fallback is terminal and does not revisit FDv2 sources
+
+# The event processor gates SendAsync on an inbox counter sized at the events
+# capacity, so a burst that outruns the io_context drops events before they
+# reach the summarizer. This test sends a full buffer of custom events and then
+# evaluates a flag, and under FDv2 the busier startup makes the evaluation lose
+# that race, so no summary event is produced. The outbox itself already keeps
+# the summary when it overflows. The inbox is the gap.
+events/event capacity/summary event is still included even if buffer was full
