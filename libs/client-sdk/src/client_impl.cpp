@@ -1,4 +1,6 @@
 #include "client_impl.hpp"
+#include "data_sources/fdv2/fdv2_data_source.hpp"
+#include "data_sources/fdv2/mode_sources.hpp"
 #include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
@@ -31,12 +33,58 @@ using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
 
+using FDv2Config = config::shared::built::FDv2Config<ClientSDK>;
+
+static bool UsesFDv2(Config const& config) {
+    return std::holds_alternative<FDv2Config>(config.DataSourceConfig().method);
+}
+
+static std::shared_ptr<data_sources::IDataSource> MakeFDv2DataSource(
+    HttpProperties const& http_properties,
+    Config const& config,
+    Context const& context,
+    boost::asio::any_io_executor const& executor,
+    flag_manager::FlagManager& flag_manager,
+    data_sources::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    auto const& fdv2 = std::get<FDv2Config>(config.DataSourceConfig().method);
+    auto const& endpoints = config.ServiceEndpoints();
+
+    if (config.DataSourceConfig().use_report) {
+        LD_LOG(logger, LogLevel::kWarn)
+            << "UseReport is not applicable to FDv2 and will be ignored";
+    }
+
+    data_sources::ModeSourceParams const params{
+        executor,
+        logger,
+        fdv2.polling_base_url,
+        fdv2.streaming_base_url,
+        http_properties,
+        endpoints,
+        context,
+        config.DataSourceConfig().with_reasons,
+        &flag_manager.Cache()};
+
+    auto sources =
+        data_sources::BuildModeSources(fdv2, fdv2.initial_mode, params);
+
+    return std::make_shared<data_sources::FDv2DataSource>(
+        std::move(sources.initializers), std::move(sources.synchronizers),
+        std::make_unique<data_sources::FallbackConditionFactory>(
+            executor, fdv2.fallback_timeout),
+        std::make_unique<data_sources::RecoveryConditionFactory>(
+            executor, fdv2.recovery_timeout),
+        executor, context, &flag_manager.Updater(), &flag_manager.Store(),
+        &status_manager, logger);
+}
+
 static std::shared_ptr<data_sources::IDataSource> MakeDataSource(
     HttpProperties const& http_properties,
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
-    IDataSourceUpdateSink& flag_updater,
+    flag_manager::FlagManager& flag_manager,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.Offline()) {
@@ -48,18 +96,26 @@ static std::shared_ptr<data_sources::IDataSource> MakeDataSource(
 
     auto data_source_properties = builder.Build();
 
-    if (config.DataSourceConfig().method.index() == 0) {
+    if (UsesFDv2(config)) {
+        return MakeFDv2DataSource(data_source_properties, config, context,
+                                  executor, flag_manager, status_manager,
+                                  logger);
+    }
+
+    if (std::holds_alternative<
+            config::shared::built::StreamingConfig<ClientSDK>>(
+            config.DataSourceConfig().method)) {
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
             config.ServiceEndpoints(), config.DataSourceConfig(),
-            data_source_properties, executor, context, flag_updater,
+            data_source_properties, executor, context, flag_manager.Updater(),
             status_manager, logger);
     }
     return std::make_shared<
         launchdarkly::client_side::data_sources::PollingDataSource>(
         config.ServiceEndpoints(), config.DataSourceConfig(),
-        data_source_properties, executor, context, flag_updater, status_manager,
-        logger);
+        data_source_properties, executor, context, flag_manager.Updater(),
+        status_manager, logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
@@ -101,13 +157,17 @@ ClientImpl::ClientImpl(Config in_cfg,
                     MakePersistence(config_)),
       data_source_factory_([this]() {
           return MakeDataSource(http_properties_, config_, context_,
-                                ioc_.get_executor(), flag_manager_.Updater(),
+                                ioc_.get_executor(), flag_manager_,
                                 status_manager_, logger_);
       }),
       data_source_(nullptr),
       event_processor_(nullptr),
       eval_reasons_available_(config_.DataSourceConfig().with_reasons) {
-    flag_manager_.LoadCache(context_);
+    // Under FDv2 the cache is loaded by an initializer, so that it enters the
+    // store through the same path as every other source.
+    if (!UsesFDv2(config_)) {
+        flag_manager_.LoadCache(context_);
+    }
 
     if (auto custom_ca = http_properties_.Tls().CustomCAFile()) {
         LD_LOG(logger_, LogLevel::kInfo)
@@ -164,7 +224,9 @@ std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     // Any flag data already loaded stays available for evaluation until a
     // full data set arrives for the new context.
     flag_manager_.ClearSelector();
-    flag_manager_.LoadCache(context);
+    if (!UsesFDv2(config_)) {
+        flag_manager_.LoadCache(context);
+    }
     event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
