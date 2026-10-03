@@ -338,6 +338,47 @@ TEST(FlagPersistenceTests, FreshnessIsPerContextAttributeSet) {
     EXPECT_FALSE(flag_persistence.ReadFreshness(with_attribute).has_value());
 }
 
+// Flag data is stored per canonical key, so a second attribute set overwrites
+// the first one's flags. The first context's freshness must not survive that.
+TEST(FlagPersistenceTests, FreshnessDoesNotOutliveOverwrittenFlags) {
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence(
+        "the-key", updater, store, persistence, logger, 5, []() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{500}};
+        });
+
+    auto item = ItemDescriptor{EvaluationResult{
+        1, std::nullopt, false, false, std::nullopt,
+        EvaluationDetailInternal{Value("test"), std::nullopt, std::nullopt}}};
+
+    auto plain = ContextBuilder().Kind("user", "user-key").Build();
+    auto with_attribute =
+        ContextBuilder().Kind("user", "user-key").Set("country", "US").Build();
+
+    flag_persistence.Apply(
+        plain,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagA", item}}, Selector{}},
+        /* from_cache= */ false);
+
+    flag_persistence.Apply(
+        with_attribute,
+        FlagChangeSet{
+            ChangeSetType::kFull, {FlagChange{"flagA", item}}, Selector{}},
+        /* from_cache= */ false);
+
+    // The second apply replaced the flags under the shared canonical key, so
+    // the first context has no data left to be fresh about.
+    EXPECT_FALSE(flag_persistence.ReadFreshness(plain).has_value());
+    EXPECT_TRUE(flag_persistence.ReadFreshness(with_attribute).has_value());
+}
+
 // A stored context that has aged out of the cache should not keep a freshness
 // record alive either.
 TEST(FlagPersistenceTests, PrunesFreshnessBeyondMaxContexts) {
