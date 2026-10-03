@@ -115,11 +115,21 @@ void FlagPersistence::LoadCached(Context const& context) {
     }
 }
 
+static bool HasPrefix(std::string const& value, std::string const& prefix) {
+    return value.compare(0, prefix.size(), prefix) == 0;
+}
+
+// Groups freshness records by the canonical key that flag data is stored under.
+static std::string FreshnessGroup(Context const& context) {
+    return PersistenceEncodeKey(context.CanonicalKey()) + ".";
+}
+
 // Identifies a context by everything it carries, not just its key. Changing
 // an attribute can change how flags evaluate.
 static std::string FreshnessId(Context const& context) {
-    return PersistenceEncodeKey(
-        boost::json::serialize(boost::json::value_from(context)));
+    return FreshnessGroup(context) +
+           PersistenceEncodeKey(
+               boost::json::serialize(boost::json::value_from(context)));
 }
 
 void FlagPersistence::RecordFreshness(Context const& context) {
@@ -129,10 +139,23 @@ void FlagPersistence::RecordFreshness(Context const& context) {
 
     std::lock_guard lock(persistence_mutex_);
     auto index = ReadIndexAt(freshness_key_);
-    index.Notice(FreshnessId(context), time_stamper_());
-    index.Prune(max_cached_contexts_);
-    persistence_->Set(environment_namespace_, freshness_key_,
-                      boost::json::serialize(boost::json::value_from(index)));
+
+    // Storing these flags replaced whatever shared the canonical key, so the
+    // other attribute sets in the group no longer describe stored data.
+    auto const group = FreshnessGroup(context);
+    ContextIndex::Index retained;
+    for (auto const& entry : index.Entries()) {
+        if (!HasPrefix(entry.id, group)) {
+            retained.push_back(entry);
+        }
+    }
+
+    ContextIndex regrouped{std::move(retained)};
+    regrouped.Notice(FreshnessId(context), time_stamper_());
+    regrouped.Prune(max_cached_contexts_);
+    persistence_->Set(
+        environment_namespace_, freshness_key_,
+        boost::json::serialize(boost::json::value_from(regrouped)));
 }
 
 std::optional<std::chrono::time_point<std::chrono::system_clock>>
