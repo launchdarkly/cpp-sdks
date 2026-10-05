@@ -8,6 +8,11 @@
 
 namespace launchdarkly::client_side::flag_manager {
 
+/**
+ * Owns the flag store and the update pipeline that feeds it.
+ *
+ * Thread-safe: each part it exposes is itself thread-safe.
+ */
 class FlagManager {
    public:
     FlagManager(std::string const& sdk_key,
@@ -17,6 +22,9 @@ class FlagManager {
     IDataSourceUpdateSink& Updater();
     IFlagNotifier& Notifier();
     FlagStore const& Store() const;
+
+    /** Returns the local cache the SDK persists flag data to. */
+    FlagPersistence& Cache();
 
     void LoadCache(Context const& context);
 

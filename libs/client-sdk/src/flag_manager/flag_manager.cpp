@@ -29,6 +29,10 @@ FlagStore const& FlagManager::Store() const {
     return flag_store_;
 }
 
+FlagPersistence& FlagManager::Cache() {
+    return persistence_updater_;
+}
+
 void FlagManager::LoadCache(Context const& context) {
     persistence_updater_.LoadCached(context);
 }
