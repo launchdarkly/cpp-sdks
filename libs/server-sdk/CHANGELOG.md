@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.15.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.14.0...launchdarkly-cpp-server-v3.15.0) (2026-10-05)
+
+
+### Features
+
+* Add the FDv2 data source orchestrator to the client SDK ([#612](https://github.com/launchdarkly/cpp-sdks/issues/612)) ([7633334](https://github.com/launchdarkly/cpp-sdks/commit/7633334e8e7e9d01e9d573890c0bf6b9c06cd880))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-internal bumped from 0.15.0 to 0.16.0
+
 ## [3.14.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.13.1...launchdarkly-cpp-server-v3.14.0) (2026-09-24)
 
 
