@@ -66,6 +66,7 @@ TEST_F(ModeSourcesFixture, StreamingModeFallsBackToPolling) {
     auto sources =
         BuildModeSources(Defaults(), ConnectionMode::kStreaming, Params());
 
+    // Streaming, polling, and FDv1.
     ASSERT_EQ(3u, sources.synchronizers.size());
     EXPECT_EQ("FDv2 streaming synchronizer",
               sources.synchronizers[0]->Build()->Identity());
@@ -161,8 +162,7 @@ TEST(FDv2ConfigTest, ModesThatMakeRequestsConfigureAnFDv1Fallback) {
         config.modes.at(ConnectionMode::kOffline).fdv1_fallback.has_value());
 }
 
-// The FDv1 tier is appended last, and the orchestrator keeps it blocked until
-// the service directs the SDK away from FDv2.
+// The FDv1 tier is appended after the mode's own synchronizers.
 TEST_F(ModeSourcesFixture, ModesWithAFallbackAppendTheFDv1Tier) {
     auto sources =
         BuildModeSources(Defaults(), ConnectionMode::kStreaming, Params());

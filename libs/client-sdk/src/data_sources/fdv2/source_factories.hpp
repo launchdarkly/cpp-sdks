@@ -101,9 +101,7 @@ class FDv2StreamingSynchronizerFactory final : public IFDv2SynchronizerFactory {
  * Builds fresh FDv1AdapterSynchronizer instances wrapping a freshly-built
  * FDv1 polling source.
  *
- * The synchronizers it builds report themselves as the FDv1 tier, which the
- * orchestrator keeps in reserve until the service directs the SDK away from
- * FDv2.
+ * The synchronizers it builds report themselves as the FDv1 tier.
  *
  * Thread-safe: Build() may be called from any thread, and the
  * configuration it hands to each source is fixed at construction.
