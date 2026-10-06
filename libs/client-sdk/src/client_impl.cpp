@@ -160,9 +160,6 @@ static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
 
 std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     UpdateContextSynchronized(context);
-    // A selector describes one context's data, so it is never carried over.
-    // Any flag data already loaded stays available for evaluation until a
-    // full data set arrives for the new context.
     flag_manager_.ClearSelector();
     flag_manager_.LoadCache(context);
     event_processor_->SendAsync(events::IdentifyEventParams{
@@ -248,11 +245,12 @@ void ClientImpl::FlushAsync() {
 }
 
 template <typename T>
-EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
-                                                  Value default_value,
-                                                  bool check_type,
-                                                  bool detailed,
-                                                  std::unordered_set<std::string>* visited) {
+EvaluationDetail<T> ClientImpl::VariationInternal(
+    FlagKey const& key,
+    Value default_value,
+    bool check_type,
+    bool detailed,
+    std::unordered_set<std::string>* visited) {
     auto desc = flag_manager_.Store().Get(key);
 
     events::FeatureEventParams event = {

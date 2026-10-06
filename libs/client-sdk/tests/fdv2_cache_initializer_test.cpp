@@ -120,6 +120,44 @@ TEST(FDv2CacheInitializerTest, NoPersistenceConfiguredProducesANoneIntent) {
     EXPECT_EQ(ChangeSetType::kNone, change_set->change_set.type);
 }
 
+TEST(FDv2CacheInitializerTest, ReadsTheContextItWasBuiltFor) {
+    auto first = ContextBuilder().Kind("user", "first").Build();
+    auto second = ContextBuilder().Kind("user", "second").Build();
+    auto logger = launchdarkly::logging::NullLogger();
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType{
+            {kEnvironment,
+             {{PersistenceEncodeKey(first.CanonicalKey()),
+               R"({"flagA":{"version":1,"value":"first-value"}})"}}}});
+    FlagManager flag_manager("the-key", logger, 5, persistence);
+
+    // Initialize for the context that has nothing cached.
+    FDv2CacheInitializer second_initializer(&flag_manager.Cache(), second,
+                                            logger);
+    auto second_future = second_initializer.Run();
+    ASSERT_TRUE(second_future.IsFinished());
+    auto second_result = second_future.GetResult();
+
+    // Another context's data in the same cache is not a hit.
+    auto* second_change_set =
+        std::get_if<FDv2SourceResult::ChangeSet>(&second_result->value);
+    ASSERT_NE(nullptr, second_change_set);
+    EXPECT_EQ(ChangeSetType::kNone, second_change_set->change_set.type);
+
+    // Initialize for the context whose data is cached.
+    FDv2CacheInitializer first_initializer(&flag_manager.Cache(), first,
+                                           logger);
+    auto first_future = first_initializer.Run();
+    ASSERT_TRUE(first_future.IsFinished());
+    auto first_result = first_future.GetResult();
+
+    // That context's cached data comes back as a full data set.
+    auto* first_change_set =
+        std::get_if<FDv2SourceResult::ChangeSet>(&first_result->value);
+    ASSERT_NE(nullptr, first_change_set);
+    EXPECT_EQ(ChangeSetType::kFull, first_change_set->change_set.type);
+}
+
 // The orchestrator needs to tell cache initializers apart from network ones,
 // so that a miss with nothing else configured still starts the SDK.
 TEST(FDv2CacheInitializerTest, FactoryIdentifiesItselfAsReadingTheCache) {
