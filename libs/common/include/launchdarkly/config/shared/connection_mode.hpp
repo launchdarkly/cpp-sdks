@@ -15,9 +15,7 @@ enum class ConnectionMode {
     kOffline,
 };
 
-/**
- * The mode's name as the configuration API spells it.
- */
+/** The mode's name as the configuration API spells it. */
 char const* GetConnectionModeName(ConnectionMode mode);
 
 }  // namespace launchdarkly::config::shared

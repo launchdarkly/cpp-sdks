@@ -35,7 +35,6 @@ struct ModeSources {
 struct ModeSourceParams {
     boost::asio::any_io_executor executor;
     Logger logger;
-    /** Used by any source that does not configure a URL of its own. */
     std::string polling_base_url;
     std::string streaming_base_url;
     config::shared::built::HttpProperties http_properties;
@@ -47,11 +46,7 @@ struct ModeSourceParams {
     Context context;
     /** Whether the application asked for evaluation reasons. */
     bool with_reasons;
-    /**
-     * The local cache, read by the cache initializer and for the last time
-     * this context was polled. Non-owning. Must outlive the sources built
-     * from these params.
-     */
+    /** Non-owning. Must outlive sources built from these params. */
     flag_manager::FlagPersistence* cache;
 };
 
@@ -60,9 +55,7 @@ struct ModeSourceParams {
  * the configuration does not define the mode.
  *
  * A mode that configures an FDv1 fallback gets its synchronizer appended to
- * the list. The orchestrator holds that tier in reserve rather than using it
- * in rotation. It is started only while the service has directed the SDK away
- * from FDv2.
+ * the synchronizer list.
  */
 ModeSources BuildModeSources(FDv2Config const& config,
                              ConnectionMode mode,

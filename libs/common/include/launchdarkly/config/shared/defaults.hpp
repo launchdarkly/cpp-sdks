@@ -83,8 +83,6 @@ struct Defaults<ClientSDK> {
     static auto FDv2Config() -> shared::built::FDv2Config<ClientSDK> {
         using Config = shared::built::FDv2Config<ClientSDK>;
 
-        // Both timeouts are chosen for consistency with the other
-        // LaunchDarkly SDKs.
         auto const fallback_timeout = std::chrono::seconds(120);
         auto const recovery_timeout = std::chrono::seconds(300);
 
