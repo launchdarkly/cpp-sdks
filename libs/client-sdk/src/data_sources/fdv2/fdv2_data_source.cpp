@@ -548,9 +548,8 @@ bool FDv2DataSource::EngageFDv1FallbackLocked(
     FDv1FallbackDirective const& directive) {
     source_manager_.SwitchToFDv1Fallback();
 
-    // Cancel any attempt already scheduled and start fresh. A
-    // CancellationSource is one-shot, so reusing it would leak the prior
-    // timer.
+    // Cancel any attempt already scheduled. A CancellationSource is one-shot,
+    // so reusing it would leak the prior timer.
     fdv2_retry_cancel_.Cancel();
     fdv2_retry_cancel_ = async::CancellationSource{};
     LD_LOG(logger_, LogLevel::kInfo)

@@ -91,22 +91,27 @@ class AdapterFixture {
 TEST(FDv1AdapterSynchronizerTest, TheFirstNextStartsTheWrappedSource) {
     AdapterFixture f;
 
+    // Building the adapter leaves the source alone.
     EXPECT_EQ(0, f.Source().start_count_);
 
+    // Ask for the first result.
     f.Source().Sink()->Init(ContextBuilder().Kind("user", "user-key").Build(),
                             {{"flagA", Flag(1, Value("a"))}});
     f.Next();
 
+    // The source is now running.
     EXPECT_EQ(1, f.Source().start_count_);
 }
 
 TEST(FDv1AdapterSynchronizerTest, InitBecomesAFullChangeSet) {
     AdapterFixture f;
 
+    // Report a data set through the FDv1 sink.
     f.Source().Sink()->Init(ContextBuilder().Kind("user", "user-key").Build(),
                             {{"flagA", Flag(1, Value("a"))}});
     auto result = f.Next();
 
+    // It arrives as a full changeset carrying the flag.
     ASSERT_TRUE(result.has_value());
     auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
     ASSERT_NE(nullptr, change_set);
@@ -119,10 +124,12 @@ TEST(FDv1AdapterSynchronizerTest, InitBecomesAFullChangeSet) {
 TEST(FDv1AdapterSynchronizerTest, UpsertBecomesAPartialChangeSet) {
     AdapterFixture f;
 
+    // Report a single flag through the FDv1 sink.
     f.Source().Sink()->Upsert(ContextBuilder().Kind("user", "user-key").Build(),
                               "flagA", Flag(2, Value("a2")));
     auto result = f.Next();
 
+    // It arrives as a partial changeset carrying that flag.
     ASSERT_TRUE(result.has_value());
     auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
     ASSERT_NE(nullptr, change_set);
@@ -132,15 +139,15 @@ TEST(FDv1AdapterSynchronizerTest, UpsertBecomesAPartialChangeSet) {
     EXPECT_EQ("flagA", change_set->change_set.data[0].key);
 }
 
-// FDv1 has no selectors, so the orchestrator must never end up asking the
-// service for a delta against data FDv1 supplied.
 TEST(FDv1AdapterSynchronizerTest, ChangeSetsCarryNoSelector) {
     AdapterFixture f;
 
+    // Report a data set through the FDv1 sink.
     f.Source().Sink()->Init(ContextBuilder().Kind("user", "user-key").Build(),
                             {{"flagA", Flag(1, Value("a"))}});
     auto result = f.Next();
 
+    // FDv1 supplies no selector, so the changeset carries none.
     auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result->value);
     ASSERT_NE(nullptr, change_set);
     EXPECT_FALSE(change_set->change_set.selector.value.has_value());
@@ -149,11 +156,13 @@ TEST(FDv1AdapterSynchronizerTest, ChangeSetsCarryNoSelector) {
 TEST(FDv1AdapterSynchronizerTest, ARecoverableErrorBecomesInterrupted) {
     AdapterFixture f;
 
+    // Report a recoverable failure through the status manager.
     f.Source().StatusManager()->SetState(
         DataSourceStatus::DataSourceState::kInterrupted,
         DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError, "boom");
     auto result = f.Next();
 
+    // It arrives as an interruption.
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result->value));
@@ -162,11 +171,13 @@ TEST(FDv1AdapterSynchronizerTest, ARecoverableErrorBecomesInterrupted) {
 TEST(FDv1AdapterSynchronizerTest, AnUnrecoverableErrorBecomesTerminal) {
     AdapterFixture f;
 
+    // Report an unrecoverable failure through the status manager.
     f.Source().StatusManager()->SetState(
         DataSourceStatus::DataSourceState::kShutdown,
         DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, "unauthorized");
     auto result = f.Next();
 
+    // It arrives as a terminal error.
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::TerminalError>(result->value));
@@ -176,9 +187,11 @@ TEST(FDv1AdapterSynchronizerTest, AnUnrecoverableErrorBecomesTerminal) {
 TEST(FDv1AdapterSynchronizerTest, BecomingValidReportsNothing) {
     AdapterFixture f;
 
+    // Report the source becoming valid.
     f.Source().StatusManager()->SetState(
         DataSourceStatus::DataSourceState::kValid);
 
+    // A status carrying no error is not a result, so Next() stays pending.
     auto future = f.Adapter().Next(launchdarkly::data_model::Selector{});
     EXPECT_FALSE(future.IsFinished());
 }
@@ -186,20 +199,23 @@ TEST(FDv1AdapterSynchronizerTest, BecomingValidReportsNothing) {
 TEST(FDv1AdapterSynchronizerTest, CloseShutsDownTheWrappedSource) {
     AdapterFixture f;
 
+    // Start the source by asking for a result, then close the adapter.
     f.Source().Sink()->Init(ContextBuilder().Kind("user", "user-key").Build(),
                             {});
     f.Next();
     f.Adapter().Close();
 
+    // The wrapped source is shut down too.
     EXPECT_EQ(1, f.Source().shutdown_count_);
 }
 
-// Nothing was started, so there is nothing to shut down.
 TEST(FDv1AdapterSynchronizerTest, CloseBeforeAnyNextDoesNotShutDown) {
     AdapterFixture f;
 
+    // Close without ever asking for a result.
     f.Adapter().Close();
 
+    // The source was never started, so it is left alone.
     EXPECT_EQ(0, f.Source().shutdown_count_);
     EXPECT_EQ(0, f.Source().start_count_);
 }
@@ -207,9 +223,11 @@ TEST(FDv1AdapterSynchronizerTest, CloseBeforeAnyNextDoesNotShutDown) {
 TEST(FDv1AdapterSynchronizerTest, NextAfterCloseIsShutdown) {
     AdapterFixture f;
 
+    // Ask for a result after closing.
     f.Adapter().Close();
     auto result = f.Next();
 
+    // The result is Shutdown, and the source is never started.
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Shutdown>(result->value));
@@ -219,11 +237,14 @@ TEST(FDv1AdapterSynchronizerTest, NextAfterCloseIsShutdown) {
 TEST(FDv1AdapterSynchronizerTest, CloseUnblocksAPendingNext) {
     AdapterFixture f;
 
+    // Leave a Next() outstanding with nothing to deliver.
     auto future = f.Adapter().Next(launchdarkly::data_model::Selector{});
     ASSERT_FALSE(future.IsFinished());
 
+    // Close the adapter.
     f.Adapter().Close();
 
+    // The outstanding Next() resolves with Shutdown.
     ASSERT_TRUE(future.IsFinished());
     EXPECT_TRUE(std::holds_alternative<FDv2SourceResult::Shutdown>(
         future.GetResult()->value));

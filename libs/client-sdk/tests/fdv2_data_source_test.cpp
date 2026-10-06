@@ -169,7 +169,6 @@ class MultiShotSynchronizerFactory : public IFDv2SynchronizerFactory {
     std::vector<std::unique_ptr<IFDv2Synchronizer>> sources_;
 };
 
-// Stands in for the FDv1 tier, which the orchestrator keeps in reserve.
 class FDv1FallbackFactory : public MultiShotSynchronizerFactory {
    public:
     explicit FDv1FallbackFactory(
@@ -291,8 +290,7 @@ class Harness {
 
     boost::asio::io_context& Context() { return ioc_; }
 
-    // Runs the orchestration to a standstill without waiting on timers, for
-    // tests where a scheduled retry is not the point.
+    // Runs the orchestration to a standstill without waiting on timers.
     void Drain() { ioc_.poll(); }
     DataSourceStatusManager& StatusManager() { return status_manager_; }
     flag_manager::FlagStore const& Store() { return flag_manager_.Store(); }
@@ -939,11 +937,13 @@ TEST(ClientFDv2DataSourceTest, FallbackDirectiveOnAnInitializerAppliesItsData) {
     synchronizers.push_back(
         std::make_unique<FDv1FallbackFactory>(std::move(fdv1_sources)));
 
+    // Run the initializer whose result carries the directive.
     auto source =
         h.MakeDataSource(std::move(initializers), std::move(synchronizers));
     source->Start();
     h.Drain();
 
+    // Its payload is applied, even though the SDK moves off FDv2.
     EXPECT_TRUE(h.Store().Get("flagA"));
 }
 
@@ -973,10 +973,12 @@ TEST(ClientFDv2DataSourceTest, FallbackDirectiveStartsTheFDv1Tier) {
     auto* fdv1_ptr = fdv1.get();
     synchronizers.push_back(std::move(fdv1));
 
+    // Run the synchronizer whose result carries the directive.
     auto source = h.MakeDataSource({}, std::move(synchronizers));
     source->Start();
     h.Drain();
 
+    // The FDv1 tier is started and its data is applied.
     EXPECT_EQ(1, fdv1_ptr->build_count_);
     EXPECT_TRUE(h.Store().Get("from-fdv1"));
 }
@@ -997,10 +999,12 @@ TEST(ClientFDv2DataSourceTest, FallbackWithNoFDv1TierDisconnects) {
     synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
         std::make_unique<MockSynchronizer>(std::move(fdv2_results))));
 
+    // Run with a directive but no FDv1 tier configured.
     auto source = h.MakeDataSource({}, std::move(synchronizers));
     source->Start();
     h.Drain();
 
+    // There is nowhere to fall back to, so the SDK reports an interruption.
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInterrupted, h.State());
     // Flag data already received stays available for evaluation.
     EXPECT_TRUE(h.Store().Get("flagA"));
@@ -1037,9 +1041,11 @@ TEST(ClientFDv2DataSourceTest, FDv2IsRetriedAfterTheFallbackTtl) {
     synchronizers.push_back(
         std::make_unique<FDv1FallbackFactory>(std::move(fdv1_sources)));
 
+    // Run past the directive's one-second TTL.
     auto source = h.MakeDataSource({}, std::move(synchronizers));
     source->Start();
     h.Context().run();
 
+    // FDv2 is started a second time.
     EXPECT_EQ(2, fdv2_ptr->build_count_);
 }

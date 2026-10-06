@@ -19,13 +19,9 @@
 namespace launchdarkly::client_side::data_sources {
 
 /**
- * Presents an FDv1 data source as an FDv2 synchronizer, so that the
- * orchestrator can run it while the service has directed the SDK away from
- * FDv2.
+ * Presents an FDv1 data source as an FDv2 synchronizer.
  *
- * FDv1 has no selectors, so the changesets this reports carry none. The
- * orchestrator therefore never asks the service for a delta against data
- * FDv1 supplied.
+ * FDv1 has no selectors, so the changesets this reports carry none.
  *
  * Thread safety: Next() and Close() may be called from any thread. Only one
  * Next() may be outstanding at a time.
@@ -33,9 +29,8 @@ namespace launchdarkly::client_side::data_sources {
 class FDv1AdapterSynchronizer final : public IFDv2Synchronizer {
    public:
     /**
-     * Builds the wrapped FDv1 source. Called once during construction with
-     * the sink and status manager the source must report through, both of
-     * which the adapter keeps alive for the source's lifetime.
+     * Builds the wrapped FDv1 source. Called once during construction, with a
+     * sink and status manager that stay valid for the source's lifetime.
      */
     using SourceBuilder =
         std::function<std::shared_ptr<IDataSource>(IDataSourceUpdateSink*,
@@ -63,17 +58,17 @@ class FDv1AdapterSynchronizer final : public IFDv2Synchronizer {
 
         async::Future<FDv2SourceResult> GetNext();
 
-        /**
-         * Resolves any pending Next() with Shutdown and clears it, so that a
-         * caller abandoned by Close() is not left waiting.
-         */
+        /** Resolves any pending Next() with Shutdown and clears it. */
         void ResolvePendingAsShutdown();
 
+        /**
+         * Hands the result to a pending Next(), or queues it for the next
+         * one. Results that arrive after Close() are dropped.
+         */
         void Notify(FDv2SourceResult result);
 
        private:
-        // Finished once the owning adapter's Close() has run. Read in Notify
-        // to drop late results.
+        // Finished once the owning adapter's Close() has run.
         async::Future<std::monostate> const closed_;
 
         mutable std::mutex mutex_;

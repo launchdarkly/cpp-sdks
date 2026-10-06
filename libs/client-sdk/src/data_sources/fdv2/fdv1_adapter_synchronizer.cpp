@@ -108,9 +108,8 @@ void FDv1AdapterSynchronizer::ConvertingSink::Apply(
 
 namespace {
 
-// Turns the wrapped source's status into the result the orchestrator acts on.
-// A valid status carries no error and needs no result. The changeset that
-// accompanied it already reported the recovery.
+// Turns the wrapped source's status into a result, or into nothing when the
+// status carries no error.
 std::optional<FDv2SourceResult> ResultForStatus(
     DataSourceStatus const& status) {
     auto const error = status.LastError();
@@ -119,9 +118,8 @@ std::optional<FDv2SourceResult> ResultForStatus(
     }
     switch (status.State()) {
         case DataSourceState::kInterrupted:
-        // An error encountered before the source ever became valid is
-        // reported as still initializing, but it is the same recoverable
-        // failure.
+        // An error before the source ever became valid is reported as still
+        // initializing, but it is the same recoverable failure.
         case DataSourceState::kInitializing:
             return FDv2SourceResult{FDv2SourceResult::Interrupted{*error}};
         case DataSourceState::kShutdown:
@@ -172,7 +170,7 @@ async::Future<FDv2SourceResult> FDv1AdapterSynchronizer::Next(
     return async::WhenAny(closed, result_future)
         .Then(
             [state = state_, result_future](std::size_t const& idx) mutable
-            -> async::Future<FDv2SourceResult> {
+                -> async::Future<FDv2SourceResult> {
                 if (idx == 0) {
                     state->ResolvePendingAsShutdown();
                     return async::MakeFuture(
@@ -191,8 +189,8 @@ void FDv1AdapterSynchronizer::Close() {
     bool const was_started = started_;
     started_ = true;
     if (was_started) {
-        // The sink and status manager are captured so that they outlive any
-        // callback the source has already queued.
+        // The completion does no work. It exists to hold these alive until
+        // shutdown finishes.
         fdv1_source_->ShutdownAsync(
             [sink = sink_, status = status_manager_, source = fdv1_source_] {});
     }
