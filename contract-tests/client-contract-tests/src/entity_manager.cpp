@@ -101,14 +101,14 @@ static FDv2Builder::Mode BuildMode(
     }
 
     if (fdv1_fallback) {
-        auto fallback = FDv2Builder::FDv1Fallback();
+        auto fallback = FDv2Builder::FDv1Polling();
         if (fdv1_fallback->baseUri) {
             fallback.BaseUrl(*fdv1_fallback->baseUri);
         }
         if (fdv1_fallback->pollIntervalMs) {
             fallback.PollInterval(ToSeconds(*fdv1_fallback->pollIntervalMs));
         }
-        mode.FallbackToFDv1(std::move(fallback));
+        mode.FDv1Fallback(std::move(fallback));
     } else {
         mode.DisableFDv1Fallback();
     }
