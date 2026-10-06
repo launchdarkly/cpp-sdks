@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/config/shared/built/fdv2_config.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 
 #include <chrono>
