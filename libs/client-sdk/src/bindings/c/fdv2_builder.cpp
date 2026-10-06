@@ -27,7 +27,7 @@ using namespace launchdarkly::client_side;
     (reinterpret_cast<LDClientFDv2PollingBuilder>(ptr))
 
 #define TO_FALLBACK_BUILDER(ptr) \
-    (reinterpret_cast<FDv2Builder::FDv1Fallback*>(ptr))
+    (reinterpret_cast<FDv2Builder::FDv1Polling*>(ptr))
 #define FROM_FALLBACK_BUILDER(ptr) \
     (reinterpret_cast<LDClientFDv2FDv1FallbackBuilder>(ptr))
 
@@ -135,13 +135,12 @@ LDClientFDv2ModeBuilder_Synchronizer_Polling(
 }
 
 LD_EXPORT(void)
-LDClientFDv2ModeBuilder_FallbackToFDv1(
-    LDClientFDv2ModeBuilder b,
-    LDClientFDv2FDv1FallbackBuilder fallback) {
+LDClientFDv2ModeBuilder_FDv1Fallback(LDClientFDv2ModeBuilder b,
+                                     LDClientFDv2FDv1FallbackBuilder fallback) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(fallback);
 
-    TO_MODE_BUILDER(b)->FallbackToFDv1(*TO_FALLBACK_BUILDER(fallback));
+    TO_MODE_BUILDER(b)->FDv1Fallback(*TO_FALLBACK_BUILDER(fallback));
     LDClientFDv2FDv1FallbackBuilder_Free(fallback);
 }
 
@@ -210,7 +209,7 @@ LDClientFDv2PollingBuilder_Free(LDClientFDv2PollingBuilder b) {
 
 LD_EXPORT(LDClientFDv2FDv1FallbackBuilder)
 LDClientFDv2FDv1FallbackBuilder_New(void) {
-    return FROM_FALLBACK_BUILDER(new FDv2Builder::FDv1Fallback());
+    return FROM_FALLBACK_BUILDER(new FDv2Builder::FDv1Polling());
 }
 
 LD_EXPORT(void)

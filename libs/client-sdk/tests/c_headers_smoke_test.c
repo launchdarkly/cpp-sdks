@@ -23,7 +23,7 @@ void LDClientFDv2HeadersSmokeTest(void) {
         mode, LDClientFDv2StreamingBuilder_New());
     LDClientFDv2ModeBuilder_Synchronizer_Polling(
         mode, LDClientFDv2PollingBuilder_New());
-    LDClientFDv2ModeBuilder_FallbackToFDv1(
+    LDClientFDv2ModeBuilder_FDv1Fallback(
         mode, LDClientFDv2FDv1FallbackBuilder_New());
     LDClientFDv2ModeBuilder_DisableFDv1Fallback(mode);
 

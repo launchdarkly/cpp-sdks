@@ -189,7 +189,7 @@ LDClientFDv2ModeBuilder_Synchronizer_Polling(
  * do not free it. Must not be NULL.
  */
 LD_EXPORT(void)
-LDClientFDv2ModeBuilder_FallbackToFDv1(
+LDClientFDv2ModeBuilder_FDv1Fallback(
     LDClientFDv2ModeBuilder b,
     LDClientFDv2FDv1FallbackBuilder fallback);
 

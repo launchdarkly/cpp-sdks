@@ -160,7 +160,7 @@ TEST(FDv2Bindings, TheFDv1FallbackIsConfigurable) {
     LDClientFDv2ModeBuilder mode = LDClientFDv2ModeBuilder_New();
     LDClientFDv2ModeBuilder_Synchronizer_Streaming(
         mode, LDClientFDv2StreamingBuilder_New());
-    LDClientFDv2ModeBuilder_FallbackToFDv1(mode, fallback);
+    LDClientFDv2ModeBuilder_FDv1Fallback(mode, fallback);
 
     LDClientFDv2Builder builder = LDClientFDv2Builder_New();
     LDClientFDv2Builder_CustomizeMode(
