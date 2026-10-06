@@ -50,8 +50,7 @@ TEST(FDv2ConfigBuilderTest, SelectingFDv2ReplacesTheFDv1Method) {
         std::holds_alternative<FDv2Config>(config->DataSourceConfig().method));
 }
 
-// What those defaults are is pinned down where they are defined. This is
-// about the builder starting from them.
+// The builder starts from the SDK's defaults, whatever they are.
 TEST(FDv2ConfigBuilderTest, AnUncustomizedBuilderYieldsTheSDKDefaults) {
     auto const config = BuildFDv2(FDv2Builder());
     auto const defaults = Defaults::FDv2Config();
@@ -139,9 +138,8 @@ TEST(FDv2ConfigBuilderTest, TheFDv1FallbackIsConfigurable) {
         ConnectionMode::kStreaming,
         FDv2Builder::Mode()
             .Synchronizer(FDv2Builder::Streaming())
-            .FallbackToFDv1(
-                FDv2Builder::FDv1Fallback().PollInterval(600s).BaseUrl(
-                    "https://relay.example.com")));
+            .FDv1Fallback(FDv2Builder::FDv1Polling().PollInterval(600s).BaseUrl(
+                "https://relay.example.com")));
 
     auto const config = BuildFDv2(std::move(builder));
     auto const& fallback =
@@ -181,7 +179,7 @@ TEST(FDv2ConfigBuilderTest, FDv2KeepsItsOwnDefaultEndpoints) {
               fdv2.polling_base_url);
 }
 
-// An application that pointed the SDK somewhere else — a Relay Proxy, say —
+// An application that pointed the SDK somewhere else -- a Relay Proxy, say --
 // has FDv2 follow it there.
 TEST(FDv2ConfigBuilderTest, ConfiguredEndpointsRedirectFDv2) {
     auto builder = ConfigBuilder("sdk-key");

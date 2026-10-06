@@ -80,9 +80,9 @@ ConfigBuilder<SDK>::Build() const {
         // default until the application configures its own endpoints. Once it
         // has, FDv2 follows them, so that pointing the SDK at a Relay Proxy
         // redirects FDv2 too.
-        if (auto* fdv2 =
-                std::get_if<built::FDv2Config<SDK>>(&data_source_config.method);
-            fdv2 != nullptr && service_endpoints_builder_.IsCustom()) {
+        auto* fdv2 =
+            std::get_if<built::FDv2Config<SDK>>(&data_source_config.method);
+        if (fdv2 != nullptr && service_endpoints_builder_.IsCustom()) {
             fdv2->polling_base_url = endpoints_config->PollingBaseUrl();
             fdv2->streaming_base_url = endpoints_config->StreamingBaseUrl();
         }

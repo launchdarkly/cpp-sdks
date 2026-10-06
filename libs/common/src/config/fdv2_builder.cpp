@@ -39,19 +39,19 @@ FDv2Builder::Config::PollingConfig FDv2Builder::Polling::Build() const {
     return {poll_interval_, base_url_override_};
 }
 
-FDv2Builder::FDv1Fallback& FDv2Builder::FDv1Fallback::PollInterval(
+FDv2Builder::FDv1Polling& FDv2Builder::FDv1Polling::PollInterval(
     std::chrono::seconds interval) {
     poll_interval_ = interval;
     return *this;
 }
 
-FDv2Builder::FDv1Fallback& FDv2Builder::FDv1Fallback::BaseUrl(
+FDv2Builder::FDv1Polling& FDv2Builder::FDv1Polling::BaseUrl(
     std::string base_url) {
     base_url_override_ = std::move(base_url);
     return *this;
 }
 
-FDv2Builder::Config::FDv1FallbackConfig FDv2Builder::FDv1Fallback::Build()
+FDv2Builder::Config::FDv1FallbackConfig FDv2Builder::FDv1Polling::Build()
     const {
     return {poll_interval_, base_url_override_};
 }
@@ -76,7 +76,7 @@ FDv2Builder::Mode& FDv2Builder::Mode::Synchronizer(Polling source) {
     return *this;
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::FallbackToFDv1(FDv1Fallback source) {
+FDv2Builder::Mode& FDv2Builder::Mode::FDv1Fallback(FDv1Polling source) {
     definition_.fdv1_fallback = source.Build();
     return *this;
 }

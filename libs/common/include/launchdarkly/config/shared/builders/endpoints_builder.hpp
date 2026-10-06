@@ -79,8 +79,7 @@ class EndpointsBuilder {
 
     /**
      * Whether the application set any of these URLs, as opposed to accepting
-     * the SDK's defaults. Read when resolving a data source whose own default
-     * endpoint differs from the SDK-wide one.
+     * the SDK's defaults.
      */
     [[nodiscard]] bool IsCustom() const;
 
