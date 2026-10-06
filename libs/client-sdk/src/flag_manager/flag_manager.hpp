@@ -28,6 +28,9 @@ class FlagManager {
 
     void LoadCache(Context const& context);
 
+    /** Forgets the selector, leaving the stored flag data in place. */
+    void ClearSelector();
+
    private:
     FlagStore flag_store_;
     FlagUpdater flag_updater_;
