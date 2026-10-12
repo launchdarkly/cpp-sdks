@@ -1049,3 +1049,58 @@ TEST(ClientFDv2DataSourceTest, FDv2IsRetriedAfterTheFallbackTtl) {
     // FDv2 is started a second time.
     EXPECT_EQ(2, fdv2_ptr->build_count_);
 }
+
+// The retry closes the FDv1 synchronizer, which resolves its pending Next()
+// with Shutdown. That Shutdown belongs to the FDv1 synchronizer, so it must not
+// stop the FDv2 synchronizer that replaced it.
+TEST(ClientFDv2DataSourceTest, FDv2KeepsSynchronizingAfterTheFallbackTtl) {
+    Harness h;
+    std::vector<data_model::Selector> retried_next_calls;
+
+    std::vector<FDv2SourceResult> first_fdv2;
+    first_fdv2.push_back(WithFallbackDirective(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagA", MakeFlag(1, Value("a"))}},
+                            MakeSelector(1, "state-1")),
+        std::chrono::seconds{1}));
+
+    std::vector<FDv2SourceResult> retried_fdv2;
+    retried_fdv2.push_back(
+        MakeChangeSetResult(data_model::ChangeSetType::kFull,
+                            {FlagChange{"flagB", MakeFlag(1, Value("b"))}},
+                            MakeSelector(2, "state-2")));
+    retried_fdv2.push_back(
+        MakeChangeSetResult(data_model::ChangeSetType::kPartial,
+                            {FlagChange{"flagC", MakeFlag(1, Value("c"))}},
+                            MakeSelector(3, "state-3")));
+
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> fdv2_sources;
+    fdv2_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::move(first_fdv2)));
+    fdv2_sources.push_back(std::make_unique<MockSynchronizer>(
+        std::move(retried_fdv2), nullptr, &retried_next_calls,
+        /* stall_after_results= */ true));
+
+    // Like a real synchronizer, the FDv1 one has a Next() pending when the
+    // TTL elapses, and Close() resolves it with Shutdown.
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> fdv1_sources;
+    fdv1_sources.push_back(std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{}, nullptr, nullptr,
+        /* stall_after_results= */ true));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<MultiShotSynchronizerFactory>(
+        std::move(fdv2_sources)));
+    synchronizers.push_back(
+        std::make_unique<FDv1FallbackFactory>(std::move(fdv1_sources)));
+
+    // Run past the directive's one-second TTL.
+    auto source = h.MakeDataSource({}, std::move(synchronizers));
+    source->Start();
+    h.Context().run();
+
+    // The retried FDv2 synchronizer is asked for every result it has, then
+    // stays connected waiting for more.
+    EXPECT_EQ(3u, retried_next_calls.size());
+    EXPECT_TRUE(h.Store().Get("flagC"));
+}
