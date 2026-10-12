@@ -9,6 +9,7 @@
 #include "../../flag_manager/flag_store.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data_systems/fdv2/conditions.hpp>
@@ -171,8 +172,11 @@ class FDv2DataSource final
     void OnInitializerResult(FDv2SourceResult result, bool from_cache);
     void StartSynchronizers();
     void RunSynchronizerNext();
-    void OnSynchronizerResult(FDv2SourceResult result);
-    void OnConditionFired(IFDv2Condition::Type type);
+    // generation identifies the synchronizer the result or condition belongs
+    // to. Results for a synchronizer that has since been replaced are dropped.
+    void OnSynchronizerResult(FDv2SourceResult result,
+                              std::uint64_t generation);
+    void OnConditionFired(IFDv2Condition::Type type, std::uint64_t generation);
 
     // Checks for closed_ and queues up a promise for any work being done.
     // Returns nullopt if closed_ already.
@@ -237,6 +241,11 @@ class FDv2DataSource final
     SourceManager source_manager_;
     std::unique_ptr<IFDv2Initializer> active_initializer_;
     std::unique_ptr<IFDv2Synchronizer> active_synchronizer_;
+    // Bumped whenever active_synchronizer_ is replaced. The FDv2 retry timer
+    // replaces it outside the synchronizer's own continuation chain, so a
+    // continuation already posted for the old synchronizer must be able to
+    // tell that it is stale.
+    std::uint64_t synchronizer_generation_ = 0;
     std::unique_ptr<Conditions> active_conditions_;
     // Any outstanding work to complete before signaling shutdown complete.
     async::Future<std::monostate> closing_ =

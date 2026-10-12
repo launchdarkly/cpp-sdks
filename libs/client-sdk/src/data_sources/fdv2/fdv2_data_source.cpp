@@ -318,10 +318,9 @@ void FDv2DataSource::OnInitializerResult(FDv2SourceResult result,
     }
 
     if (disconnected) {
-        status_manager_->SetState(
-            DataSourceStatus::DataSourceState::kInterrupted,
-            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
-            kNoFDv1FallbackConfigured);
+        PublishState(DataSourceStatus::DataSourceState::kInterrupted,
+                     DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+                     kNoFDv1FallbackConfigured);
         return;
     }
     if (got_basis) {
@@ -339,6 +338,7 @@ void FDv2DataSource::StartSynchronizers() {
         if (closed_) {
             return;
         }
+        ++synchronizer_generation_;
         active_synchronizer_ = source_manager_.NextSynchronizer();
         if (active_synchronizer_) {
             LD_LOG(logger_, LogLevel::kInfo)
@@ -400,17 +400,20 @@ void FDv2DataSource::RunSynchronizerNext() {
     auto cond_future = active_conditions_->GetFuture(cond_cancel->GetToken());
     async::WhenAny(cond_future, next_future)
         .Then(
-            [weak = weak_from_this(), cond_future, next_future,
-             cond_cancel](std::size_t const& idx) -> std::monostate {
+            [weak = weak_from_this(), cond_future, next_future, cond_cancel,
+             generation = synchronizer_generation_](
+                std::size_t const& idx) -> std::monostate {
                 cond_cancel->Cancel();
                 auto self = weak.lock();
                 if (!self) {
                     return {};
                 }
                 if (idx == 0) {
-                    self->OnConditionFired(*cond_future.GetResult());
+                    self->OnConditionFired(*cond_future.GetResult(),
+                                           generation);
                 } else {
-                    self->OnSynchronizerResult(*next_future.GetResult());
+                    self->OnSynchronizerResult(*next_future.GetResult(),
+                                               generation);
                 }
                 return {};
             },
@@ -419,13 +422,14 @@ void FDv2DataSource::RunSynchronizerNext() {
             });
 }
 
-void FDv2DataSource::OnConditionFired(IFDv2Condition::Type type) {
+void FDv2DataSource::OnConditionFired(IFDv2Condition::Type type,
+                                      std::uint64_t generation) {
     if (type == IFDv2Condition::Type::kCancelled) {
         return;
     }
     {
         std::lock_guard lock(mutex_);
-        if (closed_) {
+        if (closed_ || generation != synchronizer_generation_) {
             return;
         }
         // Destructors close the active synchronizer and conditions.
@@ -458,10 +462,14 @@ std::unique_ptr<Conditions> FDv2DataSource::BuildActiveConditions() const {
     return std::make_unique<Conditions>(std::move(conditions));
 }
 
-void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
+void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result,
+                                          std::uint64_t generation) {
     {
         std::lock_guard lock(mutex_);
-        if (closed_) {
+        if (closed_ || generation != synchronizer_generation_) {
+            // Either shutting down, or the result belongs to a synchronizer
+            // that has since been replaced, such as the FDv1 synchronizer
+            // closed by the FDv2 retry timer.
             return;
         }
         if (active_conditions_) {
@@ -508,6 +516,9 @@ void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
     bool disconnected = false;
     {
         std::lock_guard lock(mutex_);
+        if (generation != synchronizer_generation_) {
+            return;
+        }
         if (closed_ || got_shutdown) {
             active_synchronizer_.reset();
             active_conditions_.reset();
@@ -531,10 +542,9 @@ void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
     }
 
     if (disconnected) {
-        status_manager_->SetState(
-            DataSourceStatus::DataSourceState::kInterrupted,
-            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
-            kNoFDv1FallbackConfigured);
+        PublishState(DataSourceStatus::DataSourceState::kInterrupted,
+                     DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+                     kNoFDv1FallbackConfigured);
         return;
     }
     if (advance) {
@@ -588,6 +598,9 @@ void FDv2DataSource::OnFDv2RetryTimer() {
         }
         LD_LOG(logger_, LogLevel::kInfo) << "fdv2: re-attempting FDv2";
         source_manager_.SwitchBackToFDv2();
+        // Anything already posted for the synchronizer being replaced,
+        // including the Shutdown that Close() produces, is now stale.
+        ++synchronizer_generation_;
         if (active_synchronizer_) {
             active_synchronizer_->Close();
             active_synchronizer_.reset();
