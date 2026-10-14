@@ -38,6 +38,16 @@ else
   suffix=""
 fi
 
+sccache_args=()
+if command -v sccache >/dev/null 2>&1; then
+  sccache_args=(
+    -D CMAKE_C_COMPILER_LAUNCHER=sccache
+    -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
+    -D CMAKE_POLICY_DEFAULT_CMP0141=NEW
+    -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
+  )
+fi
+
 # Build a static release.
 mkdir -p "build-static${suffix}" && cd "build-static${suffix}"
 mkdir -p release
@@ -46,7 +56,8 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release \
                -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" \
                -D LD_CURL_NETWORKING="$build_curl" \
                -D BUILD_TESTING=OFF \
-               -D CMAKE_INSTALL_PREFIX=./release ..
+               -D CMAKE_INSTALL_PREFIX=./release \
+               "${sccache_args[@]}" ..
 
 cmake --build . --target "$TARGET"
 cmake --install .
@@ -62,7 +73,8 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release \
                -D BUILD_TESTING=OFF \
                -D LD_BUILD_SHARED_LIBS=ON \
                -D LD_DYNAMIC_LINK_BOOST=OFF \
-               -D CMAKE_INSTALL_PREFIX=./release ..
+               -D CMAKE_INSTALL_PREFIX=./release \
+               "${sccache_args[@]}" ..
 
 cmake --build . --target "$TARGET"
 cmake --install .
@@ -76,7 +88,8 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Debug \
                -D LD_BUILD_REDIS_SUPPORT="$build_redis" \
                -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" \
                -D LD_CURL_NETWORKING="$build_curl" \
-               -D CMAKE_INSTALL_PREFIX=./release ..
+               -D CMAKE_INSTALL_PREFIX=./release \
+               "${sccache_args[@]}" ..
 
 cmake --build . --target "$TARGET"
 cmake --install .
@@ -93,7 +106,8 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Debug \
                -D LD_CURL_NETWORKING="$build_curl" \
                -D LD_BUILD_SHARED_LIBS=ON \
                -D LD_DYNAMIC_LINK_BOOST=OFF \
-               -D CMAKE_INSTALL_PREFIX=./release ..
+               -D CMAKE_INSTALL_PREFIX=./release \
+               "${sccache_args[@]}" ..
 
 cmake --build . --target "$TARGET"
 cmake --install .
