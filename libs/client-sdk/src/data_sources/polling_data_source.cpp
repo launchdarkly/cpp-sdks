@@ -1,6 +1,6 @@
-#include <boost/json.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/json.hpp>
 
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
@@ -49,9 +49,7 @@ static network::HttpRequest MakeRequest(
     }
 
     if (data_source_config.with_reasons) {
-        if (url) {
-            url->append("?withReasons=true");
-        }
+        url = network::AppendQueryParam(url, "withReasons", "true");
     }
 
     config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>

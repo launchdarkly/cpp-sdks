@@ -162,6 +162,23 @@ TEST(MakeFDv2PollRequestTest, ValidFilterKeyIsIncluded) {
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll?filter=my-filter_1.0");
 }
 
+// The Beast backend sends Path() as the request target, so the encoding of a
+// server-supplied selector state must survive into it. The state has no
+// space because Boost.URL releases differ on whether a space becomes "+".
+TEST(MakeFDv2PollRequestTest, BasisStateStaysPercentEncodedInThePath) {
+    auto logger = MakeNullLogger();
+    auto props =
+        config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
+    auto req = MakeFDv2PollRequest(
+        "http://example.com", props,
+        data_model::Selector{data_model::Selector::State{7, "x\r\nY&z#"}},
+        std::string{"my-filter"}, logger);
+    EXPECT_EQ(req.Url(),
+              "http://example.com/sdk/poll"
+              "?basis=x%0D%0AY%26z%23&filter=my-filter");
+    EXPECT_EQ(req.Path(), "/sdk/poll?basis=x%0D%0AY%26z%23&filter=my-filter");
+}
+
 TEST(MakeFDv2PollRequestTest, InvalidFilterKeyIsDropped) {
     auto logger = MakeNullLogger();
     auto props =
