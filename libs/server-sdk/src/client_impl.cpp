@@ -69,7 +69,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeBackgroundSyncSystem(
     config::built::BackgroundSyncConfig const& cfg,
     config::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& executor,
-    data_components::DataSourceStatusManager& status_manager,
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager,
     Logger& logger) {
     return std::make_unique<data_systems::BackgroundSync>(
         endpoints, cfg, http_properties, executor, status_manager, logger);
@@ -160,10 +160,10 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     config::built::HttpProperties const& http_properties,
     Config const& config,
     boost::asio::any_io_executor const& executor,
-    data_components::DataSourceStatusManager& status_manager,
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager,
     Logger& logger) {
     if (config.DataSystemConfig().disabled) {
-        return std::make_unique<data_systems::OfflineSystem>(status_manager);
+        return std::make_unique<data_systems::OfflineSystem>(*status_manager);
     }
 
     auto data_source_properties =
@@ -177,12 +177,12 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
                     executor, status_manager, logger);
             },
             [&](config::built::LazyLoadConfig const& cfg) {
-                return MakeLazyLoadSystem(cfg, status_manager, logger);
+                return MakeLazyLoadSystem(cfg, *status_manager, logger);
             },
             [&](config::built::FDv2Config const& cfg) {
                 return MakeFDv2System(config.ServiceEndpoints(), cfg,
                                       data_source_properties, executor,
-                                      status_manager, logger);
+                                      *status_manager, logger);
             },
         },
         config.DataSystemConfig().system_);
@@ -237,7 +237,8 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
-      status_manager_(),
+      status_manager_(
+          std::make_shared<data_components::DataSourceStatusManager>()),
       data_system_(MakeDataSystem(http_properties_,
                                   config_,
                                   ioc_.get_executor(),
@@ -289,7 +290,7 @@ std::future<bool> ClientImpl::StartAsync() {
     auto pr = std::make_shared<std::promise<bool>>();
     auto fut = pr->get_future();
 
-    status_manager_.OnDataSourceStatusChangeEx([this, pr](auto _) {
+    status_manager_->OnDataSourceStatusChangeEx([this, pr](auto _) {
         if (data_system_->Initialized()) {
             pr->set_value(true);
             return true; /* delete this change listener since the
@@ -777,7 +778,7 @@ Value ClientImpl::JsonVariation(Context const& ctx,
 }
 
 IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
-    return status_manager_;
+    return *status_manager_;
 }
 
 IBigSegmentStoreStatusProvider& ClientImpl::BigSegmentStoreStatus() {

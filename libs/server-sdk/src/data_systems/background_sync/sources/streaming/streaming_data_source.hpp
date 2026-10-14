@@ -12,6 +12,8 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include <memory>
+
 namespace launchdarkly::server_side::data_systems {
 
 class StreamingDataSource final
@@ -21,12 +23,13 @@ class StreamingDataSource final
     StreamingDataSource(
         boost::asio::any_io_executor io,
         Logger const& logger,
-        data_components::DataSourceStatusManager& status_manager,
+        std::shared_ptr<data_components::DataSourceStatusManager>
+            status_manager,
         config::built::ServiceEndpoints const& endpoints,
         config::built::BackgroundSyncConfig::StreamingConfig const& streaming,
         config::built::HttpProperties const& http_properties);
 
-    void StartAsync(data_interfaces::IDestination* dest,
+    void StartAsync(std::shared_ptr<data_interfaces::IDestination> dest,
                     data_model::SDKDataSet const* bootstrap_data) override;
     void ShutdownAsync(std::function<void()> completion) override;
 
@@ -38,7 +41,7 @@ class StreamingDataSource final
     boost::asio::any_io_executor io_;
     Logger const& logger_;
 
-    data_components::DataSourceStatusManager& status_manager_;
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager_;
     config::built::HttpProperties http_config_;
 
     std::optional<DataSourceEventHandler> event_handler_;
