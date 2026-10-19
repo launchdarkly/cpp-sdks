@@ -37,6 +37,13 @@ Logger MakeNullLogger() {
     return Logger{std::make_shared<NullBackend>()};
 }
 
+// Runs handlers until none are ready, without waiting on pending timers
+// (e.g. the FDv2 recovery timer scheduled by an FDv1 fallback directive).
+void RunReadyHandlers(boost::asio::io_context& ioc) {
+    while (ioc.poll() > 0) {
+    }
+}
+
 // Initializer that resolves Run() with a single pre-set result.
 class MockInitializer : public IFDv2Initializer {
    public:
@@ -1119,8 +1126,7 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagSwitchesToFdv1Adapter) {
                       /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
     ds.Initialize();
-    // The 1h FDv2 retry timer stays pending, so bound the run.
-    ioc.run_for(500ms);
+    RunReadyHandlers(ioc);
 
     EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
@@ -1152,8 +1158,7 @@ TEST(FDv2DataSystemTest,
                       /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
     ds.Initialize();
-    // The 1h FDv2 retry timer stays pending, so bound the run.
-    ioc.run_for(500ms);
+    RunReadyHandlers(ioc);
 
     EXPECT_NE(DataSourceStatus::DataSourceState::kOff,
               status_manager.Status().State());
@@ -1242,8 +1247,7 @@ TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
                       /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
     ds.Initialize();
-    // The 1h FDv2 retry timer stays pending, so bound the run.
-    ioc.run_for(500ms);
+    RunReadyHandlers(ioc);
 
     // FDv2 synchronizer was skipped; FDv1 adapter was built and ran.
     EXPECT_EQ(0, fdv2_factory_ptr->build_count_);
@@ -1298,8 +1302,7 @@ TEST(FDv2DataSystemTest,
                       /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
     ds.Initialize();
-    // The 1h FDv2 retry timer stays pending, so bound the run.
-    ioc.run_for(500ms);
+    RunReadyHandlers(ioc);
 
     // Basis applied before the switch.
     EXPECT_TRUE(ds.Initialized());
@@ -1457,8 +1460,7 @@ TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
                       /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
     ds.Initialize();
-    // The 1h FDv2 retry timer stays pending, so bound the run.
-    ioc.run_for(500ms);
+    RunReadyHandlers(ioc);
 
     EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
