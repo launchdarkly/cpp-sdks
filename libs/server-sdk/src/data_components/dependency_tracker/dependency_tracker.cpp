@@ -63,8 +63,9 @@ DependencyMap::DependencyMap()
       } {}
 
 void DependencyMap::Set(DataKind kind, std::string key, DependencySet val) {
-    data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().emplace(
-        std::move(key), std::move(val));
+    data_[static_cast<std::underlying_type_t<DataKind>>(kind)]
+        .Data()
+        .insert_or_assign(std::move(key), std::move(val));
 }
 
 std::optional<DependencySet> DependencyMap::Get(DataKind kind,
@@ -155,7 +156,9 @@ void DependencyTracker::UpdateDependencies(DataKind kind,
             for (auto const& dep : deps_by_kind.Data()) {
                 auto deps_to_this_dep = dependencies_to_.Get(kind_of_dep, dep);
                 if (deps_to_this_dep) {
-                    deps_to_this_dep->Remove(kind_of_dep, key);
+                    deps_to_this_dep->Remove(kind, key);
+                    dependencies_to_.Set(kind_of_dep, dep,
+                                         std::move(*deps_to_this_dep));
                 }
             }
         }
@@ -165,15 +168,11 @@ void DependencyTracker::UpdateDependencies(DataKind kind,
     for (auto const& deps_by_kind : deps) {
         for (auto const& dep : deps_by_kind.Data()) {
             auto deps_to_this_dep =
-                dependencies_to_.Get(deps_by_kind.Kind(), dep);
-            if (!deps_to_this_dep) {
-                auto new_deps_to_this_dep = DependencySet();
-                new_deps_to_this_dep.Set(kind, key);
-                dependencies_to_.Set(deps_by_kind.Kind(), dep,
-                                     new_deps_to_this_dep);
-            } else {
-                deps_to_this_dep->Set(kind, key);
-            }
+                dependencies_to_.Get(deps_by_kind.Kind(), dep)
+                    .value_or(DependencySet());
+            deps_to_this_dep.Set(kind, key);
+            dependencies_to_.Set(deps_by_kind.Kind(), dep,
+                                 std::move(deps_to_this_dep));
         }
     }
 }
