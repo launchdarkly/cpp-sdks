@@ -784,6 +784,10 @@ IBigSegmentStoreStatusProvider& ClientImpl::BigSegmentStoreStatus() {
     return big_segment_status_provider_;
 }
 
+IChangeNotifier& ClientImpl::FlagNotifier() {
+    return data_system_->FlagNotifier();
+}
+
 ClientImpl::~ClientImpl() {
     ioc_.stop();
     // TODO(SC-219101)

@@ -41,4 +41,8 @@ std::string const& OfflineSystem::Identity() const {
     return ident;
 }
 
+IChangeNotifier& OfflineSystem::FlagNotifier() {
+    return change_notifier_;
+}
+
 }  // namespace launchdarkly::server_side::data_systems

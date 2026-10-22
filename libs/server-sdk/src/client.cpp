@@ -233,6 +233,10 @@ IBigSegmentStoreStatusProvider& Client::BigSegmentStoreStatus() {
     return client->BigSegmentStoreStatus();
 }
 
+IChangeNotifier& Client::FlagNotifier() {
+    return client->FlagNotifier();
+}
+
 char const* Client::Version() {
     return kVersion;
 }

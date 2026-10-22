@@ -1,4 +1,5 @@
 #include "client_entity.hpp"
+#include "http_callback.hpp"
 
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
@@ -40,8 +41,9 @@ tl::expected<launchdarkly::Context, std::string> ParseContext(
 }
 
 ClientEntity::ClientEntity(
-    std::unique_ptr<launchdarkly::server_side::Client> client)
-    : client_(std::move(client)) {}
+    std::unique_ptr<launchdarkly::server_side::Client> client,
+    boost::asio::any_io_executor executor)
+    : executor_(std::move(executor)), client_(std::move(client)) {}
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
     IdentifyEventParams const& params) {
@@ -359,6 +361,37 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
 
     return result;
 }
+tl::expected<nlohmann::json, std::string>
+ClientEntity::RegisterFlagChangeListener(
+    RegisterFlagChangeListenerParams const& params) {
+    auto connection = client_->FlagNotifier().OnFlagChange(
+        [executor = executor_, listener_id = params.listenerId,
+         callback_uri = params.callbackUri](auto changes) {
+            for (auto const& flag_key : *changes) {
+                PostJsonCallback(
+                    executor, callback_uri,
+                    {{"listenerId", listener_id}, {"flagKey", flag_key}});
+            }
+        });
+    if (auto existing = listeners_.find(params.listenerId);
+        existing != listeners_.end()) {
+        existing->second->Disconnect();
+    }
+    listeners_[params.listenerId] = std::move(connection);
+    return nlohmann::json{};
+}
+
+tl::expected<nlohmann::json, std::string> ClientEntity::UnregisterListener(
+    UnregisterListenerParams const& params) {
+    auto it = listeners_.find(params.listenerId);
+    if (it == listeners_.end()) {
+        return tl::make_unexpected("unknown listener: " + params.listenerId);
+    }
+    it->second->Disconnect();
+    listeners_.erase(it);
+    return nlohmann::json{};
+}
+
 tl::expected<nlohmann::json, std::string> ClientEntity::Command(
     CommandParams params) {
     switch (params.command) {
@@ -399,6 +432,19 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
             return ContextConvert(*params.contextConvert);
         case Command::GetBigSegmentStoreStatus:
             return GetBigSegmentStoreStatus();
+        case Command::RegisterFlagChangeListener:
+            if (!params.registerFlagChangeListener) {
+                return tl::make_unexpected(
+                    "registerFlagChangeListener params must be set");
+            }
+            return RegisterFlagChangeListener(
+                *params.registerFlagChangeListener);
+        case Command::UnregisterListener:
+            if (!params.unregisterListener) {
+                return tl::make_unexpected(
+                    "unregisterListener params must be set");
+            }
+            return UnregisterListener(*params.unregisterListener);
     }
     return tl::make_unexpected("unrecognized command");
 }

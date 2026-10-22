@@ -424,7 +424,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     auto init = client->StartAsync();
     init.wait_for(waitForClient);
 
-    entities_.try_emplace(id, std::move(client));
+    entities_.try_emplace(id, std::move(client), executor_);
 
     return id;
 }

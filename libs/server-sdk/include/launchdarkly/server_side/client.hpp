@@ -8,6 +8,7 @@
 
 #include <launchdarkly/server_side/all_flags_state.hpp>
 #include <launchdarkly/server_side/big_segment_store_status.hpp>
+#include <launchdarkly/server_side/change_notifier.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
 #include <chrono>
@@ -509,6 +510,20 @@ class IClient {
      */
     virtual IBigSegmentStoreStatusProvider& BigSegmentStoreStatus() = 0;
 
+    /**
+     * Returns an interface for registering listeners that are notified when
+     * flag configurations change. A flag is reported as changed when its own
+     * configuration changes, or when a flag or segment it depends on changes.
+     *
+     * Listeners are called after the change has been applied, so
+     * evaluations made from a listener use the updated data. Listeners are
+     * never called when the SDK is offline or uses a lazy load data system.
+     *
+     * @return A change notifier which remains valid for the lifetime of the
+     * client.
+     */
+    virtual IChangeNotifier& FlagNotifier() = 0;
+
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
     IClient(IClient&& item) = delete;
@@ -662,6 +677,8 @@ class Client : public IClient {
     IDataSourceStatusProvider& DataSourceStatus() override;
 
     IBigSegmentStoreStatusProvider& BigSegmentStoreStatus() override;
+
+    IChangeNotifier& FlagNotifier() override;
 
     /**
      * Returns the version of the SDK.

@@ -496,4 +496,8 @@ bool FDv2DataSystem::Initialized() const {
     return store_.Initialized();
 }
 
+IChangeNotifier& FDv2DataSystem::FlagNotifier() {
+    return change_notifier_;
+}
+
 }  // namespace launchdarkly::server_side::data_systems

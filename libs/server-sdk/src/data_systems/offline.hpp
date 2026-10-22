@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../data_components/change_notifier/null_change_notifier.hpp"
 #include "../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../data_interfaces/system/idata_system.hpp"
 
@@ -22,9 +23,11 @@ class OfflineSystem final : public data_interfaces::IDataSystem {
     [[nodiscard]] bool Initialized() const override;
     [[nodiscard]] std::string const& Identity() const override;
     void Initialize() override;
+    IChangeNotifier& FlagNotifier() override;
 
    private:
     data_components::DataSourceStatusManager& status_manager_;
+    data_components::NullChangeNotifier change_notifier_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems

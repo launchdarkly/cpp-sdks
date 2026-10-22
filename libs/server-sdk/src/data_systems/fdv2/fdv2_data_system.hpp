@@ -237,6 +237,12 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
      */
     bool Initialized() const override;
 
+    /**
+     * Returns the notifier for flag configuration changes applied by
+     * initializers and synchronizers.
+     */
+    IChangeNotifier& FlagNotifier() override;
+
    private:
     /**
      * Signals the orchestration loop to stop and closes any active source.
