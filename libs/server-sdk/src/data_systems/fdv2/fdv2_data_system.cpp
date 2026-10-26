@@ -441,9 +441,6 @@ void FDv2DataSystem::OnSynchronizerResult(
 }
 
 void FDv2DataSystem::ScheduleFDv2RetryLocked(std::chrono::seconds ttl) {
-    if (ttl == std::chrono::seconds::zero()) {
-        return;
-    }
     // Cancel any in-flight retry and start fresh; CancellationSource is
     // one-shot, so reusing the same source for successive schedules would
     // leak prior timers.

@@ -5,13 +5,10 @@
 #include <launchdarkly/data_model/change_set.hpp>
 #include <launchdarkly/data_sources/data_source_status_error_info.hpp>
 
-#include <charconv>
 #include <chrono>
-#include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>
 #include <variant>
 
 namespace launchdarkly::server_side::data_interfaces {
@@ -22,32 +19,32 @@ namespace launchdarkly::server_side::data_interfaces {
  * X-LD-FD-Fallback: true response header).
  */
 struct FDv1FallbackDirective {
-    /** Default TTL used when the directive carries no TTL of its own. */
+    /** Used whenever the service supplies no usable TTL. */
     static constexpr std::chrono::seconds kDefaultTtl = std::chrono::hours(1);
 
     /**
-     * Parse the value of an X-LD-FD-Fallback-TTL header (or equivalent
-     * protocolFallbackTTL field from a goodbye message). Returns
-     * std::nullopt if the value is malformed.
+     * Builds a directive using the jittered default TTL, so that SDKs which
+     * fell back together do not all retry at once. Used when the service
+     * supplies no usable TTL. Safe to call from any thread.
      */
-    static std::optional<std::chrono::seconds> ParseTtl(
-        std::string_view value) {
-        std::uint64_t seconds = 0;
-        auto const* begin = value.data();
-        auto const* end = begin + value.size();
-        auto const [ptr, ec] = std::from_chars(begin, end, seconds);
-        if (ec != std::errc{} || ptr != end) {
-            return std::nullopt;
-        }
-        return std::chrono::seconds(seconds);
-    }
+    static FDv1FallbackDirective DefaultTtl();
 
     /**
-     * How long to stay on FDv1 before attempting to recover to FDv2.
-     * A value of 0 seconds means the SDK should remain on FDv1
-     * indefinitely.
+     * Builds a directive from a service-supplied TTL, used as given. A value
+     * outside (0, 1 hour] uses the jittered default instead, so a fallback is
+     * never indefinite.
      */
-    std::chrono::seconds ttl = kDefaultTtl;
+    static FDv1FallbackDirective FromServiceTtl(std::chrono::seconds ttl);
+
+    /**
+     * Builds a directive from the raw value of an X-LD-FD-Fallback-TTL
+     * header. A value that is not a whole number of seconds uses the
+     * jittered default.
+     */
+    static FDv1FallbackDirective FromServiceTtl(std::string_view ttl);
+
+    /** How long to stay off FDv2 before attempting to recover to it. */
+    std::chrono::seconds ttl;
 };
 
 /**
