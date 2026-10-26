@@ -2,16 +2,16 @@
 Checks: >
   boost-*,
   bugprone-*,
-  -bugprone-unchecked-optional-access,
-  performance-*,
-  readability-*,
-  -readability-identifier-length,
-  portability-*,
-  modernize-*,
-  -modernize-use-trailing-return-type,
   clang-analyzer-*,
   cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -bugprone-unchecked-optional-access,
   -cppcoreguidelines-avoid-magic-numbers,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-length,
   -readability-magic-numbers
 CheckOptions:
   - { key: readability-identifier-length.IgnoredParameterNames,   value: 'i|j|k|c|os|it' }
