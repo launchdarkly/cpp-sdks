@@ -20,7 +20,7 @@ class ClientTest : public ::testing::Test {
 TEST_F(ClientTest, ClientConstructedWithMinimalConfigAndContextT) {
     char const* version = client_.Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.14.0");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.15.0");  // {x-release-please-version}
 }
 
 TEST_F(ClientTest, BoolVariationDefaultPassesThrough) {
