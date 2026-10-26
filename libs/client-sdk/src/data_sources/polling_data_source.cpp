@@ -1,6 +1,6 @@
-#include <boost/json.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/json.hpp>
 
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
@@ -148,7 +148,14 @@ void PollingDataSource::HandlePollResult(network::HttpResult res) {
             << "Polling for feature flag updates failed: "
             << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
     } else if (res.Status() == 200) {
-        data_source_handler_.HandleMessage("put", res.Body().value());
+        if (res.Body()) {
+            data_source_handler_.HandleMessage("put", *res.Body());
+        } else {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kInterrupted,
+                DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+                "Polling response contained no body");
+        }
     } else if (res.Status() == 304) {
         // This should be handled ahead of here, but if we get a 304,
         // and it didn't have an etag, we still don't want to try to

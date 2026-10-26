@@ -4,6 +4,7 @@
 
 #include "../data_components/big_segments/big_segment_store_wrapper.hpp"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>
@@ -30,8 +31,9 @@ enum EvaluationReason::BigSegmentsStatus ToBigSegmentsStatus(
     return EvaluationReason::BigSegmentsStatus::kHealthy;
 }
 
-std::string MakeBigSegmentRef(Segment const& segment) {
-    return segment.key + ".g" + std::to_string(*segment.generation);
+std::string MakeBigSegmentRef(std::string const& key,
+                              std::uint64_t generation) {
+    return key + ".g" + std::to_string(generation);
 }
 
 // Evaluates membership in an unbounded (Big) segment. Returns true/false for a
@@ -46,6 +48,7 @@ std::optional<bool> MatchBigSegment(Segment const& segment,
             EvaluationReason::BigSegmentsStatus::kNotConfigured);
         return false;
     }
+    std::uint64_t const generation = *segment.generation;
 
     // An absent or empty unboundedContextKind defaults to "user".
     ContextKind const kind = (segment.unboundedContextKind &&
@@ -81,7 +84,8 @@ std::optional<bool> MatchBigSegment(Segment const& segment,
         membership = stack.FindMembership(key);
     }
 
-    return membership->CheckMembership(MakeBigSegmentRef(segment));
+    return membership->CheckMembership(
+        MakeBigSegmentRef(segment.key, generation));
 }
 
 }  // namespace

@@ -1,4 +1,15 @@
 ---
+Checks: >
+  boost-*,
+  bugprone-*,
+  -bugprone-unchecked-optional-access,
+  performance-*,
+  readability-*,
+  portability-*,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  clang-analyzer-*,
+  cppcoreguidelines-*
 CheckOptions:
   - { key: readability-identifier-length.IgnoredParameterNames,   value: 'i|j|k|c|os|it' }
   - { key: readability-identifier-length.IgnoredVariableNames, value: 'ec|id|it' }

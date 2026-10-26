@@ -272,11 +272,14 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
             } else if constexpr (std::is_same_v<T,
                                                 FDv2ProtocolHandler::Error>) {
                 if (r.kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
-                    auto const& id = r.server_error.value().id;
+                    std::string id;
+                    if (r.server_error) {
+                        id = r.server_error->id.value_or("");
+                    }
                     std::string msg =
                         "An issue was encountered receiving updates for "
                         "payload '" +
-                        id.value_or("") + "' with reason: '" + r.message +
+                        id + "' with reason: '" + r.message +
                         "'. Automatic retry will occur.";
                     LD_LOG(logger_, LogLevel::kInfo)
                         << kIdentity << ": " << msg;
