@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/config/shared/builders/fdv2_builder.hpp>
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
@@ -134,6 +135,7 @@ class DataSourceBuilder<ClientSDK> {
    public:
     using Streaming = StreamingBuilder<ClientSDK>;
     using Polling = PollingBuilder<ClientSDK>;
+    using FDv2 = FDv2Builder;
 
     DataSourceBuilder();
 
@@ -190,6 +192,18 @@ class DataSourceBuilder<ClientSDK> {
     DataSourceBuilder& Method(Polling polling_builder);
 
     /**
+     * Set the FDv2 configuration for the builder.
+     *
+     * FDv2 is the current flag delivery protocol. It supersedes the
+     * streaming and polling methods above, which speak FDv1, and configures
+     * both transports itself through named connection modes.
+     *
+     * @param fdv2_builder The FDv2 builder.
+     * @return Reference to this builder.
+     */
+    DataSourceBuilder& Method(FDv2 fdv2_builder);
+
+    /**
      * Build a data source config. This is used internal to the SDK.
      *
      * @return The built config.
@@ -197,7 +211,7 @@ class DataSourceBuilder<ClientSDK> {
     [[nodiscard]] built::DataSourceConfig<ClientSDK> Build() const;
 
    private:
-    std::variant<Streaming, Polling> method_;
+    std::variant<Streaming, Polling, FDv2> method_;
     bool with_reasons_;
     bool use_report_;
 };
