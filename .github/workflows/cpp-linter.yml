@@ -38,8 +38,8 @@ jobs:
           style: file
           # The file extensions to run the action against. This comma-separated string defaults to 'c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx'.
           # extensions: # optional, default is c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx
-          # A string of regex-like patterns specifying what checks clang-tidy will use. This defaults to 'boost-*,bugprone-*,performance-*,readability-*,portability-*,modernize-*,clang-analyzer-*,cppcoreguidelines-*'. See also clang-tidy docs for more info.
-          tidy-checks: boost-*,bugprone-*,performance-*,readability-*,portability-*,modernize-*,-modernize-use-trailing-return-type,clang-analyzer-*,cppcoreguidelines-*
+          # A blank string makes clang-tidy use only the checks in .clang-tidy files.
+          tidy-checks: ''
           # The relative path to the repository root directory. The default value '.' is relative to the runner's GITHUB_WORKSPACE environment variable.
           #  repo-root: # optional, default is .
           # The desired version of the clang tools to use. Accepted options are strings which can be 15, 14, 13, 12, 11, 10, 9, or 8. Defaults to 12.
