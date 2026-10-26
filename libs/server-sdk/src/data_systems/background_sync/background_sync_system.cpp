@@ -42,6 +42,10 @@ bool BackgroundSync::Initialized() const {
     return store_.Initialized();
 }
 
+IChangeNotifier& BackgroundSync::FlagNotifier() {
+    return change_notifier_;
+}
+
 std::string const& BackgroundSync::Identity() const {
     static std::string id = "background sync via " + synchronizer_->Identity();
     return id;

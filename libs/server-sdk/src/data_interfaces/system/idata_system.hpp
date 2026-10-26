@@ -2,6 +2,8 @@
 
 #include "../store/istore.hpp"
 
+#include <launchdarkly/server_side/change_notifier.hpp>
+
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
@@ -20,6 +22,12 @@ class IDataSystem : public IStore {
      * the IStore methods are called.
      */
     virtual void Initialize() = 0;
+
+    /**
+     * @return Notifier for flag configuration changes. Valid for the lifetime
+     * of the system.
+     */
+    virtual IChangeNotifier& FlagNotifier() = 0;
 
     virtual ~IDataSystem() override = default;
     IDataSystem(IDataSystem const& item) = delete;

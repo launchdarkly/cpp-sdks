@@ -179,6 +179,8 @@ class ClientImpl : public IClient {
 
     IBigSegmentStoreStatusProvider& BigSegmentStoreStatus() override;
 
+    IChangeNotifier& FlagNotifier() override;
+
     ~ClientImpl();
 
     std::future<bool> StartAsync() override;

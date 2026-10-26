@@ -1,21 +1,10 @@
 #include "contract_test_hook.hpp"
+#include "http_callback.hpp"
 
 #include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
-
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/post.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/url.hpp>
-
-namespace beast = boost::beast;
-namespace http = beast::http;
-namespace net = boost::asio;
-using tcp = net::ip::tcp;
 
 using namespace launchdarkly::server_side::hooks;
 
@@ -55,52 +44,7 @@ std::optional<std::string> ContractTestHook::GetErrorForStage(
 
 void ContractTestHook::PostCallback(std::string const& stage,
                                     nlohmann::json const& payload) {
-    auto uri_result = boost::urls::parse_uri(config_.callbackUri);
-    if (!uri_result) {
-        return;
-    }
-
-    auto uri = *uri_result;
-    std::string host(uri.host());
-    std::string port = uri.has_port() ? std::string(uri.port()) : "80";
-    std::string target(uri.path());
-    if (target.empty()) {
-        target = "/";
-    }
-
-    // Send synchronously so callbacks from sequential hook invocations arrive
-    // at the harness in the order the SDK invoked them.
-    beast::error_code ec;
-    tcp::resolver resolver(executor_);
-    auto results = resolver.resolve(host, port, ec);
-    if (ec) {
-        return;
-    }
-
-    beast::tcp_stream stream(executor_);
-    stream.connect(results, ec);
-    if (ec) {
-        return;
-    }
-
-    http::request<http::string_body> req{http::verb::post, target, 11};
-    req.set(http::field::host, host);
-    req.set(http::field::user_agent, "cpp-server-sdk-contract-tests");
-    req.set(http::field::content_type, "application/json");
-    req.body() = payload.dump();
-    req.prepare_payload();
-
-    http::write(stream, req, ec);
-    if (ec) {
-        return;
-    }
-
-    beast::flat_buffer buffer;
-    http::response<http::string_body> res;
-    http::read(stream, buffer, res, ec);
-
-    beast::error_code ignore_ec;
-    stream.socket().shutdown(tcp::socket::shutdown_both, ignore_ec);
+    PostJsonCallback(executor_, config_.callbackUri, payload);
 }
 
 EvaluationSeriesData ContractTestHook::BeforeEvaluation(

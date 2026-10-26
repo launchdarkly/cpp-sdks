@@ -424,6 +424,23 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BigSegmentStoreStatusResponse,
                                                 available,
                                                 stale);
 
+struct RegisterFlagChangeListenerParams {
+    std::string listenerId;
+    std::string callbackUri;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(
+    RegisterFlagChangeListenerParams,
+    listenerId,
+    callbackUri);
+
+struct UnregisterListenerParams {
+    std::string listenerId;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(UnregisterListenerParams,
+                                                listenerId);
+
 enum class Command {
     Unknown = -1,
     EvaluateFlag,
@@ -433,20 +450,24 @@ enum class Command {
     FlushEvents,
     ContextBuild,
     ContextConvert,
-    GetBigSegmentStoreStatus
+    GetBigSegmentStoreStatus,
+    RegisterFlagChangeListener,
+    UnregisterListener
 };
 
-NLOHMANN_JSON_SERIALIZE_ENUM(Command,
-                             {{Command::Unknown, nullptr},
-                              {Command::EvaluateFlag, "evaluate"},
-                              {Command::EvaluateAllFlags, "evaluateAll"},
-                              {Command::IdentifyEvent, "identifyEvent"},
-                              {Command::CustomEvent, "customEvent"},
-                              {Command::FlushEvents, "flushEvents"},
-                              {Command::ContextBuild, "contextBuild"},
-                              {Command::ContextConvert, "contextConvert"},
-                              {Command::GetBigSegmentStoreStatus,
-                               "getBigSegmentStoreStatus"}});
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    Command,
+    {{Command::Unknown, nullptr},
+     {Command::EvaluateFlag, "evaluate"},
+     {Command::EvaluateAllFlags, "evaluateAll"},
+     {Command::IdentifyEvent, "identifyEvent"},
+     {Command::CustomEvent, "customEvent"},
+     {Command::FlushEvents, "flushEvents"},
+     {Command::ContextBuild, "contextBuild"},
+     {Command::ContextConvert, "contextConvert"},
+     {Command::GetBigSegmentStoreStatus, "getBigSegmentStoreStatus"},
+     {Command::RegisterFlagChangeListener, "registerFlagChangeListener"},
+     {Command::UnregisterListener, "unregisterListener"}});
 
 struct CommandParams {
     Command command;
@@ -456,6 +477,8 @@ struct CommandParams {
     std::optional<IdentifyEventParams> identifyEvent;
     std::optional<ContextBuildParams> contextBuild;
     std::optional<ContextConvertParams> contextConvert;
+    std::optional<RegisterFlagChangeListenerParams> registerFlagChangeListener;
+    std::optional<UnregisterListenerParams> unregisterListener;
     CommandParams();
 };
 
@@ -466,4 +489,6 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CommandParams,
                                                 customEvent,
                                                 identifyEvent,
                                                 contextBuild,
-                                                contextConvert);
+                                                contextConvert,
+                                                registerFlagChangeListener,
+                                                unregisterListener);

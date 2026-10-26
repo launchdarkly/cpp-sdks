@@ -146,6 +146,10 @@ bool LazyLoad::Initialized() const {
     return true;
 }
 
+IChangeNotifier& LazyLoad::FlagNotifier() {
+    return change_notifier_;
+}
+
 void LazyLoad::RefreshAllFlags() const {
     RefreshAll<data_model::Flag>(Keys::kAllFlags,
                                  data_components::DataKind::kFlag,

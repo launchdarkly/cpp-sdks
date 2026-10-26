@@ -74,6 +74,21 @@ TEST(ScopedMapTest, CanGetItem) {
                     ->Contains(DataKind::kSegment, "segmentA"));
 }
 
+TEST(ScopedMapTest, SetReplacesExistingItem) {
+    DependencyMap map;
+    DependencySet first;
+    first.Set(DataKind::kSegment, "segmentA");
+    DependencySet second;
+    second.Set(DataKind::kSegment, "segmentB");
+
+    map.Set(DataKind::kFlag, "flagA", first);
+    map.Set(DataKind::kFlag, "flagA", second);
+
+    auto deps = map.Get(DataKind::kFlag, "flagA");
+    EXPECT_FALSE(deps->Contains(DataKind::kSegment, "segmentA"));
+    EXPECT_TRUE(deps->Contains(DataKind::kSegment, "segmentB"));
+}
+
 TEST(ScopedMapTest, CanIterate) {
     DependencyMap map;
 
@@ -286,4 +301,92 @@ TEST(DependencyTrackerTest, HandlesUpdateForSomethingThatDoesNotExist) {
 
     EXPECT_EQ(1, changes.Size());
     EXPECT_TRUE(changes.Contains(DataKind::kFlag, "potato"));
+}
+
+TEST(DependencyTrackerTest, FollowsDependencyAddedToItemWithDependents) {
+    DependencyTracker tracker;
+
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    Flag flag_b;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
+    flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
+
+    Flag flag_c;
+    flag_c.key = "flagC";
+    flag_c.version = 1;
+
+    tracker.UpdateDependencies("flagA", FlagDescriptor(flag_a));
+    tracker.UpdateDependencies("flagB", FlagDescriptor(flag_b));
+    tracker.UpdateDependencies("flagC", FlagDescriptor(flag_c));
+
+    // flagC starts depending on flagA, which already has flagB as a dependent.
+    flag_c.version = 2;
+    flag_c.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
+    tracker.UpdateDependencies("flagC", FlagDescriptor(flag_c));
+
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kFlag, "flagA", changes);
+
+    EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagA"));
+    EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagB"));
+    EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagC"));
+    EXPECT_EQ(3, changes.Size());
+}
+
+TEST(DependencyTrackerTest, StopsFollowingRemovedDependency) {
+    DependencyTracker tracker;
+
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    Flag flag_b;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
+    flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
+
+    tracker.UpdateDependencies("flagA", FlagDescriptor(flag_a));
+    tracker.UpdateDependencies("flagB", FlagDescriptor(flag_b));
+
+    flag_b.version = 2;
+    flag_b.prerequisites.clear();
+    tracker.UpdateDependencies("flagB", FlagDescriptor(flag_b));
+
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kFlag, "flagA", changes);
+
+    EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagA"));
+    EXPECT_EQ(1, changes.Size());
+}
+
+TEST(DependencyTrackerTest, StopsFollowingRemovedSegmentDependency) {
+    DependencyTracker tracker;
+
+    Segment segment_a;
+    segment_a.key = "segmentA";
+    segment_a.version = 1;
+
+    Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+    flag_a.rules.push_back(Flag::Rule{std::vector<Clause>{
+        Clause{Clause::Op::kSegmentMatch, std::vector<Value>{"segmentA"}, false,
+               ContextKind("user"), AttributeReference("key")}}});
+
+    tracker.UpdateDependencies("segmentA", SegmentDescriptor(segment_a));
+    tracker.UpdateDependencies("flagA", FlagDescriptor(flag_a));
+
+    flag_a.version = 2;
+    flag_a.rules.clear();
+    tracker.UpdateDependencies("flagA", FlagDescriptor(flag_a));
+
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);
+
+    EXPECT_TRUE(changes.Contains(DataKind::kSegment, "segmentA"));
+    EXPECT_EQ(1, changes.Size());
 }

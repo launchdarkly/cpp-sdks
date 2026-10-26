@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../include/launchdarkly/server_side/integrations/data_reader/kinds.hpp"
+#include "../../data_components/change_notifier/null_change_notifier.hpp"
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
@@ -57,6 +58,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     void Initialize() override;
 
     bool Initialized() const override;
+
+    IChangeNotifier& FlagNotifier() override;
 
     // Public for usage in tests.
     struct Kinds {
@@ -182,6 +185,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     std::unique_ptr<data_interfaces::IDataReader> reader_;
 
     data_components::DataSourceStatusManager& status_manager_;
+    data_components::NullChangeNotifier change_notifier_;
 
     mutable data_components::ExpirationTracker tracker_;
     TimeFn time_;
