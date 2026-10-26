@@ -9,7 +9,9 @@ Checks: >
   modernize-*,
   -modernize-use-trailing-return-type,
   clang-analyzer-*,
-  cppcoreguidelines-*
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers
 CheckOptions:
   - { key: readability-identifier-length.IgnoredParameterNames,   value: 'i|j|k|c|os|it' }
   - { key: readability-identifier-length.IgnoredVariableNames, value: 'ec|id|it' }
