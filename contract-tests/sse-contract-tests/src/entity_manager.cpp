@@ -44,13 +44,23 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });
 
+    auto suppress_next_error = std::make_shared<std::atomic_bool>(false);
+
     client_builder.receiver([copy = poster](launchdarkly::sse::Event event) {
         copy->post_event(std::move(event));
     });
 
-    client_builder.errors([copy = poster](launchdarkly::sse::Error event) {
-        copy->post_error(event);
-    });
+    client_builder.errors(
+        [copy = poster, suppress = suppress_next_error](launchdarkly::sse::Error event) {
+            // A caller-triggered restart surfaces as an error on the read
+            // path (the canceled read looks like a body timeout); like other
+            // services (e.g. okhttp's StreamClosedByCallerException
+            // suppression) we don't report it to the harness.
+            if (suppress->exchange(false)) {
+                return;
+            }
+            copy->post_error(event);
+        });
 
     auto client = client_builder.build();
     if (!client) {
@@ -61,8 +71,24 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
 
     client->async_connect();
 
-    entities_.emplace(id, std::make_pair(client, poster));
+    entities_.emplace(id, std::make_tuple(client, poster, suppress_next_error));
     return id;
+}
+
+std::optional<bool> EntityManager::command(std::string const& id,
+                                           std::string const& command) {
+    auto it = entities_.find(id);
+    if (it == entities_.end()) {
+        return std::nullopt;
+    }
+
+    if (command == "restart") {
+        std::get<2>(it->second)->store(true);
+        std::get<0>(it->second)->async_restart("test harness restart command");
+        return true;
+    }
+
+    return false;
 }
 
 bool EntityManager::destroy(std::string const& id) {
@@ -71,8 +97,8 @@ bool EntityManager::destroy(std::string const& id) {
         return false;
     }
 
-    it->second.first->async_shutdown(nullptr);
-    it->second.second->stop();
+    std::get<0>(it->second)->async_shutdown(nullptr);
+    std::get<1>(it->second)->stop();
 
     entities_.erase(it);
 
