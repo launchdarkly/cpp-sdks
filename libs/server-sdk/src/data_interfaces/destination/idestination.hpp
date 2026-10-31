@@ -14,7 +14,9 @@ namespace launchdarkly::server_side::data_interfaces {
 class IDestination {
    public:
     /**
-     * \brief Initialize the destination with a base set of data.
+     * \brief Initialize the destination with a base set of data. The data set
+     * may carry the environment ID that LaunchDarkly reported with it;
+     * destinations which do not track it ignore the value.
      * \param data_set The initial data received by the SDK.
      */
     virtual void Init(data_model::SDKDataSet data_set) = 0;

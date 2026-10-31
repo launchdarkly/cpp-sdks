@@ -4,6 +4,7 @@
 #include <launchdarkly/data_model/item_descriptor.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -19,6 +20,9 @@ struct SDKDataSet {
 
     Flags flags;
     Segments segments;
+
+    // Environment ID reported by LaunchDarkly alongside this data, if known.
+    std::optional<std::string> environment_id;
 };
 
 }  // namespace launchdarkly::data_model

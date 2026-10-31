@@ -44,6 +44,14 @@ void FDv1AdapterSynchronizer::State::Notify(FDv2SourceResult result) {
         if (closed_future_.IsFinished()) {
             return;
         }
+        if (auto* cs =
+                std::get_if<FDv2SourceResult::ChangeSet>(&result.value)) {
+            if (cs->change_set.environment_id) {
+                environment_id_ = cs->change_set.environment_id;
+            } else {
+                cs->change_set.environment_id = environment_id_;
+            }
+        }
         if (pending_promise_) {
             promise = std::move(pending_promise_);
             pending_promise_.reset();
@@ -80,7 +88,7 @@ void FDv1AdapterSynchronizer::ConvertingDestination::Init(
     state->Notify(FDv2SourceResult{FDv2SourceResult::ChangeSet{
         data_model::ChangeSet<data_interfaces::ChangeSetData>{
             data_model::ChangeSetType::kFull, std::move(changes),
-            data_model::Selector{}}}});
+            data_model::Selector{}, std::move(data_set.environment_id)}}});
 }
 
 void FDv1AdapterSynchronizer::ConvertingDestination::Upsert(

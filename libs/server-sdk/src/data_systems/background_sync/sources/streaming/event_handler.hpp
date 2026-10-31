@@ -111,10 +111,14 @@ class DataSourceEventHandler {
      * Handles an event from the LaunchDarkly service.
      * @param type The type of the event. "put"/"patch"/"delete".
      * @param data The content of the event.
+     * @param environment_id Environment ID reported by the connection, if any.
+     * It is carried with the data of a "put".
      * @return A status indicating if the message could be handled.
      */
-    MessageStatus HandleMessage(std::string const& type,
-                                std::string const& data);
+    MessageStatus HandleMessage(
+        std::string const& type,
+        std::string const& data,
+        std::optional<std::string> const& environment_id = std::nullopt);
 
    private:
     data_interfaces::IDestination& handler_;
