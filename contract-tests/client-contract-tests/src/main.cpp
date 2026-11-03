@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("client-prereq-events");
         srv.add_capability("client-prereq-cycle-detection");
         srv.add_capability("wrapper");
+        srv.add_capability("client-event-source-http-errors");
         // Proxies are supported only with CURL networking.
 #ifdef LD_CURL_NETWORKING
         srv.add_capability("http-proxy");
