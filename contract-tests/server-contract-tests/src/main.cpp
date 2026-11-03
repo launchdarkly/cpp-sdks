@@ -54,6 +54,9 @@ int main(int argc, char* argv[]) {
         srv.add_capability("instance-id");
         srv.add_capability("fdv1-fallback");
         srv.add_capability("big-segments");
+        srv.add_capability("all-flags-with-reasons");
+        srv.add_capability("all-flags-client-side-only");
+        srv.add_capability("all-flags-details-only-for-tracked-flags");
 #ifdef LD_REDIS_SUPPORT_ENABLED
         srv.add_capability("persistent-data-store-redis");
 #endif
