@@ -37,4 +37,8 @@ void FlagManager::LoadCache(Context const& context) {
     persistence_updater_.LoadCached(context);
 }
 
+void FlagManager::ClearSelector() {
+    flag_store_.ClearSelector();
+}
+
 }  // namespace launchdarkly::client_side::flag_manager
