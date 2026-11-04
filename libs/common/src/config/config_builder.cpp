@@ -1,6 +1,9 @@
 #include <launchdarkly/config/shared/builders/config_builder.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
 
+#include <type_traits>
+#include <variant>
+
 namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
@@ -71,6 +74,19 @@ ConfigBuilder<SDK>::Build() const {
     std::optional<std::string> app_tag = app_info_builder_.Build();
 
     auto data_source_config = data_source_builder_.Build();
+
+    if constexpr (std::is_same_v<SDK, ClientSDK>) {
+        // FDv2 polls a different endpoint than FDv1 does, so it keeps its own
+        // default until the application configures its own endpoints. Once it
+        // has, FDv2 follows them, so that pointing the SDK at a Relay Proxy
+        // redirects FDv2 too.
+        if (auto* fdv2 =
+                std::get_if<built::FDv2Config<SDK>>(&data_source_config.method);
+            fdv2 != nullptr && service_endpoints_builder_.IsCustom()) {
+            fdv2->polling_base_url = endpoints_config->PollingBaseUrl();
+            fdv2->streaming_base_url = endpoints_config->StreamingBaseUrl();
+        }
+    }
 
     auto http_properties = http_properties_builder_.Build();
 
