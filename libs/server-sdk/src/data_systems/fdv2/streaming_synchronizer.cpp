@@ -192,16 +192,13 @@ void FDv2StreamingSynchronizer::State::OnResponse(
         latest_fdv1_fallback_.reset();
         return;
     }
-    data_interfaces::FDv1FallbackDirective directive;
     auto const ttl_it = headers.find("X-LD-FD-Fallback-TTL");
-    if (ttl_it != headers.end()) {
-        auto const value = ttl_it->value();
-        auto const ttl = data_interfaces::FDv1FallbackDirective::ParseTtl(
-            std::string_view{value.data(), value.size()});
-        if (ttl) {
-            directive.ttl = *ttl;
-        }
-    }
+    auto const directive =
+        ttl_it == headers.end()
+            ? data_interfaces::FDv1FallbackDirective::DefaultTtl()
+            : data_interfaces::FDv1FallbackDirective::FromServiceTtl(
+                  std::string_view{ttl_it->value().data(),
+                                   ttl_it->value().size()});
     std::lock_guard lock(mutex_);
     latest_fdv1_fallback_ = directive;
 }
@@ -257,8 +254,8 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                     FDv2SourceResult::Goodbye{r.reason}};
                 if (r.protocol_fallback_ttl) {
                     goodbye_result.fdv1_fallback =
-                        data_interfaces::FDv1FallbackDirective{
-                            std::chrono::seconds(*r.protocol_fallback_ttl)};
+                        data_interfaces::FDv1FallbackDirective::FromServiceTtl(
+                            std::chrono::seconds(*r.protocol_fallback_ttl));
                 }
                 Notify(std::move(goodbye_result));
                 // Drop the current connection and reconnect; the protocol

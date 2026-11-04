@@ -7,9 +7,12 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
+#include <chrono>
+
 using namespace launchdarkly;
 using namespace launchdarkly::server_side::data_interfaces;
 using namespace launchdarkly::server_side::data_systems;
+using namespace std::chrono_literals;
 
 static Logger MakeNullLogger() {
     struct NullBackend : ILogBackend {
@@ -102,7 +105,9 @@ TEST(HandleFDv2PollResponseTest, DirectiveWithoutTtlHeaderUsesDefault) {
     auto result =
         HandleResponse(304, std::nullopt, {{"X-LD-FD-Fallback", "true"}});
     ASSERT_TRUE(result.fdv1_fallback);
-    EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result.fdv1_fallback->ttl);
+    // The jittered 1-hour default lands in [30min, 1h].
+    EXPECT_GE(result.fdv1_fallback->ttl, 30min);
+    EXPECT_LE(result.fdv1_fallback->ttl, 1h);
 }
 
 TEST(HandleFDv2PollResponseTest, DirectiveWithTtlHeaderParsesValue) {
@@ -118,7 +123,22 @@ TEST(HandleFDv2PollResponseTest, DirectiveWithMalformedTtlFallsBackToDefault) {
                                  {{"X-LD-FD-Fallback", "true"},
                                   {"X-LD-FD-Fallback-TTL", "not-a-number"}});
     ASSERT_TRUE(result.fdv1_fallback);
-    EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result.fdv1_fallback->ttl);
+    // The jittered 1-hour default lands in [30min, 1h].
+    EXPECT_GE(result.fdv1_fallback->ttl, 30min);
+    EXPECT_LE(result.fdv1_fallback->ttl, 1h);
+}
+
+TEST(HandleFDv2PollResponseTest, DirectiveWithOutOfRangeTtlUsesDefault) {
+    for (auto const* ttl : {"0", "3601", "86400"}) {
+        auto result = HandleResponse(
+            304, std::nullopt,
+            {{"X-LD-FD-Fallback", "true"}, {"X-LD-FD-Fallback-TTL", ttl}});
+        ASSERT_TRUE(result.fdv1_fallback);
+
+        // The jittered 1-hour default lands in [30min, 1h].
+        EXPECT_GE(result.fdv1_fallback->ttl, 30min);
+        EXPECT_LE(result.fdv1_fallback->ttl, 1h);
+    }
 }
 
 TEST(HandleFDv2PollResponseTest, NetworkErrorDoesNotSetFlag) {
