@@ -47,6 +47,16 @@ TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
     EXPECT_FALSE(store.Initialized());
 }
 
+TEST(MemoryStoreApplyTest, EnvironmentIdIsTakenFromChangeSet) {
+    MemoryStore store;
+    store.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kFull, {}, Selector{}, "env-123"});
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
+
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kFull, {}, Selector{}});
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
+}
+
 // ---------------------------------------------------------------------------
 // kFull tests
 // ---------------------------------------------------------------------------

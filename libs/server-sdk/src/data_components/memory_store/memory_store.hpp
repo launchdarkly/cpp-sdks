@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -43,6 +44,12 @@ class MemoryStore final : public data_interfaces::IStore,
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
 
+    /**
+     * @return The environment ID reported by LaunchDarkly, if any has been
+     * received.
+     */
+    [[nodiscard]] std::optional<std::string> EnvironmentId() const;
+
     bool RemoveFlag(std::string const& key);
 
     bool RemoveSegment(std::string const& key);
@@ -59,6 +66,10 @@ class MemoryStore final : public data_interfaces::IStore,
     MemoryStore& operator=(MemoryStore&&) = delete;
 
    private:
+    // Requires data_mutex_ to be held. Ignores empty values so that data
+    // without an environment ID does not discard a previously reported one.
+    void RetainEnvironmentId(std::optional<std::string> const& environment_id);
+
     static inline std::string const description_ = "memory";
     std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
         flags_;
@@ -66,6 +77,7 @@ class MemoryStore final : public data_interfaces::IStore,
                        std::shared_ptr<data_model::SegmentDescriptor>>
         segments_;
     bool initialized_ = false;
+    std::optional<std::string> environment_id_;
     mutable std::mutex data_mutex_;
 };
 

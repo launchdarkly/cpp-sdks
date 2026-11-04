@@ -2,6 +2,9 @@
 
 #include <launchdarkly/data_model/selector.hpp>
 
+#include <optional>
+#include <string>
+
 namespace launchdarkly::data_model {
 
 enum class ChangeSetType {
@@ -15,6 +18,9 @@ struct ChangeSet {
     ChangeSetType type;
     T data;
     Selector selector;
+
+    // Environment ID reported by LaunchDarkly alongside this data, if known.
+    std::optional<std::string> environment_id;
 };
 
 }  // namespace launchdarkly::data_model

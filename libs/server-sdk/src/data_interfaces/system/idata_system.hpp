@@ -2,6 +2,9 @@
 
 #include "../store/istore.hpp"
 
+#include <optional>
+#include <string>
+
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
@@ -20,6 +23,12 @@ class IDataSystem : public IStore {
      * the IStore methods are called.
      */
     virtual void Initialize() = 0;
+
+    /**
+     * @return The environment ID reported by LaunchDarkly alongside the data,
+     * if the system has received one.
+     */
+    [[nodiscard]] virtual std::optional<std::string> EnvironmentId() const = 0;
 
     virtual ~IDataSystem() override = default;
     IDataSystem(IDataSystem const& item) = delete;

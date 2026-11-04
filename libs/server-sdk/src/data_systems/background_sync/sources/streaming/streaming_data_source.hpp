@@ -46,6 +46,10 @@ class StreamingDataSource final
 
     config::built::BackgroundSyncConfig::StreamingConfig streaming_config_;
 
+    // Environment ID from the most recent successful stream response. Read
+    // and written only from the SSE client's callbacks.
+    std::optional<std::string> environment_id_;
+
     std::shared_ptr<sse::Client> client_;
 };
 }  // namespace launchdarkly::server_side::data_systems
