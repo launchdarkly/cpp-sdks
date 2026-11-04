@@ -31,25 +31,25 @@ std::string const& StreamingDataSource::Identity() const {
 StreamingDataSource::StreamingDataSource(
     boost::asio::any_io_executor io,
     Logger const& logger,
-    data_components::DataSourceStatusManager& status_manager,
+    std::shared_ptr<data_components::DataSourceStatusManager> status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::StreamingConfig const& streaming,
     config::built::HttpProperties const& http_properties)
     : io_(std::move(io)),
       logger_(logger),
-      status_manager_(status_manager),
+      status_manager_(std::move(status_manager)),
       http_config_(http_properties),
       streaming_endpoint_(endpoints.StreamingBaseUrl()),
       streaming_config_(streaming) {}
 
 void StreamingDataSource::StartAsync(
-    data_interfaces::IDestination* dest,
+    std::shared_ptr<data_interfaces::IDestination> dest,
     data_model::SDKDataSet const* bootstrap_data) {
     boost::ignore_unused(bootstrap_data);
 
-    event_handler_.emplace(*dest, logger_, status_manager_);
+    event_handler_.emplace(dest, logger_, status_manager_);
 
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
+    status_manager_->SetState(DataSourceStatus::DataSourceState::kInitializing);
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,
                                           streaming_config_.streaming_path);
@@ -68,7 +68,7 @@ void StreamingDataSource::StartAsync(
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kOff,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
             kCouldNotParseEndpoint);
@@ -80,7 +80,7 @@ void StreamingDataSource::StartAsync(
     // Unlikely that it could be parsed earlier, and it cannot be parsed now.
     if (!uri_components) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kOff,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
             kCouldNotParseEndpoint);
@@ -129,12 +129,14 @@ void StreamingDataSource::StartAsync(
         if (auto self = weak_self.lock()) {
             auto status =
                 self->event_handler_->HandleMessage(event.type(), event.data());
-            if (status == DataSourceEventHandler::MessageStatus::kInvalidMessage) {
+            if (status ==
+                DataSourceEventHandler::MessageStatus::kInvalidMessage) {
                 // Invalid data received - restart the connection with backoff
                 // to get a fresh stream. The backoff mechanism prevents rapid
                 // reconnection attempts.
                 LD_LOG(self->logger_, LogLevel::kWarn)
-                    << "Received invalid data from stream, restarting connection";
+                    << "Received invalid data from stream, restarting "
+                       "connection";
                 if (self->client_) {
                     self->client_->async_restart("invalid data in stream");
                 }
@@ -162,7 +164,7 @@ void StreamingDataSource::StartAsync(
 
     if (!client_) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kOff,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
             kCouldNotParseEndpoint);
@@ -182,7 +184,7 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
         [this, state, error_string = std::move(error_string)](auto error) {
             using T = std::decay_t<decltype(error)>;
             if constexpr (std::is_same_v<T, sse::errors::ReadTimeout>) {
-                this->status_manager_.SetState(
+                this->status_manager_->SetState(
                     state,
                     DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
                     std::move(error_string));
@@ -190,7 +192,7 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
             } else if constexpr (std::is_same_v<
                                      T,
                                      sse::errors::UnrecoverableClientError>) {
-                this->status_manager_.SetState(
+                this->status_manager_->SetState(
                     state,
                     static_cast<data_components::DataSourceStatusManager::
                                     StatusCodeType>(error.status),
@@ -198,14 +200,14 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
 
             } else if constexpr (std::is_same_v<
                                      T, sse::errors::InvalidRedirectLocation>) {
-                this->status_manager_.SetState(
+                this->status_manager_->SetState(
                     state,
                     DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
                     std::move(error_string));
 
             } else if constexpr (std::is_same_v<T,
                                                 sse::errors::NotRedirectable>) {
-                this->status_manager_.SetState(
+                this->status_manager_->SetState(
                     state,
                     DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
                     std::move(error_string));
@@ -219,7 +221,7 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
 
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
     if (client_) {
-        status_manager_.SetState(
+        status_manager_->SetState(
             DataSourceStatus::DataSourceState::kInitializing);
         return client_->async_shutdown(std::move(completion));
     }
