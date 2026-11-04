@@ -4,8 +4,11 @@
 #include <launchdarkly/client_side/bindings/c/sdk.h>
 
 #include <launchdarkly/bindings/c/context_builder.h>
+#include <launchdarkly/bindings/c/value.h>
 
+#include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/client_side/data_source_status.hpp>
+#include <launchdarkly/context_builder.hpp>
 
 #include <chrono>
 
@@ -218,4 +221,38 @@ TEST(ClientBindings, TestDataSourceStatusStateName) {
     ASSERT_STREQ(LDDataSourceStatus_State_Name(
                      LD_DATASOURCESTATUS_STATE_UNUSED_MAXVALUE, "unknown"),
                  "unknown");
+}
+
+// Records the data and the metric value of a track call. The C API handle is
+// a pointer to a Client, so the C API calls this override.
+class TrackRecordingClient : public launchdarkly::client_side::Client {
+   public:
+    using Client::Client;
+    using Client::Track;
+
+    void Track(std::string event_name,
+               launchdarkly::Value data,
+               double metric_value) override {
+        data_ = std::move(data);
+        metric_value_ = metric_value;
+    }
+
+    launchdarkly::Value data_;
+    double metric_value_ = 0.0;
+};
+
+TEST(ClientBindings, TrackMetricPassesDataAndMetricValue) {
+    auto* client = new TrackRecordingClient(
+        launchdarkly::client_side::ConfigBuilder("sdk-123").Build().value(),
+        launchdarkly::ContextBuilder().Kind("cat", "shadow").Build());
+    auto sdk = reinterpret_cast<LDClientSDK>(
+        static_cast<launchdarkly::client_side::Client*>(client));
+
+    LDClientSDK_TrackMetric(sdk, "test-event", 42.5,
+                            LDValue_NewString("my-data"));
+
+    EXPECT_EQ(client->data_, launchdarkly::Value("my-data"));
+    EXPECT_EQ(client->metric_value_, 42.5);
+
+    LDClientSDK_Free(sdk);
 }

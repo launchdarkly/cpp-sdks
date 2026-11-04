@@ -136,8 +136,8 @@ LDServerSDK_TrackMetric(LDServerSDK sdk,
 
     Value* as_value = TO_VALUE(value);
 
-    TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, metric_value,
-                       std::move(*as_value));
+    TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, std::move(*as_value),
+                       metric_value);
 
     LDValue_Free(value);
 }
