@@ -119,7 +119,7 @@ LDClientSDK_TrackMetric(LDClientSDK sdk,
 
     auto as_value = reinterpret_cast<Value*>(value);
 
-    TO_SDK(sdk)->Track(event_name, metric_value, std::move(*as_value));
+    TO_SDK(sdk)->Track(event_name, std::move(*as_value), metric_value);
 
     LDValue_Free(value);
 }

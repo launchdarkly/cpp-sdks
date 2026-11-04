@@ -263,6 +263,57 @@ TEST(ServerCBindingsHooksTest, TrackSeriesContextAccessors) {
     LDServerSDK_Free(client);
 }
 
+// Hook that records the string data and the metric value of a track call
+static void TrackValues_AfterTrack(LDServerSDKTrackSeriesContext track_context,
+                                   void* user_data) {
+    auto* tracker = static_cast<HookCallTracker*>(user_data);
+
+    LDValue data_value = nullptr;
+    if (LDTrackSeriesContext_Data(track_context, &data_value) &&
+        LDValue_Type(data_value) == LDValueType_String) {
+        tracker->calls.push_back(std::string("data:") +
+                                 LDValue_GetString(data_value));
+    }
+
+    double metric_value = 0.0;
+    if (LDTrackSeriesContext_MetricValue(track_context, &metric_value)) {
+        tracker->calls.push_back("metric:" + std::to_string(metric_value));
+    }
+}
+
+TEST(ServerCBindingsHooksTest, TrackMetricPassesDataAndMetricValue) {
+    HookCallTracker tracker;
+
+    struct LDServerSDKHook hook;
+    LDServerSDKHook_Init(&hook);
+    hook.Name = "TrackValuesHook";
+    hook.AfterTrack = TrackValues_AfterTrack;
+    hook.UserData = &tracker;
+
+    auto config_builder = LDServerConfigBuilder_New("sdk-key");
+    LDServerConfigBuilder_Hooks(config_builder, hook);
+    LDServerConfigBuilder_Events_Enabled(config_builder, false);
+
+    LDServerConfig config = nullptr;
+    LDServerConfigBuilder_Build(config_builder, &config);
+    auto client = LDServerSDK_New(config);
+
+    auto context_builder = LDContextBuilder_New();
+    LDContextBuilder_AddKind(context_builder, "user", "user-key");
+    auto context = LDContextBuilder_Build(context_builder);
+
+    LDServerSDK_TrackMetric(client, context, "test-event", 42.5,
+                            LDValue_NewString("my-data"));
+
+    // The hook sees the data as the data, and the metric as the metric
+    ASSERT_EQ(tracker.calls.size(), 2);
+    EXPECT_EQ(tracker.calls[0], "data:my-data");
+    EXPECT_EQ(tracker.calls[1], "metric:42.500000");
+
+    LDContext_Free(context);
+    LDServerSDK_Free(client);
+}
+
 // Hook that passes data between stages using EvaluationSeriesData
 static LDServerSDKEvaluationSeriesData DataPassing_BeforeEvaluation(
     LDServerSDKEvaluationSeriesContext series_context,
