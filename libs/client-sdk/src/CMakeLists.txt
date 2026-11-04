@@ -61,6 +61,7 @@ target_sources(${LIBNAME} PRIVATE
         flag_manager/flag_updater.hpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp
+        bindings/c/fdv2_builder.cpp
         bindings/c/config.cpp
         data_sources/null_data_source.cpp
         flag_manager/context_index.cpp
