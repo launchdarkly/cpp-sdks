@@ -49,9 +49,7 @@ static network::HttpRequest MakeRequest(
     }
 
     if (data_source_config.with_reasons) {
-        if (url) {
-            url->append("?withReasons=true");
-        }
+        url = network::AppendQueryParam(url, "withReasons", "true");
     }
 
     config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>

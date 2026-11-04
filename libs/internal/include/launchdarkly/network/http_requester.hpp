@@ -90,8 +90,16 @@ class HttpRequest {
         const;
     [[nodiscard]] std::string const& Host() const;
     [[nodiscard]] std::optional<std::string> const& Port() const;
+
+    /**
+     * The percent-encoded request target: the path, and the query when the
+     * URL has one. The Beast backend sends this as the request target.
+     */
     [[nodiscard]] std::string const& Path() const;
 
+    /**
+     * The percent-encoded URL the request was created from.
+     */
     [[nodiscard]] std::string const& Url() const;
 
     [[nodiscard]] bool Https() const;
@@ -104,6 +112,15 @@ class HttpRequest {
      */
     [[nodiscard]] bool Valid() const;
 
+    /**
+     * Create a request for a URL.
+     *
+     * @param url A percent-encoded URL. Values that need encoding must be
+     * added with AppendUrl or AppendQueryParam, which encode them.
+     * @param method The HTTP method.
+     * @param properties The properties for the request.
+     * @param body The request body, if any.
+     */
     HttpRequest(std::string const& url,
                 HttpMethod method,
                 config::shared::built::HttpProperties properties,
@@ -134,8 +151,11 @@ class HttpRequest {
 bool IsRecoverableStatus(HttpResult::StatusCode status);
 
 /**
- * Append a path to a URL. This will account for query parameters on the
- * original URL. This will also normalize the URL.
+ * Append a path to a URL. The appended path is not percent-encoded: '/'
+ * separates segments, and every other character that is not allowed in a
+ * path segment is percent-encoded, so a '%' becomes "%25". Dot segments such
+ * as ".." are resolved. The query of the URL, and the percent-encoding the
+ * URL already has, are kept.
  *
  * If the input URL doesn't parse, then std::nullopt will be returned.
  *
@@ -143,10 +163,29 @@ bool IsRecoverableStatus(HttpResult::StatusCode status);
  * std::nullopt. This is to facilitate multiple appends without having to check
  * intermediate results.
  *
- * @param to_append Path to append to the URL.
+ * @param to_append Path to append to the URL, not percent-encoded.
  * @return The appended URL, or std::nullopt if the URL could not be parsed.
  */
 std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
                                      std::string const& to_append);
+
+/**
+ * Append a query parameter to a URL. The key and value are not
+ * percent-encoded: every character outside the unreserved set is
+ * percent-encoded. The parameter is joined with '&' when the URL already
+ * carries a query, so a base URL that has its own parameters keeps them.
+ *
+ * If the input URL doesn't parse, then std::nullopt will be returned.
+ *
+ * @param url_in Input URL, if std::nullopt, the method will return
+ * std::nullopt.
+ * @param key The parameter name, not percent-encoded.
+ * @param value The parameter value, not percent-encoded.
+ * @return The URL with the parameter appended, or std::nullopt if the URL
+ * could not be parsed.
+ */
+std::optional<std::string> AppendQueryParam(std::optional<std::string> url_in,
+                                            std::string const& key,
+                                            std::string const& value);
 
 }  // namespace launchdarkly::network
