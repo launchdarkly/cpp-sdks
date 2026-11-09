@@ -1,4 +1,0 @@
-<map id="launchdarkly::server_side::integrations::RedisDataSource" name="launchdarkly::server_side::integrations::RedisDataSource">
-<area shape="rect" id="node1" title="RedisDataSource represents a data source for the Server&#45;Side SDK backed by Redis. It is meant to be u..." alt="" coords="11,80,166,136"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,172,32"/>
-</map>
