@@ -1,9 +1,9 @@
 {
   "name": "@launchdarkly/cpp-server-dynamodb-source",
   "description": "This package.json exists for modeling dependencies for the release process.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "dependencies": {
-    "@launchdarkly/cpp-server": "3.14.0"
+    "@launchdarkly/cpp-server": "3.15.0"
   }
 }
