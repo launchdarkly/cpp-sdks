@@ -1,0 +1,34 @@
+\hypertarget{structLDServerLazyLoadDynamoDBResult}{}\doxysection{LDServer\+Lazy\+Load\+Dynamo\+DBResult Struct Reference}
+\label{structLDServerLazyLoadDynamoDBResult}\index{LDServerLazyLoadDynamoDBResult@{LDServerLazyLoadDynamoDBResult}}
+
+
+Stores the result of calling \mbox{\hyperlink{dynamodb__source_8h_a003149b72c9cbbd3c9a4780f988b2c5c}{LDServer\+Lazy\+Load\+Dynamo\+DBSource\+\_\+\+New}}.  
+
+
+
+
+{\ttfamily \#include $<$dynamodb\+\_\+source.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structLDServerLazyLoadDynamoDBResult_a7dbcd14a304460fec6790a0b784c4c99}\label{structLDServerLazyLoadDynamoDBResult_a7dbcd14a304460fec6790a0b784c4c99}} 
+\mbox{\hyperlink{dynamodb__source_8h_a6dee03c0b698272127b92379bbbdaec1}{LDServer\+Lazy\+Load\+Dynamo\+DBSource}} {\bfseries source}
+\item 
+\mbox{\Hypertarget{structLDServerLazyLoadDynamoDBResult_a202e328451f3ca7ccd26847d592681f1}\label{structLDServerLazyLoadDynamoDBResult_a202e328451f3ca7ccd26847d592681f1}} 
+char {\bfseries error\+\_\+message} \mbox{[}LDSERVER\+\_\+\+LAZYLOAD\+\_\+\+DYNAMODBSOURCE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Stores the result of calling \mbox{\hyperlink{dynamodb__source_8h_a003149b72c9cbbd3c9a4780f988b2c5c}{LDServer\+Lazy\+Load\+Dynamo\+DBSource\+\_\+\+New}}. 
+
+On successful creation, source will contain a pointer which may be passed into the Launch\+Darkly SDK\textquotesingle{}s configuration.
+
+On failure, error\+\_\+message contains a NULL-\/terminated string describing the error.
+
+The message may be truncated if it was originally longer than error\+\_\+message\textquotesingle{}s buffer size. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/bindings/c/integrations/dynamodb/\mbox{\hyperlink{dynamodb__source_8h}{dynamodb\+\_\+source.\+h}}\end{DoxyCompactItemize}
