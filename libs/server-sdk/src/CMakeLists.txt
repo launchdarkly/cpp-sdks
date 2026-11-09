@@ -54,6 +54,7 @@ target_sources(${LIBNAME}
         data_components/big_segments/big_segment_store_status_provider.hpp
         data_components/big_segments/big_segment_store_status_provider.cpp
         data_interfaces/destination/itransactional_destination.hpp
+        data_interfaces/source/fdv2_source_result.cpp
         data_components/memory_store/memory_store.hpp
         data_components/memory_store/memory_store.cpp
         data_components/serialization_adapters/json_deserializer.hpp

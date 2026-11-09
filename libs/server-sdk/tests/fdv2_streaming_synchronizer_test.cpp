@@ -433,6 +433,52 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventReturnsGoodbye) {
     EXPECT_EQ(*g->reason, "bye");
 }
 
+TEST(FDv2StreamingSynchronizerTest, GoodbyeFallbackTtlIsUsedAsGiven) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    sse::Event goodbye("goodbye",
+                       R"({"reason":"bye","protocolFallbackTTL":120})");
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result->fdv1_fallback);
+    EXPECT_EQ(120s, result->fdv1_fallback->ttl);
+}
+
+TEST(FDv2StreamingSynchronizerTest, GoodbyeOutOfRangeFallbackTtlUsesDefault) {
+    for (auto const* ttl : {"0", "-60", "3601"}) {
+        auto logger = MakeNullLogger();
+        IoContextRunner runner;
+
+        FDv2StreamingSynchronizer synchronizer(
+            runner.context().get_executor(), logger, "http://localhost",
+            MakeHttpProperties(), std::nullopt, 1s);
+        FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+        sse::Event goodbye(
+            "goodbye",
+            std::string(R"({"reason":"bye","protocolFallbackTTL":)") + ttl +
+                "}");
+        FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
+        auto result =
+            synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+        ASSERT_TRUE(result.has_value());
+        ASSERT_TRUE(result->fdv1_fallback);
+
+        // The jittered 1-hour default lands in [30min, 1h].
+        EXPECT_GE(result->fdv1_fallback->ttl, 30min);
+        EXPECT_LE(result->fdv1_fallback->ttl, 1h);
+    }
+}
+
 TEST(FDv2StreamingSynchronizerTest, GoodbyeEventTriggersAsyncRestart) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;
@@ -877,5 +923,7 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithoutTtlHeaderUsesDefault) {
     // The result carries the default TTL.
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fdv1_fallback);
-    EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result->fdv1_fallback->ttl);
+    // The jittered 1-hour default lands in [30min, 1h].
+    EXPECT_GE(result->fdv1_fallback->ttl, 30min);
+    EXPECT_LE(result->fdv1_fallback->ttl, 1h);
 }

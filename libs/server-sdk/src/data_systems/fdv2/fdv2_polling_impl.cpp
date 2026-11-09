@@ -41,16 +41,11 @@ ReadFDv1FallbackDirective(network::HttpResult::HeadersType const& headers) {
     if (it == headers.end() || !boost::iequals(it->second, "true")) {
         return std::nullopt;
     }
-    data_interfaces::FDv1FallbackDirective directive;
     auto const ttl_it = headers.find(kFDv1FallbackTtlHeader);
-    if (ttl_it != headers.end()) {
-        auto const ttl =
-            data_interfaces::FDv1FallbackDirective::ParseTtl(ttl_it->second);
-        if (ttl) {
-            directive.ttl = *ttl;
-        }
-    }
-    return directive;
+    return ttl_it == headers.end()
+               ? data_interfaces::FDv1FallbackDirective::DefaultTtl()
+               : data_interfaces::FDv1FallbackDirective::FromServiceTtl(
+                     ttl_it->second);
 }
 
 network::HttpRequest MakeFDv2PollRequest(
@@ -131,8 +126,9 @@ static FDv2SourceResult ParseFDv2PollEvents(
         if (auto* goodbye = std::get_if<Goodbye>(&result)) {
             FDv2SourceResult result{FDv2SourceResult::Goodbye{goodbye->reason}};
             if (goodbye->protocol_fallback_ttl) {
-                result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{
-                    std::chrono::seconds(*goodbye->protocol_fallback_ttl)};
+                result.fdv1_fallback =
+                    data_interfaces::FDv1FallbackDirective::FromServiceTtl(
+                        std::chrono::seconds(*goodbye->protocol_fallback_ttl));
             }
             return result;
         }

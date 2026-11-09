@@ -258,7 +258,7 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     void OnConditionFired(IFDv2Condition::Type type);
 
     // Schedules an FDv2 recovery attempt after the given TTL. Called with
-    // mutex_ held. TTL of 0 disables the recovery and is a no-op.
+    // mutex_ held.
     void ScheduleFDv2RetryLocked(std::chrono::seconds ttl);
 
     // Invoked when the FDv1 fallback TTL expires. Switches the source list
