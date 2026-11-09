@@ -1,0 +1,83 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Big\+Segment\+Store Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}\index{launchdarkly::server\_side::integrations::RedisBigSegmentStore@{launchdarkly::server\_side::integrations::RedisBigSegmentStore}}
+
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}} is a Big Segments persistent store backed by Redis.  
+
+
+
+
+{\ttfamily \#include $<$redis\+\_\+big\+\_\+segment\+\_\+store.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Big\+Segment\+Store\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=208pt]{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Big\+Segment\+Store\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=208pt]{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_aca8d52bd40969a52dc8e69c0efa2cbf4}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_aca8d52bd40969a52dc8e69c0efa2cbf4}} 
+Get\+Membership\+Result {\bfseries Get\+Membership} (std\+::string const \&context\+\_\+hash) const noexcept override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_a675fb4de7cc5b5391f3915f867911a73}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_a675fb4de7cc5b5391f3915f867911a73}} 
+Get\+Metadata\+Result {\bfseries Get\+Metadata} () const noexcept override
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static tl\+::expected$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}} $>$, std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_af13f3d347d2b7752b198f44e40cf4f81}{Create}} (std\+::string uri, std\+::string prefix)
+\begin{DoxyCompactList}\small\item\em Creates a new \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}}, or returns an error if construction failed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}} is a Big Segments persistent store backed by Redis. 
+
+Call \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_af13f3d347d2b7752b198f44e40cf4f81}{Redis\+Big\+Segment\+Store\+::\+Create}} to obtain a new instance, then pass it to the SDK via the Big Segments config builder.
+
+The same Redis database can be shared with \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}} — Big Segments keys use their own prefixed namespaces ({\ttfamily big\+\_\+segment\+\_\+include}, {\ttfamily big\+\_\+segment\+\_\+exclude}, {\ttfamily big\+\_\+segments\+\_\+synchronized\+\_\+on}) and do not conflict with the flag/segment hashes. The Launch\+Darkly Relay Proxy is responsible for populating Big Segments data in Redis; this class only reads from it.
+
+This implementation is backed by \href{https://github.com/sewenew/redis-plus-plus}{\texttt{ Redis++}}, a C++ wrapper for the \href{https://github.com/redis/hiredis}{\texttt{ hiredis}} library. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_af13f3d347d2b7752b198f44e40cf4f81}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore_af13f3d347d2b7752b198f44e40cf4f81}} 
+\index{launchdarkly::server\_side::integrations::RedisBigSegmentStore@{launchdarkly::server\_side::integrations::RedisBigSegmentStore}!Create@{Create}}
+\index{Create@{Create}!launchdarkly::server\_side::integrations::RedisBigSegmentStore@{launchdarkly::server\_side::integrations::RedisBigSegmentStore}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily tl\+::expected$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}} $>$, std\+::string $>$ launchdarkly\+::server\+\_\+side\+::integrations\+::\+Redis\+Big\+Segment\+Store\+::\+Create (\begin{DoxyParamCaption}\item[{std\+::string}]{uri,  }\item[{std\+::string}]{prefix }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Creates a new \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}}, or returns an error if construction failed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em uri} & Redis URI. The URI is passed to the underlying Redis++ client verbatim. See \href{https://github.com/sewenew/redis-plus-plus\#api-reference}{\texttt{ Redis++ API Reference}} for details on the possible URI formats.\\
+\hline
+{\em prefix} & Prefix to use when reading SDK data from Redis. This allows multiple Launch\+Darkly environments to be stored in the same database (under different prefixes).\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisBigSegmentStore}{Redis\+Big\+Segment\+Store}}, or an error if construction failed. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/redis/\mbox{\hyperlink{redis__big__segment__store_8hpp}{redis\+\_\+big\+\_\+segment\+\_\+store.\+hpp}}\item 
+src/redis\+\_\+big\+\_\+segment\+\_\+store.\+cpp\end{DoxyCompactItemize}
