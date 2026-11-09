@@ -1,5 +1,0 @@
-<map id="launchdarkly::server_side::data_systems::StreamingDataSource" name="launchdarkly::server_side::data_systems::StreamingDataSource">
-<area shape="rect" id="node1" title=" " alt="" coords="316,43,480,99"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer.html" title="IDataSynchronizer obtains data via a background synchronization mechanism, updating an IDestination w..." alt="" coords="54,5,219,61"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,86,268,127"/>
-</map>

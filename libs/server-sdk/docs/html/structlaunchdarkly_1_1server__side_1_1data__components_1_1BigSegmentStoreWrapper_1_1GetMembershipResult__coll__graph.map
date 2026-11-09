@@ -1,4 +1,0 @@
-<map id="launchdarkly::server_side::data_components::BigSegmentStoreWrapper::GetMembershipResult" name="launchdarkly::server_side::data_components::BigSegmentStoreWrapper::GetMembershipResult">
-<area shape="rect" id="node1" title=" " alt="" coords="5,124,204,195"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1integrations_1_1Membership.html" title="Membership describes which Big Segments a single context belongs to, as reported by an IBigSegmentSto..." alt="" coords="27,5,182,61"/>
-</map>

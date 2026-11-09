@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="15,93,161,134"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper.html" title="Internal layer between the evaluator and a customer&#45;provided integrations::IBigSegmentStore." alt="" coords="219,5,417,61"/>
-<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource.html" title=" " alt="" coords="237,165,399,221"/>
-<area shape="rect" id="node4" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource.html" title=" " alt="" coords="236,85,400,141"/>
-<area shape="rect" id="node5" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer.html" title="IDataSynchronizer obtains data via a background synchronization mechanism, updating an IDestination w..." alt="" coords="5,161,171,217"/>
-</map>

@@ -1,8 +1,0 @@
-<map id="include/launchdarkly/server_side/bindings/c/evaluation_series_context.h" name="include/launchdarkly/server_side/bindings/c/evaluation_series_context.h">
-<area shape="rect" id="node1" title="C bindings for read&#45;only evaluation context passed to hooks." alt="" coords="197,5,417,61"/>
-<area shape="rect" id="node2" href="$export_8h.html" title="Export macros for C bindings." alt="" coords="183,303,348,344"/>
-<area shape="rect" id="node3" href="$hook__context_8h.html" title="C bindings for passing caller data to hooks." alt="" coords="5,199,168,255"/>
-<area shape="rect" id="node4" href="$value_8h.html" title=" " alt="" coords="243,206,408,247"/>
-<area shape="rect" id="node5" title=" " alt="" coords="455,310,537,337"/>
-<area shape="rect" id="node6" href="$context_8h.html" title=" " alt="" coords="344,109,509,151"/>
-</map>
