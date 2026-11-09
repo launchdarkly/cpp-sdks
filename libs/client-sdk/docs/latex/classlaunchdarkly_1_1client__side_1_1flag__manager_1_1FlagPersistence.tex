@@ -1,0 +1,98 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}{}\doxysection{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Persistence Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+
+
+{\ttfamily \#include $<$flag\+\_\+persistence.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Persistence\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=244pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Persistence\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=244pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa0db63091e9c32f41e23d372f8eebc5f}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa0db63091e9c32f41e23d372f8eebc5f}} 
+using {\bfseries Time\+Stampsource} = std\+::function$<$ std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$()$>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa46898c078abfd1f0c836d50a11df718}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa46898c078abfd1f0c836d50a11df718}} 
+{\bfseries Flag\+Persistence} (std\+::string const \&sdk\+\_\+key, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&sink, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{Flag\+Store}} \&flag\+\_\+store, std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classIPersistence}{IPersistence}} $>$ persistence, Logger \&logger, std\+::size\+\_\+t max\+\_\+cached\+\_\+contexts, Time\+Stampsource time\+\_\+stamper=\mbox{[}$\,$\mbox{]}() \{ return std\+::chrono\+::system\+\_\+clock\+::now();\})
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_abbe6444643777f973047d0c9fde2d6b6}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_abbe6444643777f973047d0c9fde2d6b6}} 
+void {\bfseries Init} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::unordered\+\_\+map$<$ std\+::string, Item\+Descriptor $>$ data) override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5defdb41e1c4a20028db95b4497fb2a3}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5defdb41e1c4a20028db95b4497fb2a3}} 
+void {\bfseries Upsert} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::string key, Item\+Descriptor item) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5e3f2b535362ad584a6d60f7a85af499}{Apply}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, Flag\+Change\+Set change\+\_\+set, bool from\+\_\+cache) override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8aa278ff86b18c612d74347f72116b5b}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8aa278ff86b18c612d74347f72116b5b}} 
+void {\bfseries Load\+Cached} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context)
+\item 
+std\+::optional$<$ std\+::unordered\+\_\+map$<$ std\+::string, Item\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a9c26ddba67a6bf08d3b0c1c89fca793d}{Read\+Cached}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context)
+\item 
+std\+::optional$<$ std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8538bd0123b6a8efcb7f984fe939cf32}{Read\+Freshness}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Mirrors data source updates into the persistent store on their way to the next sink, and reads them back when a context is loaded.
+
+Thread-\/safe\+: concurrent reads and updates are serialized. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5e3f2b535362ad584a6d60f7a85af499}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5e3f2b535362ad584a6d60f7a85af499}} 
+\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}!Apply@{Apply}}
+\index{Apply@{Apply}!launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+\doxysubsubsection{\texorpdfstring{Apply()}{Apply()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Persistence\+::\+Apply (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&}]{context,  }\item[{Flag\+Change\+Set}]{change\+\_\+set,  }\item[{bool}]{from\+\_\+cache }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Applies a changeset as a single unit. Unlike Upsert, this path does not order or reject updates by version. FDv2 reserves the per-\/flag version for event tracking and manages payload consistency through selectors instead.
+
+
+\begin{DoxyParams}{Parameters}
+{\em from\+\_\+cache} & Whether the changeset was loaded from the local cache. Such data is not written back, nor treated as current. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink_ad2c8bc6cc0f28dc72fe80285e6ea808e}{launchdarkly\+::client\+\_\+side\+::\+IData\+Source\+Update\+Sink}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a9c26ddba67a6bf08d3b0c1c89fca793d}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a9c26ddba67a6bf08d3b0c1c89fca793d}} 
+\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}!ReadCached@{ReadCached}}
+\index{ReadCached@{ReadCached}!launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+\doxysubsubsection{\texorpdfstring{ReadCached()}{ReadCached()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::unordered\+\_\+map$<$ std\+::string, Item\+Descriptor $>$ $>$ launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Persistence\+::\+Read\+Cached (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&}]{context }\end{DoxyParamCaption})}
+
+Returns the flag data stored for the given context, or nullopt when nothing is stored for it or persistence is disabled. An empty map means an environment with no flags was stored, which is distinct from nothing being stored at all. \mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8538bd0123b6a8efcb7f984fe939cf32}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8538bd0123b6a8efcb7f984fe939cf32}} 
+\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}!ReadFreshness@{ReadFreshness}}
+\index{ReadFreshness@{ReadFreshness}!launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+\doxysubsubsection{\texorpdfstring{ReadFreshness()}{ReadFreshness()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ $>$ launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Persistence\+::\+Read\+Freshness (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&}]{context }\end{DoxyParamCaption})}
+
+Returns the time the service last confirmed the flag data for this context was current. Returns nullopt if the service never confirmed it, or if no flag data is cached for the context now.
+
+Keyed by the context\textquotesingle{}s whole set of attributes, not just its key, because changing an attribute can change how flags evaluate. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/flag\+\_\+manager/flag\+\_\+persistence.\+hpp\item 
+src/flag\+\_\+manager/flag\+\_\+persistence.\+cpp\end{DoxyCompactItemize}

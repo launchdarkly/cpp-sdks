@@ -1,0 +1,94 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4}{}\doxysection{launchdarkly\+::config\+::shared\+::builders\+::Persistence\+Builder$<$ Client\+SDK $>$ Class Reference}
+\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4}\index{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_1_1CustomBuilder}{Custom\+Builder}}
+\item 
+class \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_1_1NoneBuilder}{None\+Builder}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_aae65f73265cb8ee41c475d084d435c6a}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_aae65f73265cb8ee41c475d084d435c6a}} 
+using {\bfseries Persistence\+Type} = std\+::variant$<$ None\+Builder, Custom\+Builder $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a1df0555e3e78b2a39cd2e948ea8a7575}{Type}} (Persistence\+Type persistence)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a79467b880dda79ca790467c47aa82c98}{Custom}} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classIPersistence}{IPersistence}} $>$ implementation)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a2423cb95ca32888d85b5d02b0594c54e}{None}} ()
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a01a9a6f5c2f4100f5c94436a9356d59f}{Max\+Contexts}} (std\+::size\+\_\+t count)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a2564b743423fc36448085c04000f78ff}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a2564b743423fc36448085c04000f78ff}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Persistence}{built\+::\+Persistence}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$ {\bfseries Build} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a79467b880dda79ca790467c47aa82c98}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a79467b880dda79ca790467c47aa82c98}} 
+\index{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}!Custom@{Custom}}
+\index{Custom@{Custom}!launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}}
+\doxysubsubsection{\texorpdfstring{Custom()}{Custom()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$\+::Custom (\begin{DoxyParamCaption}\item[{std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classIPersistence}{IPersistence}} $>$}]{implementation }\end{DoxyParamCaption})}
+
+Set the persistence to a custom implementation.
+
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a01a9a6f5c2f4100f5c94436a9356d59f}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a01a9a6f5c2f4100f5c94436a9356d59f}} 
+\index{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}!MaxContexts@{MaxContexts}}
+\index{MaxContexts@{MaxContexts}!launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}}
+\doxysubsubsection{\texorpdfstring{MaxContexts()}{MaxContexts()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$\+::Max\+Contexts (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{count }\end{DoxyParamCaption})}
+
+Set the maximum number of contexts to retain cached flag data for.
+
+Has no effect if persistence is disabled.
+
+
+\begin{DoxyParams}{Parameters}
+{\em count} & The number to retain cached flag data for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a2423cb95ca32888d85b5d02b0594c54e}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a2423cb95ca32888d85b5d02b0594c54e}} 
+\index{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}!None@{None}}
+\index{None@{None}!launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}}
+\doxysubsubsection{\texorpdfstring{None()}{None()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$\+::None (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Disables persistence. \begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a1df0555e3e78b2a39cd2e948ea8a7575}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder_3_01ClientSDK_01_4_a1df0555e3e78b2a39cd2e948ea8a7575}} 
+\index{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}!Type@{Type}}
+\index{Type@{Type}!launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$@{launchdarkly::config::shared::builders::PersistenceBuilder$<$ ClientSDK $>$}}
+\doxysubsubsection{\texorpdfstring{Type()}{Type()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Persistence\+Builder}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK}} $>$\+::Type (\begin{DoxyParamCaption}\item[{Persistence\+Type}]{persistence }\end{DoxyParamCaption})}
+
+Set the implementation of persistence.
+
+The Custom and None convenience methods can be used to directly set the persistence type.
+
+
+\begin{DoxyParams}{Parameters}
+{\em persistence} & The builder for the type of persistence. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/persistence\+\_\+builder.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/config/persistence\+\_\+builder.\+cpp\end{DoxyCompactItemize}

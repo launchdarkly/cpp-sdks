@@ -1,0 +1,92 @@
+\hypertarget{structLDPersistence}{}\doxysection{LDPersistence Struct Reference}
+\label{structLDPersistence}\index{LDPersistence@{LDPersistence}}
+
+
+{\ttfamily \#include $<$builder.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Set\+Fn \mbox{\hyperlink{structLDPersistence_a13f2ef726a388ea42c13022949b19e81}{Set}}
+\item 
+Remove\+Fn \mbox{\hyperlink{structLDPersistence_ab0c9fa9849ee1fe18f2102ac9196cb22}{Remove}}
+\item 
+Read\+Fn \mbox{\hyperlink{structLDPersistence_a05f85844dce682067f71ca9e559d7265}{Read}}
+\item 
+Free\+Fn \mbox{\hyperlink{structLDPersistence_af3b436d1b4f41028feba441bb321ab48}{Free\+Read}}
+\item 
+void $\ast$ \mbox{\hyperlink{structLDPersistence_a93a222f58a75dfe30f2bccb6ca6e67b2}{User\+Data}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a persistence interface suitable for use with SDK configuration. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structLDPersistence_af3b436d1b4f41028feba441bb321ab48}\label{structLDPersistence_af3b436d1b4f41028feba441bb321ab48}} 
+\index{LDPersistence@{LDPersistence}!FreeRead@{FreeRead}}
+\index{FreeRead@{FreeRead}!LDPersistence@{LDPersistence}}
+\doxysubsubsection{\texorpdfstring{FreeRead}{FreeRead}}
+{\footnotesize\ttfamily Free\+Fn LDPersistence\+::\+Free\+Read}
+
+The SDK will call this function after it has finished with the read\+\_\+value from Read. \mbox{\Hypertarget{structLDPersistence_a05f85844dce682067f71ca9e559d7265}\label{structLDPersistence_a05f85844dce682067f71ca9e559d7265}} 
+\index{LDPersistence@{LDPersistence}!Read@{Read}}
+\index{Read@{Read}!LDPersistence@{LDPersistence}}
+\doxysubsubsection{\texorpdfstring{Read}{Read}}
+{\footnotesize\ttfamily Read\+Fn LDPersistence\+::\+Read}
+
+Attempt to read a value from the store. 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em storage\+\_\+namespace} & The namespace of the data. \\
+\hline
+ & {\em key} & The key of the data. \\
+\hline
+\mbox{\texttt{ out}}  & {\em read\+\_\+value} & Out buffer containing the read string data. Should be set to null if no data was read.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The number of characters read. Should be 0 if no data was read. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{structLDPersistence_ab0c9fa9849ee1fe18f2102ac9196cb22}\label{structLDPersistence_ab0c9fa9849ee1fe18f2102ac9196cb22}} 
+\index{LDPersistence@{LDPersistence}!Remove@{Remove}}
+\index{Remove@{Remove}!LDPersistence@{LDPersistence}}
+\doxysubsubsection{\texorpdfstring{Remove}{Remove}}
+{\footnotesize\ttfamily Remove\+Fn LDPersistence\+::\+Remove}
+
+Remove a value from the store. If the value cannot be removed, then the function should complete normally.
+
+
+\begin{DoxyParams}{Parameters}
+{\em storage\+\_\+namespace} & The namespace of the data. \\
+\hline
+{\em key} & The key of the data. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structLDPersistence_a13f2ef726a388ea42c13022949b19e81}\label{structLDPersistence_a13f2ef726a388ea42c13022949b19e81}} 
+\index{LDPersistence@{LDPersistence}!Set@{Set}}
+\index{Set@{Set}!LDPersistence@{LDPersistence}}
+\doxysubsubsection{\texorpdfstring{Set}{Set}}
+{\footnotesize\ttfamily Set\+Fn LDPersistence\+::\+Set}
+
+Add or update a value in the store. If the value cannot be set, then the function should complete normally.
+
+
+\begin{DoxyParams}{Parameters}
+{\em storage\+\_\+namespace} & The namespace for the data. \\
+\hline
+{\em key} & The key for the data. \\
+\hline
+{\em value} & The data to add or update. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structLDPersistence_a93a222f58a75dfe30f2bccb6ca6e67b2}\label{structLDPersistence_a93a222f58a75dfe30f2bccb6ca6e67b2}} 
+\index{LDPersistence@{LDPersistence}!UserData@{UserData}}
+\index{UserData@{UserData}!LDPersistence@{LDPersistence}}
+\doxysubsubsection{\texorpdfstring{UserData}{UserData}}
+{\footnotesize\ttfamily void$\ast$ LDPersistence\+::\+User\+Data}
+
+User\+Data is forwarded into all method calls in this struct. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/client\+\_\+side/bindings/c/config/\mbox{\hyperlink{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2builder_8h}{builder.\+h}}\end{DoxyCompactItemize}

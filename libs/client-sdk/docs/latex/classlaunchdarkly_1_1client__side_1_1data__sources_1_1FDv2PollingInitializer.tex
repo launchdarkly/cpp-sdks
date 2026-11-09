@@ -1,0 +1,87 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Polling\+Initializer Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer}\index{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}}
+
+
+{\ttfamily \#include $<$polling\+\_\+initializer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Polling\+Initializer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Polling\+Initializer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a75252bfdfdc56495e458c89308bec2ca}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a75252bfdfdc56495e458c89308bec2ca}} 
+{\bfseries FDv2\+Polling\+Initializer} (boost\+::asio\+::any\+\_\+io\+\_\+executor const \&executor, Logger const \&logger, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2RequestConfig}{FDv2\+Request\+Config}} const \&request\+\_\+config)
+\item 
+async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{Run}} () override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}{Close}} () override
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_ae7abe0589849a7a12f1a0b817cde9109}{Identity}} () const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Loads a basis with a single request to the FDv2 client polling endpoint.
+
+Threading model\+: \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{Run()}} should only be called once at a time. \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}{Close()}} may be called concurrently with \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{Run()}}. This object may be safely destroyed once no call to \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{Run()}} or \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}{Close()}} is in progress. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Polling\+Initializer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{Run()}} call, causing it to return \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3ba4036d82984698fb82fce698306543}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_ae7abe0589849a7a12f1a0b817cde9109}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_ae7abe0589849a7a12f1a0b817cde9109}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Polling\+Initializer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the initializer. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_a3e1f73970a88ebb65f2cac2f6630abcc}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}!Run@{Run}}
+\index{Run@{Run}!launchdarkly::client\_side::data\_sources::FDv2PollingInitializer@{launchdarkly::client\_side::data\_sources::FDv2PollingInitializer}}
+\doxysubsubsection{\texorpdfstring{Run()}{Run()}}
+{\footnotesize\ttfamily async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Polling\+Initializer\+::\+Run (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a Future that resolves with the result once the initializer completes. Called at most once per instance.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_a0836103cedf0ccc0694487a41b72b200}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2PollingInitializer_abde0788d73384df3df8cc10f36dcba21}{Run()}}, in which case the future resolves with \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer_aa2ce3ebca088ab633002d41ffde0daa2}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/polling\+\_\+initializer.\+hpp\item 
+src/data\+\_\+sources/fdv2/polling\+\_\+initializer.\+cpp\end{DoxyCompactItemize}

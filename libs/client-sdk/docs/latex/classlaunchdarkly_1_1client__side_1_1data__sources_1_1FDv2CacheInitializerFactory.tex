@@ -1,0 +1,61 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Cache\+Initializer\+Factory Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory}\index{launchdarkly::client\_side::data\_sources::FDv2CacheInitializerFactory@{launchdarkly::client\_side::data\_sources::FDv2CacheInitializerFactory}}
+
+
+{\ttfamily \#include $<$cache\+\_\+initializer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Cache\+Initializer\+Factory\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=233pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Cache\+Initializer\+Factory\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=233pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_ad9ace655cfaaba5d33d5ffeb272cf092}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_ad9ace655cfaaba5d33d5ffeb272cf092}} 
+{\bfseries FDv2\+Cache\+Initializer\+Factory} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}{flag\+\_\+manager\+::\+Flag\+Persistence}} $\ast$cache, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} context, Logger const \&logger)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_aaf6a28491a048515490078229e1c16fe}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_aaf6a28491a048515490078229e1c16fe}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Initializer}{IFDv2\+Initializer}} $>$ {\bfseries Build} () override
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_aac16c4def7701ef9cc4e337502996d73}{Is\+From\+Cache}} () const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builds fresh \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializer}{FDv2\+Cache\+Initializer}} instances on demand.
+
+Thread-\/safe\+: Build() may be called from any thread. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_aac16c4def7701ef9cc4e337502996d73}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2CacheInitializerFactory_aac16c4def7701ef9cc4e337502996d73}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2CacheInitializerFactory@{launchdarkly::client\_side::data\_sources::FDv2CacheInitializerFactory}!IsFromCache@{IsFromCache}}
+\index{IsFromCache@{IsFromCache}!launchdarkly::client\_side::data\_sources::FDv2CacheInitializerFactory@{launchdarkly::client\_side::data\_sources::FDv2CacheInitializerFactory}}
+\doxysubsubsection{\texorpdfstring{IsFromCache()}{IsFromCache()}}
+{\footnotesize\ttfamily bool launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Cache\+Initializer\+Factory\+::\+Is\+From\+Cache (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Whether the initializers this factory builds read from the local cache rather than the network. 
+
+Reimplemented from \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory_a999ce41b19e24d3171c1900e95556a87}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Initializer\+Factory}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/cache\+\_\+initializer.\+hpp\item 
+src/data\+\_\+sources/fdv2/cache\+\_\+initializer.\+cpp\end{DoxyCompactItemize}

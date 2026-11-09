@@ -1,0 +1,61 @@
+\hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Source\+Result Struct Reference}
+\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult}\index{launchdarkly::client\_side::data\_sources::FDv2SourceResult@{launchdarkly::client\_side::data\_sources::FDv2SourceResult}}
+
+
+{\ttfamily \#include $<$fdv2\+\_\+source\+\_\+result.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1ChangeSet}{Change\+Set}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Goodbye}{Goodbye}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Interrupted}{Interrupted}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Shutdown}{Shutdown}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1TerminalError}{Terminal\+Error}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a6dd27669af31cf400d2981e31306ee6b}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a6dd27669af31cf400d2981e31306ee6b}} 
+using {\bfseries Error\+Info} = \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusErrorInfo}{common\+::data\+\_\+sources\+::\+Data\+Source\+Status\+Error\+Info}}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_abefba6f33968f5fdcfe279074fbeabb4}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_abefba6f33968f5fdcfe279074fbeabb4}} 
+using {\bfseries Value} = std\+::variant$<$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1ChangeSet}{Change\+Set}}, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Interrupted}{Interrupted}}, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1TerminalError}{Terminal\+Error}}, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Shutdown}{Shutdown}}, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_1_1Goodbye}{Goodbye}} $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a6c6e3d5ad77158d21738a90b68393054}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a6c6e3d5ad77158d21738a90b68393054}} 
+Value {\bfseries value}
+\item 
+std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} $>$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a021c2db050e213d2647411e731432e23}{fdv1\+\_\+fallback}}
+\item 
+std\+::optional$<$ std\+::string $>$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a9c765f9353869522dd9560ba1c78e240}{environment\+\_\+id}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+What an initializer or synchronizer produced\+: either flag data to apply, or a signal about the source\textquotesingle{}s own state. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a9c765f9353869522dd9560ba1c78e240}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a9c765f9353869522dd9560ba1c78e240}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2SourceResult@{launchdarkly::client\_side::data\_sources::FDv2SourceResult}!environment\_id@{environment\_id}}
+\index{environment\_id@{environment\_id}!launchdarkly::client\_side::data\_sources::FDv2SourceResult@{launchdarkly::client\_side::data\_sources::FDv2SourceResult}}
+\doxysubsubsection{\texorpdfstring{environment\_id}{environment\_id}}
+{\footnotesize\ttfamily std\+::optional$<$std\+::string$>$ launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Source\+Result\+::environment\+\_\+id}
+
+The environment the service reported this result was evaluated in, if the underlying transport could observe it. \mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a021c2db050e213d2647411e731432e23}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2SourceResult_a021c2db050e213d2647411e731432e23}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2SourceResult@{launchdarkly::client\_side::data\_sources::FDv2SourceResult}!fdv1\_fallback@{fdv1\_fallback}}
+\index{fdv1\_fallback@{fdv1\_fallback}!launchdarkly::client\_side::data\_sources::FDv2SourceResult@{launchdarkly::client\_side::data\_sources::FDv2SourceResult}}
+\doxysubsubsection{\texorpdfstring{fdv1\_fallback}{fdv1\_fallback}}
+{\footnotesize\ttfamily std\+::optional$<$\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}}$>$ launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Source\+Result\+::fdv1\+\_\+fallback}
+
+Set if the underlying transport observed an FDv1 fallback directive. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/fdv2\+\_\+source\+\_\+result.\+hpp\end{DoxyCompactItemize}

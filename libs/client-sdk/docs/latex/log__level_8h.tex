@@ -1,0 +1,86 @@
+\hypertarget{log__level_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/logging/log\+\_\+level.h File Reference}
+\label{log__level_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/logging/log\_level.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/logging/log\_level.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/status.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+Include dependency graph for log\+\_\+level.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{log__level_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{log__level_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} \{ \newline
+{\bfseries LD\+\_\+\+LOG\+\_\+\+DEBUG} = 0
+, {\bfseries LD\+\_\+\+LOG\+\_\+\+INFO} = 1
+, {\bfseries LD\+\_\+\+LOG\+\_\+\+WARN} = 2
+, {\bfseries LD\+\_\+\+LOG\+\_\+\+ERROR} = 3
+, \newline
+{\bfseries LD\+\_\+\+UNUSED\+\_\+\+MAXVALUE} = INT32\+\_\+\+MAX
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{log__level_8h_adcc43a9628e714d45f12d305b483fa7d}{LDLog\+Level\+\_\+\+Name}} (enum \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} level, char const $\ast$level\+\_\+if\+\_\+unknown)
+\item 
+\mbox{\hyperlink{log__level_8h_aa0fcb189491198d54e25f1d0032850e2}{LDLog\+Level\+\_\+\+Enum}} (char const $\ast$level, enum \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} level\+\_\+if\+\_\+unknown)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{log__level_8h_a350a93aa37f635cf7e778121189bb49c}\label{log__level_8h_a350a93aa37f635cf7e778121189bb49c}} 
+\index{log\_level.h@{log\_level.h}!LDLogLevel@{LDLogLevel}}
+\index{LDLogLevel@{LDLogLevel}!log\_level.h@{log\_level.h}}
+\doxysubsubsection{\texorpdfstring{LDLogLevel}{LDLogLevel}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}}}
+
+Defines the log levels used with the SDK\textquotesingle{}s default logger, or a user-\/provided custom logger. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{log__level_8h_aa0fcb189491198d54e25f1d0032850e2}\label{log__level_8h_aa0fcb189491198d54e25f1d0032850e2}} 
+\index{log\_level.h@{log\_level.h}!LDLogLevel\_Enum@{LDLogLevel\_Enum}}
+\index{LDLogLevel\_Enum@{LDLogLevel\_Enum}!log\_level.h@{log\_level.h}}
+\doxysubsubsection{\texorpdfstring{LDLogLevel\_Enum()}{LDLogLevel\_Enum()}}
+{\footnotesize\ttfamily LDLog\+Level\+\_\+\+Enum (\begin{DoxyParamCaption}\item[{char const $\ast$}]{level,  }\item[{enum \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}}}]{level\+\_\+if\+\_\+unknown }\end{DoxyParamCaption})}
+
+Lookup a LDLog\+Level by name. 
+\begin{DoxyParams}{Parameters}
+{\em level} & Name of level. \\
+\hline
+{\em level\+\_\+if\+\_\+unknown} & Default level to return if the level wasn\textquotesingle{}t recognized. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+LDLog\+Level matching the name, or level\+\_\+if\+\_\+unknown if not recognized. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{log__level_8h_adcc43a9628e714d45f12d305b483fa7d}\label{log__level_8h_adcc43a9628e714d45f12d305b483fa7d}} 
+\index{log\_level.h@{log\_level.h}!LDLogLevel\_Name@{LDLogLevel\_Name}}
+\index{LDLogLevel\_Name@{LDLogLevel\_Name}!log\_level.h@{log\_level.h}}
+\doxysubsubsection{\texorpdfstring{LDLogLevel\_Name()}{LDLogLevel\_Name()}}
+{\footnotesize\ttfamily LDLog\+Level\+\_\+\+Name (\begin{DoxyParamCaption}\item[{enum \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}}}]{level,  }\item[{char const $\ast$}]{level\+\_\+if\+\_\+unknown }\end{DoxyParamCaption})}
+
+Lookup the name of a LDLog\+Level. 
+\begin{DoxyParams}{Parameters}
+{\em level} & Target level. \\
+\hline
+{\em level\+\_\+if\+\_\+unknown} & Default name to return if the level wasn\textquotesingle{}t recognized. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Name of the level as a string, or level\+\_\+if\+\_\+unknown if not recognized. 
+\end{DoxyReturn}
