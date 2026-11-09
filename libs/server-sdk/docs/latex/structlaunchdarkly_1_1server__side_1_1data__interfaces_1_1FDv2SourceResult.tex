@@ -1,0 +1,53 @@
+\hypertarget{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::FDv2\+Source\+Result Struct Reference}
+\label{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}\index{launchdarkly::server\_side::data\_interfaces::FDv2SourceResult@{launchdarkly::server\_side::data\_interfaces::FDv2SourceResult}}
+
+
+{\ttfamily \#include $<$fdv2\+\_\+source\+\_\+result.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1ChangeSet}{Change\+Set}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Goodbye}{Goodbye}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Interrupted}{Interrupted}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Shutdown}{Shutdown}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1TerminalError}{Terminal\+Error}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_aa5710459353fff8a63a0588bc91ca20d}\label{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_aa5710459353fff8a63a0588bc91ca20d}} 
+using {\bfseries Error\+Info} = \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusErrorInfo}{common\+::data\+\_\+sources\+::\+Data\+Source\+Status\+Error\+Info}}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_a8fac324af6cd23198da9d8f227a2e502}\label{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_a8fac324af6cd23198da9d8f227a2e502}} 
+using {\bfseries Value} = std\+::variant$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1ChangeSet}{Change\+Set}}, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Interrupted}{Interrupted}}, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1TerminalError}{Terminal\+Error}}, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Shutdown}{Shutdown}}, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Goodbye}{Goodbye}} $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_a2131c0d6b7c7ae2ed970cee115c995fe}\label{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_a2131c0d6b7c7ae2ed970cee115c995fe}} 
+Value {\bfseries value}
+\item 
+std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} $>$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_aceb6f286cdcd11dee1738a931e9c7dd0}{fdv1\+\_\+fallback}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Result returned by \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a019bb72c783d2ed1cc244137ffd6dddb}{IFDv2\+Initializer\+::\+Run}} and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{IFDv2\+Synchronizer\+::\+Next}}. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_aceb6f286cdcd11dee1738a931e9c7dd0}\label{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_aceb6f286cdcd11dee1738a931e9c7dd0}} 
+\index{launchdarkly::server\_side::data\_interfaces::FDv2SourceResult@{launchdarkly::server\_side::data\_interfaces::FDv2SourceResult}!fdv1\_fallback@{fdv1\_fallback}}
+\index{fdv1\_fallback@{fdv1\_fallback}!launchdarkly::server\_side::data\_interfaces::FDv2SourceResult@{launchdarkly::server\_side::data\_interfaces::FDv2SourceResult}}
+\doxysubsubsection{\texorpdfstring{fdv1\_fallback}{fdv1\_fallback}}
+{\footnotesize\ttfamily std\+::optional$<$\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}}$>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+FDv2\+Source\+Result\+::fdv1\+\_\+fallback}
+
+Set if the underlying transport observed an FDv1 fallback directive. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/source/fdv2\+\_\+source\+\_\+result.\+hpp\end{DoxyCompactItemize}

@@ -1,0 +1,47 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Polling\+Adapter\+Factory Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory}\index{launchdarkly::server\_side::data\_systems::FDv1PollingAdapterFactory@{launchdarkly::server\_side::data\_systems::FDv1PollingAdapterFactory}}
+
+
+{\ttfamily \#include $<$synchronizer\+\_\+factories.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Polling\+Adapter\+Factory\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=229pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv1\+Polling\+Adapter\+Factory\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=229pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory_adf96d1d7b71682d5449cb08f342075cc}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory_adf96d1d7b71682d5449cb08f342075cc}} 
+{\bfseries FDv1\+Polling\+Adapter\+Factory} (boost\+::asio\+::any\+\_\+io\+\_\+executor executor, Logger logger, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config\+::built\+::\+Service\+Endpoints}} endpoints, \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1PollingConfig}{config\+::built\+::\+FDv2\+Config\+::\+FDv1\+Polling\+Config}} polling, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} http\+\_\+properties)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory_a0551fa5574d9ea058ca5334797ad6fe9}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory_a0551fa5574d9ea058ca5334797ad6fe9}} 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}} $>$ {\bfseries Build} () override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory_ad9ca0a8a36d2592c075e8d398aa8d671}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1PollingAdapterFactory_ad9ca0a8a36d2592c075e8d398aa8d671}} 
+bool {\bfseries Is\+FDv1\+Fallback} () const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builds fresh \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer}{FDv1\+Adapter\+Synchronizer}} instances wrapping a freshly-\/built FDv1 \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource}{Polling\+Data\+Source}}. Reports Is\+FDv1\+Fallback() = true. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/synchronizer\+\_\+factories.\+hpp\item 
+src/data\+\_\+systems/fdv2/synchronizer\+\_\+factories.\+cpp\end{DoxyCompactItemize}

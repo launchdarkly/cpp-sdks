@@ -1,0 +1,295 @@
+\hypertarget{evaluation__series__data_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/evaluation\+\_\+series\+\_\+data.h File Reference}
+\label{evaluation__series__data_8h}\index{include/launchdarkly/server\_side/bindings/c/evaluation\_series\_data.h@{include/launchdarkly/server\_side/bindings/c/evaluation\_series\_data.h}}
+
+
+C bindings for hook data passed between evaluation stages.  
+
+
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/context.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+Include dependency graph for evaluation\+\_\+series\+\_\+data.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{evaluation__series__data_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{evaluation__series__data_8h_a6502d002c9b78204e71e5eda1ec07b13}\label{evaluation__series__data_8h_a6502d002c9b78204e71e5eda1ec07b13}} 
+typedef struct p\+\_\+\+LDServer\+SDKEvaluation\+Series\+Data $\ast$ {\bfseries LDServer\+SDKEvaluation\+Series\+Data}
+\item 
+\mbox{\Hypertarget{evaluation__series__data_8h_afa86b818a7d32d67b18dc0dcbc975b52}\label{evaluation__series__data_8h_afa86b818a7d32d67b18dc0dcbc975b52}} 
+typedef struct p\+\_\+\+LDEvaluation\+Series\+Data\+Builder $\ast$ {\bfseries LDServer\+SDKEvaluation\+Series\+Data\+Builder}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{evaluation__series__data_8h_aa3ad812fda85fb2ff65b458d009c843b}{LDEvaluation\+Series\+Data\+\_\+\+New}} (void)
+\begin{DoxyCompactList}\small\item\em Create a new empty evaluation series data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_a50fc4cb51feae11129ca8160c52925db}{LDEvaluation\+Series\+Data\+\_\+\+Get\+Value}} (LDServer\+SDKEvaluation\+Series\+Data data, char const $\ast$key, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} $\ast$out\+\_\+value)
+\begin{DoxyCompactList}\small\item\em Get a Value from the evaluation series data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_a3cb359df322fa74573113a7f35315d85}{LDEvaluation\+Series\+Data\+\_\+\+Get\+Pointer}} (LDServer\+SDKEvaluation\+Series\+Data data, char const $\ast$key, void $\ast$$\ast$out\+\_\+pointer)
+\begin{DoxyCompactList}\small\item\em Get a pointer from the evaluation series data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_a210b4a9ae1ff924ba3ecc05f876416b4}{LDEvaluation\+Series\+Data\+\_\+\+New\+Builder}} (LDServer\+SDKEvaluation\+Series\+Data data)
+\begin{DoxyCompactList}\small\item\em Create a builder from existing data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_af5d338bcd18b5784b8bf1afaa166dabb}{LDEvaluation\+Series\+Data\+\_\+\+Free}} (LDServer\+SDKEvaluation\+Series\+Data data)
+\begin{DoxyCompactList}\small\item\em Free evaluation series data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_a05860a96de4b20aa6c06ece56f02c969}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Set\+Value}} (LDServer\+SDKEvaluation\+Series\+Data\+Builder builder, char const $\ast$key, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} value)
+\begin{DoxyCompactList}\small\item\em Set a Value in the builder. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_a2c9e50d7269ffbd56fbb2692eb4e1bf5}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Set\+Pointer}} (LDServer\+SDKEvaluation\+Series\+Data\+Builder builder, char const $\ast$key, void $\ast$pointer)
+\begin{DoxyCompactList}\small\item\em Set a pointer in the builder. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_abaad039c62016571eb82e123911e31e3}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Build}} (LDServer\+SDKEvaluation\+Series\+Data\+Builder builder)
+\begin{DoxyCompactList}\small\item\em Build the evaluation series data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{evaluation__series__data_8h_a125102db2ee238acceb9c22d57769cba}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Free}} (LDServer\+SDKEvaluation\+Series\+Data\+Builder builder)
+\begin{DoxyCompactList}\small\item\em Free a builder without building. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+C bindings for hook data passed between evaluation stages. 
+
+Evaluation\+Series\+Data is mutable data that hooks can use to pass information from before\+Evaluation to after\+Evaluation. This is useful for\+:
+\begin{DoxyItemize}
+\item Storing timing information
+\item Passing span contexts for distributed tracing
+\item Accumulating custom metrics
+\end{DoxyItemize}
+
+LIFETIME AND OWNERSHIP\+:
+\begin{DoxyItemize}
+\item Data returned from hook callbacks transfers ownership to the SDK
+\item Data received in callbacks can be modified and returned (ownership transfer)
+\item Keys are copied by the SDK
+\item Values retrieved with Get\+Value() are temporary -\/ valid only during callback
+\item Do not call \mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free()}} on values retrieved with Get\+Value()
+\item Values stored with Set\+Value() are copied into the data object
+\item Pointers (void$\ast$) lifetime is managed by the application
+\end{DoxyItemize}
+
+BUILDER PATTERN\+: To modify data, use \mbox{\hyperlink{evaluation__series__data_8h_a210b4a9ae1ff924ba3ecc05f876416b4}{LDEvaluation\+Series\+Data\+\_\+\+New\+Builder()}} to create a builder, make changes, then build a new data object. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{evaluation__series__data_8h_af5d338bcd18b5784b8bf1afaa166dabb}\label{evaluation__series__data_8h_af5d338bcd18b5784b8bf1afaa166dabb}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesData\_Free@{LDEvaluationSeriesData\_Free}}
+\index{LDEvaluationSeriesData\_Free@{LDEvaluationSeriesData\_Free}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesData\_Free()}{LDEvaluationSeriesData\_Free()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data}]{data }\end{DoxyParamCaption})}
+
+
+
+Free evaluation series data. 
+
+Only call this if you created the data and are not returning it from a hook callback. Data returned from callbacks is owned by the SDK.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Data to free. May be NULL (no-\/op). \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{evaluation__series__data_8h_a3cb359df322fa74573113a7f35315d85}\label{evaluation__series__data_8h_a3cb359df322fa74573113a7f35315d85}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesData\_GetPointer@{LDEvaluationSeriesData\_GetPointer}}
+\index{LDEvaluationSeriesData\_GetPointer@{LDEvaluationSeriesData\_GetPointer}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesData\_GetPointer()}{LDEvaluationSeriesData\_GetPointer()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+\_\+\+Get\+Pointer (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data}]{data,  }\item[{char const $\ast$}]{key,  }\item[{void $\ast$$\ast$}]{out\+\_\+pointer }\end{DoxyParamCaption})}
+
+
+
+Get a pointer from the evaluation series data. 
+
+Retrieves a pointer previously stored with \mbox{\hyperlink{evaluation__series__data_8h_a2c9e50d7269ffbd56fbb2692eb4e1bf5}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Set\+Pointer()}}.
+
+USAGE -\/ Open\+Telemetry span\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{void}* span;}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (\mbox{\hyperlink{evaluation__series__data_8h_a3cb359df322fa74573113a7f35315d85}{LDEvaluationSeriesData\_GetPointer}}(data, \textcolor{stringliteral}{"{}span"{}}, \&span)) \{}
+\DoxyCodeLine{    \textcolor{comment}{// Cast and use span}}
+\DoxyCodeLine{    MySpan* typed\_span = (MySpan*)span;}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Data object. Must not be NULL. \\
+\hline
+{\em key} & Key to look up. Must be null-\/terminated UTF-\/8 string. Must not be NULL. \\
+\hline
+{\em out\+\_\+pointer} & Pointer to receive the pointer value. Must not be NULL. Set to NULL if key not found. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if key was found and contains a pointer, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__series__data_8h_a50fc4cb51feae11129ca8160c52925db}\label{evaluation__series__data_8h_a50fc4cb51feae11129ca8160c52925db}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesData\_GetValue@{LDEvaluationSeriesData\_GetValue}}
+\index{LDEvaluationSeriesData\_GetValue@{LDEvaluationSeriesData\_GetValue}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesData\_GetValue()}{LDEvaluationSeriesData\_GetValue()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+\_\+\+Get\+Value (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data}]{data,  }\item[{char const $\ast$}]{key,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} $\ast$}]{out\+\_\+value }\end{DoxyParamCaption})}
+
+
+
+Get a Value from the evaluation series data. 
+
+LIFETIME\+: Returns a temporary value valid only during the callback. Do not call \mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free()}} on the returned value.
+
+USAGE\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} value;}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (\mbox{\hyperlink{evaluation__series__data_8h_a50fc4cb51feae11129ca8160c52925db}{LDEvaluationSeriesData\_GetValue}}(data, \textcolor{stringliteral}{"{}timestamp"{}}, \&value)) \{}
+\DoxyCodeLine{    \textcolor{comment}{// Use value (valid only during callback)}}
+\DoxyCodeLine{    \textcolor{keywordtype}{double} timestamp = \mbox{\hyperlink{value_8h_a9d8c737c58fbc4f335f3bab42a6670a4}{LDValue\_GetNumber}}(value);}
+\DoxyCodeLine{    \textcolor{comment}{// Do NOT call LDValue\_Free(value)}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Data object. Must not be NULL. \\
+\hline
+{\em key} & Key to look up. Must be null-\/terminated UTF-\/8 string. Must not be NULL. \\
+\hline
+{\em out\+\_\+value} & Pointer to receive the value. Must not be NULL. Set to a temporary LDValue (valid only during callback). Do not call \mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free()}} on this value. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if key was found and contains a Value, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__series__data_8h_aa3ad812fda85fb2ff65b458d009c843b}\label{evaluation__series__data_8h_aa3ad812fda85fb2ff65b458d009c843b}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesData\_New@{LDEvaluationSeriesData\_New}}
+\index{LDEvaluationSeriesData\_New@{LDEvaluationSeriesData\_New}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesData\_New()}{LDEvaluationSeriesData\_New()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+\_\+\+New (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Create a new empty evaluation series data. 
+
+\begin{DoxyReturn}{Returns}
+New data object. Must be freed with \mbox{\hyperlink{evaluation__series__data_8h_af5d338bcd18b5784b8bf1afaa166dabb}{LDEvaluation\+Series\+Data\+\_\+\+Free()}} or transferred to SDK via hook callback return. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__series__data_8h_a210b4a9ae1ff924ba3ecc05f876416b4}\label{evaluation__series__data_8h_a210b4a9ae1ff924ba3ecc05f876416b4}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesData\_NewBuilder@{LDEvaluationSeriesData\_NewBuilder}}
+\index{LDEvaluationSeriesData\_NewBuilder@{LDEvaluationSeriesData\_NewBuilder}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesData\_NewBuilder()}{LDEvaluationSeriesData\_NewBuilder()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+\_\+\+New\+Builder (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data}]{data }\end{DoxyParamCaption})}
+
+
+
+Create a builder from existing data. 
+
+Creates a builder initialized with the contents of the data object. Use this to add or modify entries in the data.
+
+USAGE\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{LDServerSDKEvaluationSeriesDataBuilder builder =}
+\DoxyCodeLine{    \mbox{\hyperlink{evaluation__series__data_8h_a210b4a9ae1ff924ba3ecc05f876416b4}{LDEvaluationSeriesData\_NewBuilder}}(input\_data);}
+\DoxyCodeLine{\mbox{\hyperlink{evaluation__series__data_8h_a05860a96de4b20aa6c06ece56f02c969}{LDEvaluationSeriesDataBuilder\_SetValue}}(builder, \textcolor{stringliteral}{"{}key"{}}, value);}
+\DoxyCodeLine{\textcolor{keywordflow}{return} \mbox{\hyperlink{evaluation__series__data_8h_abaad039c62016571eb82e123911e31e3}{LDEvaluationSeriesDataBuilder\_Build}}(builder);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Data to copy into builder. May be NULL (creates empty builder). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Builder object. Must be freed with \mbox{\hyperlink{evaluation__series__data_8h_a125102db2ee238acceb9c22d57769cba}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Free()}} or consumed with \mbox{\hyperlink{evaluation__series__data_8h_abaad039c62016571eb82e123911e31e3}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Build()}}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__series__data_8h_abaad039c62016571eb82e123911e31e3}\label{evaluation__series__data_8h_abaad039c62016571eb82e123911e31e3}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesDataBuilder\_Build@{LDEvaluationSeriesDataBuilder\_Build}}
+\index{LDEvaluationSeriesDataBuilder\_Build@{LDEvaluationSeriesDataBuilder\_Build}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesDataBuilder\_Build()}{LDEvaluationSeriesDataBuilder\_Build()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+Builder\+\_\+\+Build (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data\+Builder}]{builder }\end{DoxyParamCaption})}
+
+
+
+Build the evaluation series data. 
+
+Consumes the builder and creates a data object. After calling this, do not call \mbox{\hyperlink{evaluation__series__data_8h_a125102db2ee238acceb9c22d57769cba}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Free()}} on the builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & Builder to consume. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Data object. Must be freed with \mbox{\hyperlink{evaluation__series__data_8h_af5d338bcd18b5784b8bf1afaa166dabb}{LDEvaluation\+Series\+Data\+\_\+\+Free()}} or transferred to SDK via hook callback return. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__series__data_8h_a125102db2ee238acceb9c22d57769cba}\label{evaluation__series__data_8h_a125102db2ee238acceb9c22d57769cba}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesDataBuilder\_Free@{LDEvaluationSeriesDataBuilder\_Free}}
+\index{LDEvaluationSeriesDataBuilder\_Free@{LDEvaluationSeriesDataBuilder\_Free}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesDataBuilder\_Free()}{LDEvaluationSeriesDataBuilder\_Free()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data\+Builder}]{builder }\end{DoxyParamCaption})}
+
+
+
+Free a builder without building. 
+
+Only call this if you did not call \mbox{\hyperlink{evaluation__series__data_8h_abaad039c62016571eb82e123911e31e3}{LDEvaluation\+Series\+Data\+Builder\+\_\+\+Build()}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & Builder to free. May be NULL (no-\/op). \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{evaluation__series__data_8h_a2c9e50d7269ffbd56fbb2692eb4e1bf5}\label{evaluation__series__data_8h_a2c9e50d7269ffbd56fbb2692eb4e1bf5}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesDataBuilder\_SetPointer@{LDEvaluationSeriesDataBuilder\_SetPointer}}
+\index{LDEvaluationSeriesDataBuilder\_SetPointer@{LDEvaluationSeriesDataBuilder\_SetPointer}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesDataBuilder\_SetPointer()}{LDEvaluationSeriesDataBuilder\_SetPointer()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+Builder\+\_\+\+Set\+Pointer (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data\+Builder}]{builder,  }\item[{char const $\ast$}]{key,  }\item[{void $\ast$}]{pointer }\end{DoxyParamCaption})}
+
+
+
+Set a pointer in the builder. 
+
+Stores an application-\/specific pointer. Useful for storing objects like Open\+Telemetry spans that need to be passed from before\+Evaluation to after\+Evaluation.
+
+LIFETIME\+: The pointer lifetime must extend through the evaluation series (from before\+Evaluation through after\+Evaluation).
+
+EXAMPLE -\/ Open\+Telemetry span\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{MySpan* span = start\_span();}
+\DoxyCodeLine{\mbox{\hyperlink{evaluation__series__data_8h_a2c9e50d7269ffbd56fbb2692eb4e1bf5}{LDEvaluationSeriesDataBuilder\_SetPointer}}(builder, \textcolor{stringliteral}{"{}span"{}}, span);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & Builder object. Must not be NULL. \\
+\hline
+{\em key} & Key for the pointer. Must be null-\/terminated UTF-\/8 string. Must not be NULL. The key is copied. \\
+\hline
+{\em pointer} & Pointer to store. May be NULL. Lifetime managed by caller. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{evaluation__series__data_8h_a05860a96de4b20aa6c06ece56f02c969}\label{evaluation__series__data_8h_a05860a96de4b20aa6c06ece56f02c969}} 
+\index{evaluation\_series\_data.h@{evaluation\_series\_data.h}!LDEvaluationSeriesDataBuilder\_SetValue@{LDEvaluationSeriesDataBuilder\_SetValue}}
+\index{LDEvaluationSeriesDataBuilder\_SetValue@{LDEvaluationSeriesDataBuilder\_SetValue}!evaluation\_series\_data.h@{evaluation\_series\_data.h}}
+\doxysubsubsection{\texorpdfstring{LDEvaluationSeriesDataBuilder\_SetValue()}{LDEvaluationSeriesDataBuilder\_SetValue()}}
+{\footnotesize\ttfamily LDEvaluation\+Series\+Data\+Builder\+\_\+\+Set\+Value (\begin{DoxyParamCaption}\item[{LDServer\+SDKEvaluation\+Series\+Data\+Builder}]{builder,  }\item[{char const $\ast$}]{key,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{value }\end{DoxyParamCaption})}
+
+
+
+Set a Value in the builder. 
+
+OWNERSHIP\+: The value is copied/moved into the builder. You are responsible for freeing the original value if needed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & Builder object. Must not be NULL. \\
+\hline
+{\em key} & Key for the value. Must be null-\/terminated UTF-\/8 string. Must not be NULL. The key is copied. \\
+\hline
+{\em value} & Value to store. Must not be NULL. The value is copied/moved. \\
+\hline
+\end{DoxyParams}
