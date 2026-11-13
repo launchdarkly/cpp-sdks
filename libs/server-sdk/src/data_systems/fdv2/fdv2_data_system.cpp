@@ -484,7 +484,8 @@ void FDv2DataSystem::OnFDv1RetryTimer() {
 
 void FDv2DataSystem::ApplyChangeSet(
     data_model::ChangeSet<data_interfaces::ChangeSetData> change_set) {
-    if (change_set.selector.value.has_value()) {
+    if (change_set.selector.value.has_value() ||
+        change_set.type != data_model::ChangeSetType::kNone) {
         std::lock_guard<std::mutex> lock(mutex_);
         selector_ = change_set.selector;
     }

@@ -42,6 +42,29 @@ TEST(HandleFDv2PollResponseTest, FlagIsFalseWhenHeaderAbsent) {
     EXPECT_FALSE(result.fdv1_fallback);
 }
 
+TEST(HandleFDv2PollResponseTest, SelectorlessFullTransferOmitsBasisOnNextPoll) {
+    auto result = HandleResponse(
+        200,
+        R"({"events":[)"
+        R"({"event":"server-intent","data":{"payloads":[)"
+        R"({"id":"","target":0,"intentCode":"xfer-full"}]}},)"
+        R"({"event":"payload-transferred","data":{"state":"","version":0}})"
+        R"(]})",
+        {});
+    auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result.value);
+    ASSERT_NE(nullptr, change_set);
+    EXPECT_EQ(data_model::ChangeSetType::kFull, change_set->change_set.type);
+    EXPECT_FALSE(change_set->change_set.selector.value.has_value());
+
+    auto logger = MakeNullLogger();
+    auto props =
+        config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
+    auto req = MakeFDv2PollRequest("http://example.com", props,
+                                   change_set->change_set.selector,
+                                   std::nullopt, logger);
+    EXPECT_EQ("http://example.com/sdk/poll", req.Url());
+}
+
 TEST(HandleFDv2PollResponseTest, RecoverableErrorPropagatesFlag) {
     auto result =
         HandleResponse(400, std::nullopt, {{"x-ld-fd-fallback", "true"}});
