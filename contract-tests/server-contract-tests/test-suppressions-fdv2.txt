@@ -1,4 +1,4 @@
-# C++ implements TTL-based FDv1 fallback; this scenario tests the older terminal semantics. Tracked in SDK-2527.
+# The SDK still retries streaming after HTTP 500 with an FDv1 directive and no fallback.
 streaming/fdv2/FDv1 fallback directive/directive without FDv1 fallback configured halts the data system
 
 # FDv2 public payload filter API is not exposed by the C++ SDK.
