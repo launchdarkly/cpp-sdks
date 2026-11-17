@@ -340,11 +340,19 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         ancestors->erase(key);
     }
 
+    // The flag exists, so the event has the flag version and the tracking
+    // settings. This includes a wrong-type result.
+    event.version = flag.FlagVersion().value_or(flag.Version());
+    event.require_full_event = flag.TrackEvents();
+    if (auto date = flag.DebugEventsUntilDate()) {
+        event.debug_events_until_date = events::Date{*date};
+    }
+
     if (check_type && default_value.Type() != Value::Type::kNull &&
         detail.Value().Type() != default_value.Type()) {
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
-        if (eval_reasons_available_) {
+        if (detailed || flag.TrackReason()) {
             event.reason = error_reason;
         }
         event_processor_->SendAsync(std::move(event));
@@ -356,12 +364,6 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
 
     if (detailed || flag.TrackReason()) {
         event.reason = detail.Reason();
-    }
-
-    event.version = flag.FlagVersion().value_or(flag.Version());
-    event.require_full_event = flag.TrackEvents();
-    if (auto date = flag.DebugEventsUntilDate()) {
-        event.debug_events_until_date = events::Date{*date};
     }
 
     event_processor_->SendAsync(std::move(event));
