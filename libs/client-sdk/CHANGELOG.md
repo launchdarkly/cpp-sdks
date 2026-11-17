@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.13.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.13.0...launchdarkly-cpp-client-v3.13.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* Send the flag version and a WRONG_TYPE reason in analytics events when a typed evaluation has the wrong type ([#644](https://github.com/launchdarkly/cpp-sdks/issues/644)) ([95f99ed](https://github.com/launchdarkly/cpp-sdks/commit/95f99ed095a40e9d4a17aab6c17740d17cac9b55))
+
 ## [3.13.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.12.0...launchdarkly-cpp-client-v3.13.0) (2026-11-04)
 
 
