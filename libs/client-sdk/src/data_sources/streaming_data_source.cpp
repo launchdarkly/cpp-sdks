@@ -1,8 +1,11 @@
 #include "streaming_data_source.hpp"
+#include "polling_data_source.hpp"
 
+#include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/encoding/base_64.hpp>
+#include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
@@ -37,7 +40,14 @@ StreamingDataSource::StreamingDataSource(
           DataSourceEventHandler(context_, handler, logger, status_manager_)),
       http_config_(http_properties),
       data_source_config_(data_source_config),
-      streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
+      streaming_endpoint_(endpoints.StreamingBaseUrl()),
+      requester_(ioc, http_properties.Tls()),
+      ping_request_(MakePollRequest(
+          endpoints,
+          {config::shared::Defaults<config::shared::ClientSDK>::PollingConfig(),
+           data_source_config.with_reasons, data_source_config.use_report},
+          http_properties,
+          context_)) {}
 
 void StreamingDataSource::Start() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
@@ -129,6 +139,10 @@ void StreamingDataSource::Start() {
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
+            if (event.type() == "ping") {
+                self->PollAfterPing();
+                return;
+            }
             self->data_source_handler_.HandleMessage(event.type(),
                                                      event.data());
             // TODO: Use the result of handle message to restart the
@@ -163,6 +177,40 @@ void StreamingDataSource::Start() {
         return;
     }
     client_->async_connect();
+}
+
+void StreamingDataSource::PollAfterPing() {
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "Received ping, polling for flag updates";
+    auto weak_self = weak_from_this();
+    requester_.Request(ping_request_,
+                       [weak_self](network::HttpResult const& res) {
+                           if (auto self = weak_self.lock()) {
+                               self->HandlePingPollResult(res);
+                           }
+                       });
+}
+
+void StreamingDataSource::HandlePingPollResult(network::HttpResult const& res) {
+    if (res.IsError()) {
+        auto const error_message = res.ErrorMessage().value_or("unknown error");
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Polling after a ping failed: " << error_message;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            error_message);
+        return;
+    }
+    if (res.Status() == 200) {
+        data_source_handler_.HandleMessage("put", res.Body().value_or(""));
+        return;
+    }
+    auto const error_message = network::ErrorForStatusCode(
+        res.Status(), "polling request after a ping", std::nullopt);
+    LD_LOG(logger_, LogLevel::kWarn) << error_message;
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInterrupted,
+                             res.Status(), error_message);
 }
 
 template <class>

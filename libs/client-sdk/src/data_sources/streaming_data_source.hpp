@@ -14,6 +14,7 @@
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/network/requester.hpp>
 #include <launchdarkly/sse/client.hpp>
 
 #include <chrono>
@@ -40,6 +41,8 @@ class StreamingDataSource final
 
    private:
     void HandleErrorStateChange(sse::Error error, std::string error_string);
+    void PollAfterPing();
+    void HandlePingPollResult(network::HttpResult const& res);
 
     Context context_;
     boost::asio::any_io_executor exec_;
@@ -55,5 +58,7 @@ class StreamingDataSource final
 
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;
+    network::Requester requester_;
+    network::HttpRequest ping_request_;
 };
 }  // namespace launchdarkly::client_side::data_sources
