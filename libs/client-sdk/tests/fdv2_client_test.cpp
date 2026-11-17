@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/async/promise.hpp>
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 
@@ -11,6 +12,7 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "../../server-sent-events/tests/mock_sse_server.hpp"
@@ -124,9 +126,10 @@ TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
     std::mutex mutex;
     std::vector<std::string> targets;
     std::function<bool(std::string const&)> send_to_first;
-    std::promise<void> second_connected;
-    std::once_flag applied_once;
-    std::promise<void> applied;
+    async::Promise<std::monostate> second_connected;
+    auto second_connected_future = second_connected.GetFuture();
+    async::Promise<std::monostate> applied;
+    auto applied_future = applied.GetFuture();
     std::once_flag pushed_once;
     bool late_update_applied = false;
 
@@ -160,7 +163,7 @@ TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
                 R"(data: {"state":"a-1","version":1})"
                 "\n\n");
         } else if (targets.size() == 2) {
-            second_connected.set_value();
+            second_connected.Resolve(std::monostate{});
         }
     });
 
@@ -185,7 +188,7 @@ TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
     // A change to flagA shows that the SDK applied the update.
     auto flag_connection = client.FlagNotifier().OnFlagChange(
         "flagA", [&](std::shared_ptr<flag_manager::FlagValueChangeEvent>) {
-            std::call_once(applied_once, [&] { applied.set_value(); });
+            applied.Resolve(std::monostate{});
         });
 
     auto status_connection = client.DataSourceStatus().OnDataSourceStatusChange(
@@ -211,8 +214,8 @@ TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
                     R"(data: {"state":"a-2","version":2})"
                     "\n\n");
                 // Wait until the SDK applies the update.
-                late_update_applied = applied.get_future().wait_for(5s) ==
-                                      std::future_status::ready;
+                late_update_applied =
+                    applied_future.WaitForResult(5s).has_value();
             });
         });
 
@@ -222,10 +225,71 @@ TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
     // The SDK applied the update from the old stream.
     ASSERT_TRUE(late_update_applied);
     // The SDK opened a stream for the second context.
-    ASSERT_EQ(std::future_status::ready,
-              second_connected.get_future().wait_for(5s));
+    ASSERT_TRUE(second_connected_future.WaitForResult(5s).has_value());
     std::lock_guard lock{mutex};
     // The first request for the second context has no basis.
     EXPECT_EQ(std::string::npos, targets[1].find("basis="))
         << "The second context requested " << targets[1];
+}
+
+// A customized mode that sets no FDv1 fallback still falls back to FDv1.
+TEST(FDv2ClientTest, CustomizedModeKeepsTheBuiltInFDv1Fallback) {
+    namespace http = boost::beast::http;
+
+    async::Promise<std::monostate> polled;
+    auto polled_future = polled.GetFuture();
+
+    sse::test::MockSSEServer server;
+    server.start([&](http::request<http::string_body> const& req,
+                     std::function<void(http::response<http::string_body>)>
+                         send_response,
+                     std::function<bool(std::string const&)> send_sse_event,
+                     std::function<void()> /* close_connection */) {
+        std::string const target(req.target());
+        // Answer FDv1 polls with no flags.
+        if (target.rfind("/msdk/evalx/contexts", 0) == 0) {
+            http::response<http::string_body> res{http::status::ok,
+                                                  req.version()};
+            res.set(http::field::content_type, "application/json");
+            res.body() = "{}";
+            res.prepare_payload();
+            send_response(res);
+            // Record the FDv1 poll.
+            polled.Resolve(std::monostate{});
+            return;
+        }
+
+        http::response<http::string_body> res{http::status::ok, req.version()};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        // Direct the SDK to FDv1.
+        send_sse_event(
+            "event: goodbye\n"
+            R"(data: {"reason":"fallback","protocolFallbackTTL":60})"
+            "\n\n");
+    });
+
+    auto builder = ConfigBuilder("the-key");
+    builder.ServiceEndpoints()
+        .PollingBaseUrl(server.url())
+        .StreamingBaseUrl(server.url())
+        .EventsBaseUrl(server.url());
+    builder.DataSource().Method(
+        DataSourceBuilder::FDv2()
+            .InitialMode(ConnectionMode::kStreaming)
+            .CustomizeMode(
+                ConnectionMode::kStreaming,
+                FDv2Builder::Mode().Synchronizer(FDv2Builder::Streaming())));
+    builder.Events().Disable();
+    builder.Persistence().None();
+
+    Client client(builder.Build().value(),
+                  ContextBuilder().Kind("user", "user-key").Build());
+
+    // Start the SDK in the customized streaming mode.
+    client.StartAsync();
+
+    // The SDK polls the FDv1 endpoint.
+    EXPECT_TRUE(polled_future.WaitForResult(5s).has_value());
 }
