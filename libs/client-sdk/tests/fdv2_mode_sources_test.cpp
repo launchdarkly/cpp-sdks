@@ -112,7 +112,7 @@ TEST_F(ModeSourcesFixture, AnOverriddenModeReplacesTheBuiltInPipeline) {
     config.modes[ConnectionMode::kStreaming] = FDv2Config::ModeDefinition{
         {FDv2Config::CacheConfig{}},
         {FDv2Config::StreamingConfig{std::chrono::seconds{1}, std::nullopt}},
-        std::nullopt};
+        FDv2Config::NoFDv1Fallback{}};
 
     auto sources =
         BuildModeSources(config, ConnectionMode::kStreaming, Params());
@@ -154,12 +154,12 @@ TEST(FDv2ConfigTest, ModesThatMakeRequestsConfigureAnFDv1Fallback) {
     auto const config = launchdarkly::config::shared::Defaults<
         launchdarkly::config::shared::ClientSDK>::FDv2Config();
 
-    EXPECT_TRUE(
-        config.modes.at(ConnectionMode::kStreaming).fdv1_fallback.has_value());
-    EXPECT_TRUE(
-        config.modes.at(ConnectionMode::kPolling).fdv1_fallback.has_value());
-    EXPECT_FALSE(
-        config.modes.at(ConnectionMode::kOffline).fdv1_fallback.has_value());
+    EXPECT_TRUE(std::holds_alternative<FDv2Config::FDv1FallbackConfig>(
+        config.modes.at(ConnectionMode::kStreaming).fdv1_fallback));
+    EXPECT_TRUE(std::holds_alternative<FDv2Config::FDv1FallbackConfig>(
+        config.modes.at(ConnectionMode::kPolling).fdv1_fallback));
+    EXPECT_TRUE(std::holds_alternative<FDv2Config::NoFDv1Fallback>(
+        config.modes.at(ConnectionMode::kOffline).fdv1_fallback));
 }
 
 // The FDv1 tier is appended after the mode's own synchronizers.
@@ -178,4 +178,19 @@ TEST_F(ModeSourcesFixture, ModesWithNoFallbackAppendNothing) {
         BuildModeSources(Defaults(), ConnectionMode::kOffline, Params());
 
     EXPECT_TRUE(sources.synchronizers.empty());
+}
+
+TEST_F(ModeSourcesFixture, UnsetFallbackUsesTheBuiltInOne) {
+    auto config = Defaults();
+    // Leave the streaming mode on the built-in FDv1 fallback.
+    config.modes.at(ConnectionMode::kStreaming).fdv1_fallback =
+        FDv2Config::BuiltInFDv1Fallback{};
+
+    // Build the sources for the streaming mode.
+    auto sources =
+        BuildModeSources(config, ConnectionMode::kStreaming, Params());
+
+    ASSERT_FALSE(sources.synchronizers.empty());
+    // The last synchronizer is the FDv1 fallback.
+    EXPECT_TRUE(sources.synchronizers.back()->IsFDv1Fallback());
 }

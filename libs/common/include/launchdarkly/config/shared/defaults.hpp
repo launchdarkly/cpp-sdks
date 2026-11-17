@@ -112,7 +112,7 @@ struct Defaults<ClientSDK> {
                 // so it has nothing to fall back to.
                 {shared::ConnectionMode::kOffline,
                  Config::ModeDefinition{
-                     {Config::CacheConfig{}}, {}, std::nullopt}},
+                     {Config::CacheConfig{}}, {}, Config::NoFDv1Fallback{}}},
             },
             /* use_post= */ false,
             fallback_timeout,

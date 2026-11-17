@@ -46,8 +46,16 @@ struct FDv2Config<ClientSDK> {
         std::optional<std::string> base_url_override;
     };
 
+    /** Uses the FDv1 fallback of the built-in mode. */
+    struct BuiltInFDv1Fallback {};
+
+    /** Uses no FDv1 fallback. */
+    struct NoFDv1Fallback {};
+
     using InitializerEntry = std::variant<CacheConfig, PollingConfig>;
     using SynchronizerEntry = std::variant<PollingConfig, StreamingConfig>;
+    using FDv1FallbackEntry =
+        std::variant<BuiltInFDv1Fallback, NoFDv1Fallback, FDv1FallbackConfig>;
 
     /**
      * What one connection mode does. The synchronizer list is ordered by
@@ -57,7 +65,7 @@ struct FDv2Config<ClientSDK> {
     struct ModeDefinition {
         std::vector<InitializerEntry> initializers;
         std::vector<SynchronizerEntry> synchronizers;
-        std::optional<FDv1FallbackConfig> fdv1_fallback;
+        FDv1FallbackEntry fdv1_fallback;
     };
 
     /** The mode the SDK starts in. */

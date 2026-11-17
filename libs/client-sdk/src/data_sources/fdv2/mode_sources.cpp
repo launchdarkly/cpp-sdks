@@ -153,8 +153,16 @@ ModeSources BuildModeSources(FDv2Config const& config,
             entry);
     }
 
-    if (auto const& fallback = definition->second.fdv1_fallback) {
-        sources.synchronizers.push_back(MakeFDv1Fallback(*fallback, params));
+    auto fallback = definition->second.fdv1_fallback;
+    // A mode that leaves the FDv1 fallback unset uses the built-in one.
+    if (std::holds_alternative<FDv2Config::BuiltInFDv1Fallback>(fallback)) {
+        auto const defaults =
+            config::shared::Defaults<config::shared::ClientSDK>::FDv2Config();
+        fallback = defaults.modes.at(mode).fdv1_fallback;
+    }
+    auto const* fdv1 = std::get_if<FDv2Config::FDv1FallbackConfig>(&fallback);
+    if (fdv1) {
+        sources.synchronizers.push_back(MakeFDv1Fallback(*fdv1, params));
     }
 
     return sources;
