@@ -27,10 +27,6 @@ Error Error::CyclicPrerequisiteReference(std::string prereq_key) {
         std::move(prereq_key)};
 }
 
-Error Error::MissingSalt(std::string key) {
-    return {"\"%1%\" is missing a salt", std::move(key)};
-}
-
 Error Error::RolloutMissingVariations() {
     return {"rollout or experiment with no variations"};
 }

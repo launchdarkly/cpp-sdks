@@ -13,7 +13,6 @@ class Error {
     static Error InvalidAttributeReference(std::string ref);
     static Error RolloutMissingVariations();
     static Error NonexistentVariationIndex(std::int64_t index);
-    static Error MissingSalt(std::string item_key);
 
     friend std::ostream& operator<<(std::ostream& out, Error const& arr);
     friend bool operator==(Error const& lhs, Error const& rhs);

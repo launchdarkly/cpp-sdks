@@ -112,7 +112,8 @@ class BucketResult {
  * @param variation_or_rollout Variation or rollout.
  * @param flag_key Key of flag.
  * @param context Context to bucket.
- * @param salt Salt to use when bucketing.
+ * @param salt Salt to use when bucketing. If there is no salt, the empty
+ * string is the salt.
  * @return A BucketResult on success, or an error if bucketing failed.
  */
 tl::expected<BucketResult, Error> Variation(

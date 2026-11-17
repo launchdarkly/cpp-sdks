@@ -261,11 +261,9 @@ tl::expected<bool, Error> Contains(Segment const& segment,
     }
 
     for (auto const& rule : segment.rules) {
-        if (!segment.salt) {
-            return tl::make_unexpected(Error::MissingSalt(segment.key));
-        }
         tl::expected<bool, Error> maybe_match =
-            Match(rule, context, store, stack, segment.key, *segment.salt);
+            Match(rule, context, store, stack, segment.key,
+                  segment.salt.value_or(""));
         if (!maybe_match) {
             return tl::make_unexpected(maybe_match.error());
         }
