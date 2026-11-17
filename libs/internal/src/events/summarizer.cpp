@@ -2,9 +2,6 @@
 
 namespace launchdarkly::events::detail {
 
-Summarizer::Summarizer(std::chrono::system_clock::time_point start)
-    : start_time_(start) {}
-
 bool Summarizer::Empty() const {
     return features_.empty();
 }
@@ -15,6 +12,14 @@ Summarizer::Features() const {
 }
 
 void Summarizer::Update(events::FeatureEventParams const& event) {
+    auto const time = event.creation_date.t;
+    if (features_.empty() || time < start_time_) {
+        start_time_ = time;
+    }
+    if (features_.empty() || time > end_time_) {
+        end_time_ = time;
+    }
+
     auto const& kinds = event.context.Kinds();
 
     auto feature_state_iterator =
@@ -30,11 +35,6 @@ void Summarizer::Update(events::FeatureEventParams const& event) {
             .first;
 
     summary_counter->second.Increment();
-}
-
-Summarizer& Summarizer::Finish(Time end_time) {
-    end_time_ = end_time;
-    return *this;
 }
 
 Summarizer::Time Summarizer::StartTime() const {

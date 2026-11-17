@@ -25,27 +25,16 @@ class Summarizer {
     using FlagKey = std::string;
 
     /**
-     * Construct a Summarizer starting at the given time.
-     * @param start Start time of the summary.
-     */
-    explicit Summarizer(Time start_time);
-
-    /**
-     * Construct a Summarizer at time zero.
+     * Construct an empty Summarizer. Its start and end times are zero.
      */
     Summarizer() = default;
 
     /**
-     * Updates the summary with a feature event.
+     * Updates the summary with a feature event. The start and end times of
+     * the summary become the earliest and latest event creation times.
      * @param event Feature event.
      */
     void Update(events::FeatureEventParams const& event);
-
-    /**
-     * Marks the summary as finished at a given timestamp.
-     * @param end_time End time of the summary.
-     */
-    Summarizer& Finish(Time end_time);
 
     /**
      * Returns true if the summary is empty.
@@ -53,12 +42,12 @@ class Summarizer {
     [[nodiscard]] bool Empty() const;
 
     /**
-     * Returns the summary's start time as given in the constructor.
+     * Returns the creation time of the earliest event in the summary.
      */
     [[nodiscard]] Time StartTime() const;
 
     /**
-     * Returns the summary's end time as specified using Finish.
+     * Returns the creation time of the latest event in the summary.
      */
     [[nodiscard]] Time EndTime() const;
 
