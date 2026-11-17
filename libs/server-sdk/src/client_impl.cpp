@@ -467,7 +467,7 @@ Value ClientImpl::Variation(Context const& ctx,
                             hooks::HookContext const& hook_context,
                             std::string const& method_name) {
     auto result = *VariationInternal(ctx, key, default_value, events_default_,
-                                     hook_context, method_name);
+                                     hook_context, method_name, value_type);
     if (result.Type() != value_type) {
         return default_value;
     }
@@ -480,7 +480,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     Value const& default_value,
     EventScope const& event_scope,
     hooks::HookContext const& hook_context,
-    std::string const& method_name) {
+    std::string const& method_name,
+    std::optional<enum Value::Type> value_type) {
     // Execute beforeEvaluation hooks
     std::optional<hooks::EvaluationSeriesExecutor> executor;
     if (!config_.Hooks().empty()) {
@@ -531,6 +532,19 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
     EvaluationDetail<Value> result =
         evaluator_.Evaluate(*flag_rule->item, context, event_scope);
+
+    // Do the type check before the analytics event is made. Then the event
+    // gives the result that the application gets. A result with no variation
+    // already holds the default value, so the check does not apply to it.
+    if (value_type && result.VariationIndex() &&
+        result.Value().Type() != *value_type) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Flag " << key << " has a value of the wrong type for the "
+            << "requested variation method; returning default value";
+        result = EvaluationDetail<Value>{
+            EvaluationReason::ErrorKind::kWrongType, default_value};
+    }
+
     auto detail = PostEvaluation(key, context, default_value, result,
                                  event_scope, flag_rule.get()->item);
 
@@ -748,7 +762,8 @@ EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
     Value default_value) {
     static hooks::HookContext empty_hook_context;
     return VariationInternal(ctx, key, default_value, events_with_reasons_,
-                             empty_hook_context, kMethodJsonVariationDetail);
+                             empty_hook_context, kMethodJsonVariationDetail,
+                             std::nullopt);
 }
 
 EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
@@ -757,7 +772,8 @@ EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
     Value default_value,
     hooks::HookContext const& hook_context) {
     return VariationInternal(ctx, key, default_value, events_with_reasons_,
-                             hook_context, kMethodJsonVariationDetail);
+                             hook_context, kMethodJsonVariationDetail,
+                             std::nullopt);
 }
 
 Value ClientImpl::JsonVariation(Context const& ctx,
@@ -765,7 +781,8 @@ Value ClientImpl::JsonVariation(Context const& ctx,
                                 Value default_value) {
     static hooks::HookContext empty_hook_context;
     return *VariationInternal(ctx, key, default_value, events_default_,
-                              empty_hook_context, kMethodJsonVariation);
+                              empty_hook_context, kMethodJsonVariation,
+                              std::nullopt);
 }
 
 Value ClientImpl::JsonVariation(Context const& ctx,
@@ -773,7 +790,8 @@ Value ClientImpl::JsonVariation(Context const& ctx,
                                 Value default_value,
                                 hooks::HookContext const& hook_context) {
     return *VariationInternal(ctx, key, default_value, events_default_,
-                              hook_context, kMethodJsonVariation);
+                              hook_context, kMethodJsonVariation,
+                              std::nullopt);
 }
 
 IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {

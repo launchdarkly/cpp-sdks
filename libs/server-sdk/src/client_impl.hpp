@@ -184,13 +184,21 @@ class ClientImpl : public IClient {
     std::future<bool> StartAsync() override;
 
    private:
+    /**
+     * Evaluates a flag, sends the analytics event, and runs the hooks.
+     *
+     * If value_type is set and the flag value has a different type, the
+     * result is the default value with no variation and a WRONG_TYPE reason.
+     * The analytics event and the hooks get this same result.
+     */
     [[nodiscard]] EvaluationDetail<Value> VariationInternal(
         Context const& ctx,
         FlagKey const& key,
         Value const& default_value,
         EventScope const& scope,
         hooks::HookContext const& hook_context,
-        std::string const& method_name);
+        std::string const& method_name,
+        std::optional<enum Value::Type> value_type);
 
     template <typename T>
     [[nodiscard]] EvaluationDetail<T> VariationDetail(
@@ -202,7 +210,7 @@ class ClientImpl : public IClient {
         std::string const& method_name) {
         auto result =
             VariationInternal(ctx, key, default_value, events_with_reasons_,
-                              hook_context, method_name);
+                              hook_context, method_name, value_type);
         if (result.Value().Type() == value_type) {
             return EvaluationDetail<T>{result.Value(), result.VariationIndex(),
                                        result.Reason()};
