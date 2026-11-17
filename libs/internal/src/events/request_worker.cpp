@@ -74,6 +74,7 @@ void RequestWorker::OnDeliveryAttempt(network::HttpResult const& result,
                        "HTTP error "
                     << result.Status();
             }
+            callback(batch_->Count(), NoResult{});
             batch_.reset();
             break;
         case Action::NotifyPermanentFailure:
@@ -85,14 +86,16 @@ void RequestWorker::OnDeliveryAttempt(network::HttpResult const& result,
             batch_.reset();
             break;
         case Action::ParseDateAndReset: {
+            DeliveryResult delivery_result = NoResult{};
             auto headers = result.Headers();
             if (auto date = headers.find("Date"); date != headers.end()) {
                 if (auto server_time =
                         ParseDateHeader<std::chrono::system_clock>(
                             date->second)) {
-                    callback(batch_->Count(), *server_time);
+                    delivery_result = *server_time;
                 }
             }
+            callback(batch_->Count(), delivery_result);
             batch_.reset();
         } break;
         case Action::Retry:

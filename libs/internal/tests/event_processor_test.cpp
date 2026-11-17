@@ -72,6 +72,9 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 
     auto config_builder = client_side::ConfigBuilder("sdk-123");
     config_builder.Events().Capacity(10).FlushInterval(std::chrono::seconds(1));
+    // Shutdown delivers the events. Nothing listens on this port, so the
+    // delivery fails at once.
+    config_builder.ServiceEndpoints().RelayProxyBaseURL("http://127.0.0.1:1");
     auto config = config_builder.Build();
 
     ASSERT_TRUE(config);
@@ -93,7 +96,7 @@ TEST(EventProcessorTests, ProcessorCompiles) {
         processor.SendAsync(identify_event);
     }
 
-    processor.ShutdownAsync();
+    processor.ShutdownAsync(nullptr);
     ioc_thread.join();
 }
 

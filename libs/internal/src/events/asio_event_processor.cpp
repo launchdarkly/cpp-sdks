@@ -115,25 +115,35 @@ void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
-    workers_.Get([this](detail::RequestWorker* worker) {
+void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type,
+                                    std::function<void()> completion) {
+    workers_.Get([this, completion](detail::RequestWorker* worker) {
         if (worker == nullptr) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
                    "flush";
+            if (completion) {
+                completion();
+            }
             return;
         }
         auto batch = CreateBatch();
         if (!batch) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: nothing to flush";
+            if (completion) {
+                completion();
+            }
             return;
         }
         worker->AsyncDeliver(
             std::move(*batch),
-            [this](std::size_t count,
-                   detail::RequestWorker::DeliveryResult result) {
+            [this, completion](std::size_t count,
+                               detail::RequestWorker::DeliveryResult result) {
                 OnEventDeliveryResult(count, result);
+                if (completion) {
+                    completion();
+                }
             });
         summarizer_ = detail::Summarizer(Clock::now());
     });
@@ -159,7 +169,8 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
                            timer_.cancel();
                            permanent_delivery_failure_ = true;
                        }
-                   }},
+                   },
+                   [](detail::RequestWorker::NoResult) {}},
         result);
 }
 
@@ -186,8 +197,11 @@ void AsioEventProcessor<SDK>::FlushAsync() {
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::ShutdownAsync() {
-    timer_.cancel();
+void AsioEventProcessor<SDK>::ShutdownAsync(std::function<void()> completion) {
+    boost::asio::post(io_, [this, completion = std::move(completion)] {
+        timer_.cancel();
+        Flush(FlushTrigger::Manual, completion);
+    });
 }
 
 template <typename SDK>

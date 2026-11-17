@@ -17,7 +17,11 @@ void PrereqEventRecorder::SendAsync(events::InputEvent const event) {
 
 void PrereqEventRecorder::FlushAsync() {}
 
-void PrereqEventRecorder::ShutdownAsync() {}
+void PrereqEventRecorder::ShutdownAsync(std::function<void()> completion) {
+    if (completion) {
+        completion();
+    }
+}
 
 std::vector<std::string> const& PrereqEventRecorder::Prerequisites() const {
     return prereqs_;

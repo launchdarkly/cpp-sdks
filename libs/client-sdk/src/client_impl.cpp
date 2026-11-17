@@ -12,6 +12,8 @@
 #include <launchdarkly/logging/null_logger.hpp>
 
 #include <chrono>
+#include <future>
+#include <memory>
 #include <optional>
 #include <utility>
 
@@ -25,6 +27,10 @@ auto const kAsioConcurrencyHint = 1;
 // Client's destructor attempts to gracefully shut down the datasource
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
+
+// Client's destructor waits at most this amount of time for the delivery of
+// pending events.
+auto const kEventDeliveryShutdownWait = std::chrono::seconds(5);
 
 using config::shared::ClientSDK;
 using launchdarkly::client_side::data_sources::DataSourceStatus;
@@ -443,6 +449,9 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 }
 
 ClientImpl::~ClientImpl() {
+    auto const delivered = std::make_shared<std::promise<void>>();
+    event_processor_->ShutdownAsync([delivered] { delivered->set_value(); });
+    delivered->get_future().wait_for(kEventDeliveryShutdownWait);
     ioc_.stop();
     // TODO(SC-219101)
     run_thread_.join();

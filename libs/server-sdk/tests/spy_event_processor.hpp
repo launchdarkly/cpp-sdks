@@ -20,7 +20,11 @@ class SpyEventProcessor : public events::IEventProcessor {
 
     void FlushAsync() override {}
 
-    void ShutdownAsync() override {}
+    void ShutdownAsync(std::function<void()> completion) override {
+        if (completion) {
+            completion();
+        }
+    }
 
     /**
      * Asserts that 'count' events were recorded.

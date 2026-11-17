@@ -2,6 +2,8 @@
 
 #include <launchdarkly/events/data/events.hpp>
 
+#include <functional>
+
 namespace launchdarkly::events {
 
 class IEventProcessor {
@@ -19,10 +21,11 @@ class IEventProcessor {
      */
     virtual void FlushAsync() = 0;
     /**
-     * Asynchronously shutdown the processor. The processor should attempt to
-     * flush all events before shutting down.
+     * Asynchronously shutdown the processor. The processor attempts to
+     * deliver all pending events, then invokes the completion.
+     * @param completion Invoked when the delivery ends. It may be empty.
      */
-    virtual void ShutdownAsync() = 0;
+    virtual void ShutdownAsync(std::function<void()> completion) = 0;
 
     virtual ~IEventProcessor() = default;
     IEventProcessor(IEventProcessor const& item) = delete;

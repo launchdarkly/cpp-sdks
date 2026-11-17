@@ -76,17 +76,23 @@ class RequestWorker {
      */
     using ServerTimeResult = std::chrono::system_clock::time_point;
 
+    /*
+     * A delivery request can resolve as a NoResult, meaning the request
+     * ended without a permanent failure or a valid server timestamp.
+     */
+    using NoResult = std::monostate;
+
     using DeliveryResult =
-        std::variant<PermanentFailureResult, ServerTimeResult>;
+        std::variant<PermanentFailureResult, ServerTimeResult, NoResult>;
 
     /*
-     * A request made with AsyncDeliver may result in invocation of the
-     * provided ResultCallback in exactly two cases:
-     * - The delivery permanently failed. The callback will be invoked
-     *   with the number of events in the batch, and a PermanentFailureResult.
-     * - The delivery succeeded and the server returned a valid timestamp. The
-     * callback will be invoked with the number of events in the batch, and a
-     * ServerTimeResult.
+     * A request made with AsyncDeliver invokes the provided ResultCallback
+     * once, when the delivery ends. The callback receives the number of
+     * events in the batch, and:
+     * - a PermanentFailureResult if the delivery permanently failed.
+     * - a ServerTimeResult if the delivery succeeded and the server returned
+     * a valid timestamp.
+     * - a NoResult in all other cases.
      */
     using ResultCallback = std::function<void(std::size_t, DeliveryResult)>;
 

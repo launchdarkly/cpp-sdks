@@ -29,7 +29,7 @@ class PrereqEventRecorder final : public events::IEventProcessor {
     void FlushAsync() override;
 
     /* No-op */
-    void ShutdownAsync() override;
+    void ShutdownAsync(std::function<void()> completion) override;
 
     std::vector<std::string> const& Prerequisites() const;
 

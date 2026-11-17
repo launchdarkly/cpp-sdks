@@ -40,7 +40,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     virtual void SendAsync(events::InputEvent event) override;
 
-    virtual void ShutdownAsync() override;
+    virtual void ShutdownAsync(std::function<void()> completion) override;
 
    private:
     using Clock = std::chrono::system_clock;
@@ -84,7 +84,8 @@ class AsioEventProcessor : public IEventProcessor {
 
     std::optional<detail::EventBatch> CreateBatch();
 
-    void Flush(FlushTrigger flush_type);
+    void Flush(FlushTrigger flush_type,
+               std::function<void()> completion = nullptr);
 
     void ScheduleFlush();
 
