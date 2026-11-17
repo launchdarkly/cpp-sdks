@@ -46,7 +46,7 @@ FDv2Builder FDv2Builder::Default() {
         .Initializer(Polling{})
         .Synchronizer(Streaming{})
         .Synchronizer(Polling{})
-        .FDv1Fallback(FDv1Streaming{});
+        .FDv1Fallback(FDv1Polling{});
 }
 
 FDv2Builder FDv2Builder::Custom() {

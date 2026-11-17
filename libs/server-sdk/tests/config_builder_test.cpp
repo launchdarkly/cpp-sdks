@@ -145,14 +145,40 @@ TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
         fdv2_config.synchronizers[1]));
 
     ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
-    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::FDv1StreamingConfig>(
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::FDv1PollingConfig>(
         *fdv2_config.fdv1_fallback));
-    EXPECT_EQ(std::get<built::FDv2Config::FDv1StreamingConfig>(
-                  *fdv2_config.fdv1_fallback),
+    EXPECT_EQ(std::get<built::FDv2Config::FDv1PollingConfig>(
+                  *fdv2_config.fdv1_fallback)
+                  .poll_interval,
               launchdarkly::config::shared::Defaults<
-                  launchdarkly::config::shared::ServerSDK>::StreamingConfig());
+                  launchdarkly::config::shared::ServerSDK>::PollingConfig()
+                  .poll_interval);
     EXPECT_EQ(fdv2_config.fallback_timeout, std::chrono::minutes{2});
     EXPECT_EQ(fdv2_config.recovery_timeout, std::chrono::minutes{5});
+}
+
+TEST_F(ConfigBuilderTest, FDv2_CustomHasNoFDv1Fallback) {
+    auto const config = builders::FDv2Builder::Custom().Build();
+
+    EXPECT_FALSE(config.fdv1_fallback.has_value());
+}
+
+TEST_F(ConfigBuilderTest, FDv2_DefaultFDv1FallbackCanBeDisabled) {
+    auto const config =
+        builders::FDv2Builder::Default().DisableFDv1Fallback().Build();
+
+    EXPECT_FALSE(config.fdv1_fallback.has_value());
+}
+
+TEST_F(ConfigBuilderTest, FDv2_DefaultFDv1FallbackCanBeReplacedWithStreaming) {
+    auto const config =
+        builders::FDv2Builder::Default()
+            .FDv1Fallback(builders::FDv2Builder::FDv1Streaming())
+            .Build();
+
+    ASSERT_TRUE(config.fdv1_fallback.has_value());
+    EXPECT_TRUE(std::holds_alternative<built::FDv2Config::FDv1StreamingConfig>(
+        *config.fdv1_fallback));
 }
 
 TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
