@@ -4,11 +4,16 @@
 #include <launchdarkly/context_builder.hpp>
 
 #include <chrono>
+#include <functional>
+#include <future>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
+#include <vector>
+
+#include "../../server-sent-events/tests/mock_sse_server.hpp"
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
@@ -109,4 +114,118 @@ TEST(FDv2ClientTest, OfflineModeEvaluatesAgainstTheCache) {
     ASSERT_EQ(std::future_status::ready, started.wait_for(5s));
     EXPECT_TRUE(started.get());
     EXPECT_EQ("fish", client.StringVariation("treat", "chicken"));
+}
+
+// During identify, the old stream can deliver one more update. The first
+// request for the new context must not contain the selector from that update.
+TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
+    namespace http = boost::beast::http;
+
+    std::mutex mutex;
+    std::vector<std::string> targets;
+    std::function<bool(std::string const&)> send_to_first;
+    std::promise<void> second_connected;
+    std::once_flag applied_once;
+    std::promise<void> applied;
+    std::once_flag pushed_once;
+    bool late_update_applied = false;
+
+    sse::test::MockSSEServer server;
+    server.start([&](http::request<http::string_body> const& req,
+                     std::function<void(http::response<http::string_body>)>
+                         send_response,
+                     std::function<bool(std::string const&)> send_sse_event,
+                     std::function<void()> /* close_connection */) {
+        http::response<http::string_body> res{http::status::ok, req.version()};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        std::lock_guard lock{mutex};
+        // Record the target of each request.
+        targets.emplace_back(req.target());
+        if (targets.size() == 1) {
+            send_to_first = send_sse_event;
+            // Send a full data set on the first stream.
+            send_sse_event(
+                "event: server-intent\n"
+                R"(data: {"payloads":[{"id":"p1","target":1,)"
+                R"("intentCode":"xfer-full"}]})"
+                "\n\n"
+                "event: put-object\n"
+                R"(data: {"version":1,"kind":"flag-eval","key":"flagA",)"
+                R"("object":{"value":"a-1","variation":0}})"
+                "\n\n"
+                "event: payload-transferred\n"
+                R"(data: {"state":"a-1","version":1})"
+                "\n\n");
+        } else if (targets.size() == 2) {
+            second_connected.set_value();
+        }
+    });
+
+    auto builder = ConfigBuilder("the-key");
+    builder.DataSource().Method(
+        DataSourceBuilder::FDv2()
+            .InitialMode(ConnectionMode::kStreaming)
+            .CustomizeMode(ConnectionMode::kStreaming,
+                           FDv2Builder::Mode()
+                               .Initializer(FDv2Builder::Cache())
+                               .Synchronizer(FDv2Builder::Streaming().BaseUrl(
+                                   server.url()))));
+    builder.Events().Disable();
+    builder.Persistence().None();
+
+    Client client(builder.Build().value(),
+                  ContextBuilder().Kind("user", "first").Build());
+    auto started = client.StartAsync();
+    ASSERT_EQ(std::future_status::ready, started.wait_for(5s));
+    ASSERT_TRUE(started.get());
+
+    // A change to flagA shows that the SDK applied the update.
+    auto flag_connection = client.FlagNotifier().OnFlagChange(
+        "flagA", [&](std::shared_ptr<flag_manager::FlagValueChangeEvent>) {
+            std::call_once(applied_once, [&] { applied.set_value(); });
+        });
+
+    auto status_connection = client.DataSourceStatus().OnDataSourceStatusChange(
+        [&](data_sources::DataSourceStatus status) {
+            // Identify sets this status before the old source closes.
+            if (status.State() != data_sources::DataSourceStatus::
+                                      DataSourceState::kInitializing) {
+                return;
+            }
+            std::call_once(pushed_once, [&] {
+                std::function<bool(std::string const&)> send;
+                {
+                    std::lock_guard lock{mutex};
+                    send = send_to_first;
+                }
+                // Send an update on the old stream.
+                send(
+                    "event: put-object\n"
+                    R"(data: {"version":2,"kind":"flag-eval","key":"flagA",)"
+                    R"("object":{"value":"a-2","variation":1}})"
+                    "\n\n"
+                    "event: payload-transferred\n"
+                    R"(data: {"state":"a-2","version":2})"
+                    "\n\n");
+                // Wait until the SDK applies the update.
+                late_update_applied = applied.get_future().wait_for(5s) ==
+                                      std::future_status::ready;
+            });
+        });
+
+    // Identify the second context.
+    client.IdentifyAsync(ContextBuilder().Kind("user", "second").Build());
+
+    // The SDK applied the update from the old stream.
+    ASSERT_TRUE(late_update_applied);
+    // The SDK opened a stream for the second context.
+    ASSERT_EQ(std::future_status::ready,
+              second_connected.get_future().wait_for(5s));
+    std::lock_guard lock{mutex};
+    // The first request for the second context has no basis.
+    EXPECT_EQ(std::string::npos, targets[1].find("basis="))
+        << "The second context requested " << targets[1];
 }
