@@ -161,8 +161,11 @@ class FDv2Builder {
      * Contains methods for configuring what one connection mode does, meaning
      * which sources load flag data and which keep it current.
      *
-     * A mode built this way replaces the SDK's built-in definition entirely,
-     * so it should list every source the mode needs, cache included.
+     * A mode built this way replaces the built-in initializers and
+     * synchronizers, so it should list every source it needs, cache included.
+     *
+     * The mode keeps the built-in FDv1 fallback. Call FDv1Fallback() to
+     * replace it, or DisableFDv1Fallback() to remove it.
      */
     class Mode {
        public:

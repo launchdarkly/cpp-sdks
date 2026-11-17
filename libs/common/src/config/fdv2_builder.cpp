@@ -82,7 +82,7 @@ FDv2Builder::Mode& FDv2Builder::Mode::FDv1Fallback(FDv1Polling source) {
 }
 
 FDv2Builder::Mode& FDv2Builder::Mode::DisableFDv1Fallback() {
-    definition_.fdv1_fallback = std::nullopt;
+    definition_.fdv1_fallback = Config::NoFDv1Fallback{};
     return *this;
 }
 

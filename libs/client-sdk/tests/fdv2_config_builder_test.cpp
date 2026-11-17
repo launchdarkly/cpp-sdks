@@ -100,7 +100,8 @@ TEST(FDv2ConfigBuilderTest, CustomizingAModeReplacesItsPipeline) {
         std::get_if<FDv2Config::StreamingConfig>(&mode.synchronizers[0]);
     ASSERT_NE(nullptr, streaming);
     EXPECT_EQ(2s, streaming->initial_reconnect_delay);
-    EXPECT_FALSE(mode.fdv1_fallback.has_value());
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2Config::NoFDv1Fallback>(mode.fdv1_fallback));
 }
 
 TEST(FDv2ConfigBuilderTest, CustomizingOneModeLeavesTheOthersAlone) {
@@ -142,10 +143,10 @@ TEST(FDv2ConfigBuilderTest, TheFDv1FallbackIsConfigurable) {
                 "https://relay.example.com")));
 
     auto const config = BuildFDv2(std::move(builder));
-    auto const& fallback =
-        config.modes.at(ConnectionMode::kStreaming).fdv1_fallback;
+    auto const* fallback = std::get_if<FDv2Config::FDv1FallbackConfig>(
+        &config.modes.at(ConnectionMode::kStreaming).fdv1_fallback);
 
-    ASSERT_TRUE(fallback.has_value());
+    ASSERT_NE(nullptr, fallback);
     EXPECT_EQ(600s, fallback->poll_interval);
     ASSERT_TRUE(fallback->base_url_override.has_value());
     EXPECT_EQ("https://relay.example.com", *fallback->base_url_override);
