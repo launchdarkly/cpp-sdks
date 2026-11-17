@@ -102,8 +102,12 @@ class EventServer {
                     http::async_write(
                         self->socket, self->response,
                         [self](beast::error_code, std::size_t) {
+                            // The client can close the connection first.
+                            // Ignore the error, so that the server thread
+                            // does not stop with an exception.
+                            beast::error_code ignored;
                             self->socket.shutdown(
-                                tcp::socket::shutdown_both);
+                                tcp::socket::shutdown_both, ignored);
                         });
                 });
         }
