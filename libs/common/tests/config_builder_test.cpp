@@ -19,6 +19,18 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ClientConfig) {
     ASSERT_EQ(cfg->SdkKey(), "sdk-123");
 }
 
+TEST_F(ConfigBuilderTest, ClientConfig_MobileKeyWithLineBreakFailsBuild) {
+    using namespace launchdarkly::client_side;
+    for (auto const* mobile_key :
+         {"mob-123\n", "mob-123\r", "mob-123\r\nX-Injected: injected"}) {
+        auto cfg = ConfigBuilder(mobile_key).Build();
+
+        ASSERT_FALSE(cfg);
+        EXPECT_EQ(cfg.error(),
+                  launchdarkly::Error::kConfig_SDKKey_InvalidCharacters);
+    }
+}
+
 TEST_F(ConfigBuilderTest,
        DefaultConstruction_UsesDefaultEndpointsIfNotSupplied) {
     using namespace launchdarkly::client_side;
