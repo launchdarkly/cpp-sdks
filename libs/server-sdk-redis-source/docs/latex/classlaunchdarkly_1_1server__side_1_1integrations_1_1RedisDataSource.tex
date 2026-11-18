@@ -1,0 +1,87 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Data\+Source Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}\index{launchdarkly::server\_side::integrations::RedisDataSource@{launchdarkly::server\_side::integrations::RedisDataSource}}
+
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}} represents a data source for the Server-\/\+Side SDK backed by Redis. It is meant to be used in place of the standard Launch\+Darkly Streaming or Polling data sources.  
+
+
+
+
+{\ttfamily \#include $<$redis\+\_\+source.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=205pt]{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=205pt]{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a5f009b71cb3146dc198967490346a678}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a5f009b71cb3146dc198967490346a678}} 
+Get\+Result {\bfseries Get} (ISerialized\+Item\+Kind const \&kind, std\+::string const \&item\+Key) const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a8d58725d6e22eac80f2583e9a49f78a6}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a8d58725d6e22eac80f2583e9a49f78a6}} 
+All\+Result {\bfseries All} (ISerialized\+Item\+Kind const \&kind) const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ace0a78e14fe96f2643e4e3835f8ec32e}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ace0a78e14fe96f2643e4e3835f8ec32e}} 
+std\+::string const  \& {\bfseries Identity} () const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ad4a8ab94fb397db55bb1174d1fcc2d13}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ad4a8ab94fb397db55bb1174d1fcc2d13}} 
+bool {\bfseries Initialized} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static tl\+::expected$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}} $>$, std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a600bc6399ac6dde198e57dc54316416b}{Create}} (std\+::string uri, std\+::string prefix)
+\begin{DoxyCompactList}\small\item\em Creates a new \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}}, or returns an error if construction failed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}} represents a data source for the Server-\/\+Side SDK backed by Redis. It is meant to be used in place of the standard Launch\+Darkly Streaming or Polling data sources. 
+
+Call \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a600bc6399ac6dde198e57dc54316416b}{Redis\+Data\+Source\+::\+Create}} to obtain a new instance. This instance can be passed into the SDK\textquotesingle{}s Data\+System configuration via the Lazy\+Load builder.
+
+This implementation is backed by \href{https://github.com/sewenew/redis-plus-plus}{\texttt{ Redis++}}, a C++ wrapper for the \href{https://github.com/redis/hiredis}{\texttt{ hiredis}} library. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a600bc6399ac6dde198e57dc54316416b}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a600bc6399ac6dde198e57dc54316416b}} 
+\index{launchdarkly::server\_side::integrations::RedisDataSource@{launchdarkly::server\_side::integrations::RedisDataSource}!Create@{Create}}
+\index{Create@{Create}!launchdarkly::server\_side::integrations::RedisDataSource@{launchdarkly::server\_side::integrations::RedisDataSource}}
+\doxysubsubsection{\texorpdfstring{Create()}{Create()}}
+{\footnotesize\ttfamily tl\+::expected$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}} $>$, std\+::string $>$ launchdarkly\+::server\+\_\+side\+::integrations\+::\+Redis\+Data\+Source\+::\+Create (\begin{DoxyParamCaption}\item[{std\+::string}]{uri,  }\item[{std\+::string}]{prefix }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Creates a new \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}}, or returns an error if construction failed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em uri} & Redis URI. The URI is passed to the underlying Redis++ client verbatim. See \href{https://github.com/sewenew/redis-plus-plus\#api-reference}{\texttt{ Redis++ API Reference}} for details on the possible URI formats.\\
+\hline
+{\em prefix} & Prefix to use when reading SDK data from Redis. This allows multiple Launch\+Darkly environments to be stored in the same database (under different prefixes.)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}}, or an error if construction failed. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/redis/\mbox{\hyperlink{redis__source_8hpp}{redis\+\_\+source.\+hpp}}\item 
+src/redis\+\_\+source.\+cpp\end{DoxyCompactItemize}
