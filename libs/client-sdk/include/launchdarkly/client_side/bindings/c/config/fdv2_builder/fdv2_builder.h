@@ -94,8 +94,12 @@ LDClientFDv2Builder_CustomizeMode(LDClientFDv2Builder b,
 /**
  * Creates a new builder for one connection mode's sources.
  *
- * A mode built this way replaces the SDK's built-in definition entirely, so it
- * should list every source the mode needs, cache included.
+ * A mode built this way replaces the built-in initializers and synchronizers,
+ * so it should list every source it needs, cache included.
+ *
+ * The mode keeps the built-in FDv1 fallback. Call
+ * LDClientFDv2ModeBuilder_FDv1Fallback to replace it, or
+ * LDClientFDv2ModeBuilder_DisableFDv1Fallback to remove it.
  *
  * If not passed into an FDv2 builder, must be manually freed with
  * LDClientFDv2ModeBuilder_Free.
