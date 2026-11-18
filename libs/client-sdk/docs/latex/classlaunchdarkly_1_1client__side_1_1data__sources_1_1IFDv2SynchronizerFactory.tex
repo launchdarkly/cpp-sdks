@@ -1,0 +1,45 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::IFDv2\+Synchronizer\+Factory Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}\index{launchdarkly::client\_side::data\_sources::IFDv2SynchronizerFactory@{launchdarkly::client\_side::data\_sources::IFDv2SynchronizerFactory}}
+
+
+{\ttfamily \#include $<$ifdv2\+\_\+synchronizer\+\_\+factory.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_aab745fc125ecb8f2736b210d08c0c1de}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_aab745fc125ecb8f2736b210d08c0c1de}} 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} $>$ {\bfseries Build} ()=0
+\item 
+virtual bool \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a1c00b326ed9e48136f130515ee06fe4c}{Is\+FDv1\+Fallback}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a601f28315d91b85d6d7f090667af15e2}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a601f28315d91b85d6d7f090667af15e2}} 
+{\bfseries IFDv2\+Synchronizer\+Factory} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a704907f250938bbc676df6dfde13f3bd}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a704907f250938bbc676df6dfde13f3bd}} 
+{\bfseries IFDv2\+Synchronizer\+Factory} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a384d1f47ee24a794a0c1b481abb2931b}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a384d1f47ee24a794a0c1b481abb2931b}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_aaf053a639faaf1ac12cf95c41bfc54ee}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_aaf053a639faaf1ac12cf95c41bfc54ee}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builds new \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} instances on demand. Each call to Build() produces a fresh synchronizer that has not yet been started.
+
+Implementations must be thread-\/safe. Build() and \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a1c00b326ed9e48136f130515ee06fe4c}{Is\+FDv1\+Fallback()}} may be called from any thread. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a1c00b326ed9e48136f130515ee06fe4c}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory_a1c00b326ed9e48136f130515ee06fe4c}} 
+\index{launchdarkly::client\_side::data\_sources::IFDv2SynchronizerFactory@{launchdarkly::client\_side::data\_sources::IFDv2SynchronizerFactory}!IsFDv1Fallback@{IsFDv1Fallback}}
+\index{IsFDv1Fallback@{IsFDv1Fallback}!launchdarkly::client\_side::data\_sources::IFDv2SynchronizerFactory@{launchdarkly::client\_side::data\_sources::IFDv2SynchronizerFactory}}
+\doxysubsubsection{\texorpdfstring{IsFDv1Fallback()}{IsFDv1Fallback()}}
+{\footnotesize\ttfamily virtual bool launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IFDv2\+Synchronizer\+Factory\+::\+Is\+FDv1\+Fallback (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+Whether the synchronizers this factory builds speak FDv1. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/ifdv2\+\_\+synchronizer\+\_\+factory.\+hpp\end{DoxyCompactItemize}
