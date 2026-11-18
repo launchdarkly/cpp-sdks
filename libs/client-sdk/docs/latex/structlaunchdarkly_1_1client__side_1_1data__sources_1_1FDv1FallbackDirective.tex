@@ -1,0 +1,70 @@
+\hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv1\+Fallback\+Directive Struct Reference}
+\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}\index{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}}
+
+
+{\ttfamily \#include $<$fdv2\+\_\+source\+\_\+result.\+hpp$>$}
+
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a46811e9d2ebb668dfe6228b018f4842f}{Default\+Ttl}} ()
+\item 
+static \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a0f55c8c6fcd93e8b64ee34f7ba5b9a98}{From\+Service\+Ttl}} (std\+::chrono\+::seconds \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_afa1aa431b622efed6f0f9982cf2e3378}{ttl}})
+\item 
+static \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a9a77d9d2213e210520bd0cc65572a17d}{From\+Service\+Ttl}} (std\+::string\+\_\+view \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_afa1aa431b622efed6f0f9982cf2e3378}{ttl}})
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::chrono\+::seconds \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_afa1aa431b622efed6f0f9982cf2e3378}{ttl}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static constexpr std\+::chrono\+::seconds \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a33f1d0ef8e898f6b2cb6019b7736e98b}{k\+Default\+Ttl}} = std\+::chrono\+::hours(1)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+An instruction from the service to stop using FDv2 and fall back to FDv1. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a46811e9d2ebb668dfe6228b018f4842f}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a46811e9d2ebb668dfe6228b018f4842f}} 
+\index{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}!DefaultTtl@{DefaultTtl}}
+\index{DefaultTtl@{DefaultTtl}!launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}}
+\doxysubsubsection{\texorpdfstring{DefaultTtl()}{DefaultTtl()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv1\+Fallback\+Directive\+::\+Default\+Ttl (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Builds a directive using the jittered default TTL, so that SDKs which fell back together do not all retry at once. Used when the service supplies no usable TTL. Safe to call from any thread. \mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a0f55c8c6fcd93e8b64ee34f7ba5b9a98}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a0f55c8c6fcd93e8b64ee34f7ba5b9a98}} 
+\index{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}!FromServiceTtl@{FromServiceTtl}}
+\index{FromServiceTtl@{FromServiceTtl}!launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}}
+\doxysubsubsection{\texorpdfstring{FromServiceTtl()}{FromServiceTtl()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv1\+Fallback\+Directive\+::\+From\+Service\+Ttl (\begin{DoxyParamCaption}\item[{std\+::chrono\+::seconds}]{ttl }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Builds a directive from a service-\/supplied TTL, used as given. A value outside (0, 1 hour\mbox{]} uses the jittered default instead, so a fallback is never indefinite. \mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a9a77d9d2213e210520bd0cc65572a17d}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a9a77d9d2213e210520bd0cc65572a17d}} 
+\index{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}!FromServiceTtl@{FromServiceTtl}}
+\index{FromServiceTtl@{FromServiceTtl}!launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}}
+\doxysubsubsection{\texorpdfstring{FromServiceTtl()}{FromServiceTtl()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective}{FDv1\+Fallback\+Directive}} launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv1\+Fallback\+Directive\+::\+From\+Service\+Ttl (\begin{DoxyParamCaption}\item[{std\+::string\+\_\+view}]{ttl }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Builds a directive from the raw value of a TTL response header. A value that is not a whole number of seconds uses the default. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a33f1d0ef8e898f6b2cb6019b7736e98b}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_a33f1d0ef8e898f6b2cb6019b7736e98b}} 
+\index{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}!kDefaultTtl@{kDefaultTtl}}
+\index{kDefaultTtl@{kDefaultTtl}!launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}}
+\doxysubsubsection{\texorpdfstring{kDefaultTtl}{kDefaultTtl}}
+{\footnotesize\ttfamily constexpr std\+::chrono\+::seconds launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv1\+Fallback\+Directive\+::k\+Default\+Ttl = std\+::chrono\+::hours(1)\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [constexpr]}}
+
+Used whenever the service supplies no usable TTL. \mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_afa1aa431b622efed6f0f9982cf2e3378}\label{structlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv1FallbackDirective_afa1aa431b622efed6f0f9982cf2e3378}} 
+\index{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}!ttl@{ttl}}
+\index{ttl@{ttl}!launchdarkly::client\_side::data\_sources::FDv1FallbackDirective@{launchdarkly::client\_side::data\_sources::FDv1FallbackDirective}}
+\doxysubsubsection{\texorpdfstring{ttl}{ttl}}
+{\footnotesize\ttfamily std\+::chrono\+::seconds launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv1\+Fallback\+Directive\+::ttl}
+
+How long to stay off FDv2 before attempting to recover to it. 
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/fdv2\+\_\+source\+\_\+result.\+hpp\item 
+src/data\+\_\+sources/fdv2/fdv2\+\_\+source\+\_\+result.\+cpp\end{DoxyCompactItemize}
