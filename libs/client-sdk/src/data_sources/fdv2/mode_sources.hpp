@@ -14,7 +14,6 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace launchdarkly::client_side::data_sources {
