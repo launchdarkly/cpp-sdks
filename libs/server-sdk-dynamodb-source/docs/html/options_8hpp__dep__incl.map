@@ -1,0 +1,6 @@
+<map id="include/launchdarkly/server_side/integrations/dynamodb/options.hpp" name="include/launchdarkly/server_side/integrations/dynamodb/options.hpp">
+<area shape="rect" id="node1" title="Options for constructing a DynamoDB&#45;backed integration." alt="" coords="319,5,502,61"/>
+<area shape="rect" id="node2" href="$dynamodb__big__segment__store_8hpp.html" title="Server&#45;Side DynamoDB Big Segments Store." alt="" coords="5,109,264,180"/>
+<area shape="rect" id="node3" href="$dynamodb__source_8hpp.html" title="Server&#45;Side DynamoDB Source." alt="" coords="287,117,534,173"/>
+<area shape="rect" id="node4" href="$client__factory_8hpp_source.html" title=" " alt="" coords="557,131,717,158"/>
+</map>
