@@ -1,0 +1,4 @@
+<map id="launchdarkly::server_side::integrations::RedisBigSegmentStore" name="launchdarkly::server_side::integrations::RedisBigSegmentStore">
+<area shape="rect" id="node1" title="RedisBigSegmentStore is a Big Segments persistent store backed by Redis." alt="" coords="5,80,176,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="21,5,160,32"/>
+</map>
