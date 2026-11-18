@@ -58,8 +58,6 @@ static std::shared_ptr<data_sources::IDataSource> MakeFDv2DataSource(
     data_sources::ModeSourceParams const params{
         executor,
         logger,
-        fdv2.polling_base_url,
-        fdv2.streaming_base_url,
         http_properties,
         endpoints,
         context,

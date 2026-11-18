@@ -15,9 +15,6 @@ template <typename SDK>
 class EndpointsBuilder;
 
 template <typename SDK>
-class ConfigBuilder;
-
-template <typename SDK>
 bool operator==(EndpointsBuilder<SDK> const& lhs,
                 EndpointsBuilder<SDK> const& rhs);
 
@@ -75,14 +72,6 @@ class EndpointsBuilder {
     [[nodiscard]] tl::expected<built::ServiceEndpoints, Error> Build() const;
 
    private:
-    friend class ConfigBuilder<SDK>;
-
-    /**
-     * Whether the application set any of these URLs, as opposed to accepting
-     * the SDK's defaults.
-     */
-    [[nodiscard]] bool IsCustom() const;
-
     std::optional<std::string> polling_base_url_;
     std::optional<std::string> streaming_base_url_;
     std::optional<std::string> events_base_url_;
