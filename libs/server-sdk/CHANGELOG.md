@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.15.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.15.0...launchdarkly-cpp-server-v3.15.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* Default the FDv1 fallback to polling, and stop synthesizing one in contract tests ([#641](https://github.com/launchdarkly/cpp-sdks/issues/641)) ([8df0d7d](https://github.com/launchdarkly/cpp-sdks/commit/8df0d7d541cba8c5eecbd1c608bf206122162c90))
+* Record the default value in analytics events when a typed evaluation has the wrong type ([#643](https://github.com/launchdarkly/cpp-sdks/issues/643)) ([6b08881](https://github.com/launchdarkly/cpp-sdks/commit/6b08881278099495b3e6972cfdf7ed99cdca4193))
+
 ## [3.15.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.14.0...launchdarkly-cpp-server-v3.15.0) (2026-11-04)
 
 
