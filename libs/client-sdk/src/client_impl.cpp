@@ -35,6 +35,17 @@ using launchdarkly::config::shared::built::HttpProperties;
 
 using FDv2Config = config::shared::built::FDv2Config<ClientSDK>;
 
+namespace {
+
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+}  // namespace
+
 static bool UsesFDv2(Config const& config) {
     return std::holds_alternative<FDv2Config>(config.DataSourceConfig().method);
 }
@@ -42,12 +53,12 @@ static bool UsesFDv2(Config const& config) {
 static std::shared_ptr<data_sources::IDataSource> MakeFDv2DataSource(
     HttpProperties const& http_properties,
     Config const& config,
+    FDv2Config const& fdv2,
     Context const& context,
     boost::asio::any_io_executor const& executor,
     flag_manager::FlagManager& flag_manager,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
-    auto const& fdv2 = std::get<FDv2Config>(config.DataSourceConfig().method);
     auto const& endpoints = config.ServiceEndpoints();
 
     if (config.DataSourceConfig().use_report) {
@@ -94,26 +105,30 @@ static std::shared_ptr<data_sources::IDataSource> MakeDataSource(
 
     auto data_source_properties = builder.Build();
 
-    if (UsesFDv2(config)) {
-        return MakeFDv2DataSource(data_source_properties, config, context,
-                                  executor, flag_manager, status_manager,
-                                  logger);
-    }
-
-    if (std::holds_alternative<
-            config::shared::built::StreamingConfig<ClientSDK>>(
-            config.DataSourceConfig().method)) {
-        return std::make_shared<
-            launchdarkly::client_side::data_sources::StreamingDataSource>(
-            config.ServiceEndpoints(), config.DataSourceConfig(),
-            data_source_properties, executor, context, flag_manager.Updater(),
-            status_manager, logger);
-    }
-    return std::make_shared<
-        launchdarkly::client_side::data_sources::PollingDataSource>(
-        config.ServiceEndpoints(), config.DataSourceConfig(),
-        data_source_properties, executor, context, flag_manager.Updater(),
-        status_manager, logger);
+    return std::visit(
+        overloaded{
+            [&](config::shared::built::StreamingConfig<ClientSDK> const&)
+                -> std::shared_ptr<data_sources::IDataSource> {
+                return std::make_shared<data_sources::StreamingDataSource>(
+                    config.ServiceEndpoints(), config.DataSourceConfig(),
+                    data_source_properties, executor, context,
+                    flag_manager.Updater(), status_manager, logger);
+            },
+            [&](config::shared::built::PollingConfig<ClientSDK> const&)
+                -> std::shared_ptr<data_sources::IDataSource> {
+                return std::make_shared<data_sources::PollingDataSource>(
+                    config.ServiceEndpoints(), config.DataSourceConfig(),
+                    data_source_properties, executor, context,
+                    flag_manager.Updater(), status_manager, logger);
+            },
+            [&](FDv2Config const& fdv2)
+                -> std::shared_ptr<data_sources::IDataSource> {
+                return MakeFDv2DataSource(data_source_properties, config, fdv2,
+                                          context, executor, flag_manager,
+                                          status_manager, logger);
+            },
+        },
+        config.DataSourceConfig().method);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
