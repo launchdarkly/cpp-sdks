@@ -1,0 +1,97 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext}{}\doxysection{launchdarkly\+::server\+\_\+side\+::hooks\+::Hook\+Context Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext}\index{launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}}
+
+
+{\ttfamily \#include $<$hook.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_af21c860ad782761b8352e4ad93d0714f}{Hook\+Context}} ()=default
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext}{Hook\+Context}} \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_aba41e0a9f31d0e5b22d0813deee096a5}{Set}} (std\+::string key, std\+::shared\+\_\+ptr$<$ std\+::any $>$ value)
+\item 
+std\+::optional$<$ std\+::shared\+\_\+ptr$<$ std\+::any $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_ab9bb8600863e47cc74bb9a0c64e4ebb2}{Get}} (std\+::string const \&key) const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_aaf565f761731e6579e3d55ff7bbb289b}{Has}} (std\+::string const \&key) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext}{Hook\+Context}} allows passing arbitrary data from the caller through to hooks.
+
+Example use case\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{// Caller creates context with span parent}}
+\DoxyCodeLine{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_af21c860ad782761b8352e4ad93d0714f}{HookContext}} ctx;}
+\DoxyCodeLine{ctx.Set(\textcolor{stringliteral}{"{}otel\_span\_parent"{}}, std::make\_shared<std::any>(span\_context));}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Pass to variation method}}
+\DoxyCodeLine{client.BoolVariation(context, \textcolor{stringliteral}{"{}flag-\/key"{}}, \textcolor{keyword}{false}, ctx);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Hook accesses the span parent}}
+\DoxyCodeLine{\textcolor{keyword}{auto} span\_parent = hook\_context.Get(\textcolor{stringliteral}{"{}otel\_span\_parent"{}});}
+
+\end{DoxyCode}
+ 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_af21c860ad782761b8352e4ad93d0714f}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_af21c860ad782761b8352e4ad93d0714f}} 
+\index{launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}!HookContext@{HookContext}}
+\index{HookContext@{HookContext}!launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}}
+\doxysubsubsection{\texorpdfstring{HookContext()}{HookContext()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+Context\+::\+Hook\+Context (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+Constructs an empty \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext}{Hook\+Context}}. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_ab9bb8600863e47cc74bb9a0c64e4ebb2}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_ab9bb8600863e47cc74bb9a0c64e4ebb2}} 
+\index{launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}!Get@{Get}}
+\index{Get@{Get}!launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}}
+\doxysubsubsection{\texorpdfstring{Get()}{Get()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::shared\+\_\+ptr$<$ std\+::any $>$ $>$ launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+Context\+::\+Get (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const}
+
+Retrieves a value from the context. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to look up. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The shared\+\_\+ptr if present, or std\+::nullopt if not found. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_aaf565f761731e6579e3d55ff7bbb289b}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_aaf565f761731e6579e3d55ff7bbb289b}} 
+\index{launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}!Has@{Has}}
+\index{Has@{Has}!launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}}
+\doxysubsubsection{\texorpdfstring{Has()}{Has()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+Context\+::\+Has (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const}
+
+Checks if a key exists in the context. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the key exists, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_aba41e0a9f31d0e5b22d0813deee096a5}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext_aba41e0a9f31d0e5b22d0813deee096a5}} 
+\index{launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}!Set@{Set}}
+\index{Set@{Set}!launchdarkly::server\_side::hooks::HookContext@{launchdarkly::server\_side::hooks::HookContext}}
+\doxysubsubsection{\texorpdfstring{Set()}{Set()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookContext}{Hook\+Context}} \& launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+Context\+::\+Set (\begin{DoxyParamCaption}\item[{std\+::string}]{key,  }\item[{std\+::shared\+\_\+ptr$<$ std\+::any $>$}]{value }\end{DoxyParamCaption})}
+
+Sets a value in the context. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to set. \\
+\hline
+{\em value} & The shared\+\_\+ptr to any type to associate with the key. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this context for chaining. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/hooks/hook.\+hpp\item 
+src/hooks/hook.\+cpp\end{DoxyCompactItemize}
