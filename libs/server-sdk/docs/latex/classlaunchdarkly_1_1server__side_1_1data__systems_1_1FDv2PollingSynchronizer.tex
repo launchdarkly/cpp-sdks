@@ -1,0 +1,106 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv2\+Polling\+Synchronizer Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer}\index{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}}
+
+
+{\ttfamily \#include $<$polling\+\_\+synchronizer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv2\+Polling\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=218pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv2\+Polling\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=218pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a4844654189956693b0aeca3bdc319455}{FDv2\+Polling\+Synchronizer}} (boost\+::asio\+::any\+\_\+io\+\_\+executor const \&executor, Logger const \&logger, std\+::string polling\+\_\+base\+\_\+url, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} const \&http\+\_\+properties, std\+::optional$<$ std\+::string $>$ filter\+\_\+key, std\+::chrono\+::seconds poll\+\_\+interval)
+\item 
+async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{data\+\_\+interfaces\+::\+FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next}} (data\+\_\+model\+::\+Selector selector) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}{Close}} () override
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a78e336effcc6e4e2e6e7e3d710877753}{Identity}} () const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+FDv2 polling synchronizer. Repeatedly polls the FDv2 polling endpoint at a configurable interval.
+
+The caller passes the current selector into each \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next()}} call, allowing the orchestrator to reflect applied changesets without any shared state.
+
+Threading model\+: \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next()}} should only be called once at a time. \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}{Close()}} may be called concurrently with \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next()}}. This object may be safely destroyed once no call to \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next()}} or \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}{Close()}} is in progress. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a4844654189956693b0aeca3bdc319455}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a4844654189956693b0aeca3bdc319455}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}!FDv2PollingSynchronizer@{FDv2PollingSynchronizer}}
+\index{FDv2PollingSynchronizer@{FDv2PollingSynchronizer}!launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{FDv2PollingSynchronizer()}{FDv2PollingSynchronizer()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer\+::\+FDv2\+Polling\+Synchronizer (\begin{DoxyParamCaption}\item[{boost\+::asio\+::any\+\_\+io\+\_\+executor const \&}]{executor,  }\item[{Logger const \&}]{logger,  }\item[{std\+::string}]{polling\+\_\+base\+\_\+url,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} const \&}]{http\+\_\+properties,  }\item[{std\+::optional$<$ std\+::string $>$}]{filter\+\_\+key,  }\item[{std\+::chrono\+::seconds}]{poll\+\_\+interval }\end{DoxyParamCaption})}
+
+Constructs a synchronizer that polls at the given interval. If filter\+\_\+key is present, only the specified payload filter is requested. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next()}} call, causing it to return FDv2\+Source\+Result\+::\+Shutdown, and releases underlying resources. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a78e336effcc6e4e2e6e7e3d710877753}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a78e336effcc6e4e2e6e7e3d710877753}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the synchronizer. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a524cf4899f10535da622a3d1e4dab7f3}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}!Next@{Next}}
+\index{Next@{Next}!launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2PollingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Next()}{Next()}}
+{\footnotesize\ttfamily async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer\+::\+Next (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+Selector}]{selector }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a Future that resolves with the next result once it is available.
+
+On the first call, the synchronizer starts its underlying connection. Subsequent calls continue reading from the same connection.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{Next()}}, in which case the future resolves with FDv2\+Source\+Result\+::\+Shutdown.
+
+
+\begin{DoxyParams}{Parameters}
+{\em selector} & The selector to send with the request, reflecting any changesets applied since the previous call. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/polling\+\_\+synchronizer.\+hpp\item 
+src/data\+\_\+systems/fdv2/polling\+\_\+synchronizer.\+cpp\end{DoxyCompactItemize}

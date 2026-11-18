@@ -1,0 +1,94 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IFDv2\+Synchronizer Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}\index{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}}
+
+
+{\ttfamily \#include $<$ifdv2\+\_\+synchronizer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IFDv2\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{Next}} (data\+\_\+model\+::\+Selector selector)=0
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}{Close}} ()=0
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a524cf4899f10535da622a3d1e4dab7f3}{Identity}} () const =0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a3052df83cfa5ba1147660940204e6d10}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a3052df83cfa5ba1147660940204e6d10}} 
+{\bfseries IFDv2\+Synchronizer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a49e4ce681ef305c09e475d36d9e69f71}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a49e4ce681ef305c09e475d36d9e69f71}} 
+{\bfseries IFDv2\+Synchronizer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a84d46be2a434838e6410b8619b65e6d7}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a84d46be2a434838e6410b8619b65e6d7}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a7e41fdf56327dec9262461b43bb9f3ba}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a7e41fdf56327dec9262461b43bb9f3ba}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a continuous data source that produces a stream of results. Used during the synchronization phase of FDv2, after initialization is complete.
+
+The stream is started lazily on the first call to \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{Next()}}. The synchronizer runs until \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}{Close()}} is called. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}} 
+\index{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{Next()}} call, causing it to return \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}, and releases underlying resources. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_aae6fa611e02ab111a617c7d3e9fcee6b}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a04f0e51ab406791c4498bae6b9c79986}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a524cf4899f10535da622a3d1e4dab7f3}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a524cf4899f10535da622a3d1e4dab7f3}} 
+\index{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the synchronizer. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a1331d5db49e5917ad10e50b78970ecaa}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a78e336effcc6e4e2e6e7e3d710877753}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_a8b51f83f349b44eb178e834d2a6122a5}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}} 
+\index{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}!Next@{Next}}
+\index{Next@{Next}!launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer@{launchdarkly::server\_side::data\_interfaces::IFDv2Synchronizer}}
+\doxysubsubsection{\texorpdfstring{Next()}{Next()}}
+{\footnotesize\ttfamily virtual async\+::\+Future$<$\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}}$>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer\+::\+Next (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+Selector}]{selector }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns a Future that resolves with the next result once it is available.
+
+On the first call, the synchronizer starts its underlying connection. Subsequent calls continue reading from the same connection.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{Next()}}, in which case the future resolves with \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em selector} & The selector to send with the request, reflecting any changesets applied since the previous call. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingSynchronizer_a6d2cd5d8f7411d73f8845dee16bf95a8}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Synchronizer}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv1AdapterSynchronizer_acef18c675b9b49592fae20dc54863d31}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv1\+Adapter\+Synchronizer}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/source/ifdv2\+\_\+synchronizer.\+hpp\end{DoxyCompactItemize}

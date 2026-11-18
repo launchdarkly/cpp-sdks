@@ -1,0 +1,51 @@
+\hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config}{}\doxysection{launchdarkly\+::server\+\_\+side\+::config\+::built\+::FDv2\+Config Struct Reference}
+\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config}\index{launchdarkly::server\_side::config::built::FDv2Config@{launchdarkly::server\_side::config::built::FDv2Config}}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::config\+::built\+::FDv2\+Config\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_1_1PollingConfig}{Polling\+Config}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_1_1StreamingConfig}{Streaming\+Config}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a7259ace96e2edcf95500d1656ffb3248}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a7259ace96e2edcf95500d1656ffb3248}} 
+using {\bfseries FDv1\+Streaming\+Config} = \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{launchdarkly\+::config\+::shared\+::built\+::\+Streaming\+Config}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ServerSDK}{launchdarkly\+::config\+::shared\+::\+Server\+SDK}} $>$
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_af6ec5ff850c11e73f2ed7e83dce70a8b}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_af6ec5ff850c11e73f2ed7e83dce70a8b}} 
+using {\bfseries FDv1\+Polling\+Config} = \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1PollingConfig}{launchdarkly\+::config\+::shared\+::built\+::\+Polling\+Config}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ServerSDK}{launchdarkly\+::config\+::shared\+::\+Server\+SDK}} $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a5295b8f697b2dd0b7676b28aa9fabbb3}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a5295b8f697b2dd0b7676b28aa9fabbb3}} 
+std\+::vector$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_1_1PollingConfig}{Polling\+Config}} $>$ {\bfseries initializers}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_aece8bff8de7d472616910a365a0af3ab}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_aece8bff8de7d472616910a365a0af3ab}} 
+std\+::vector$<$ std\+::variant$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_1_1StreamingConfig}{Streaming\+Config}}, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_1_1PollingConfig}{Polling\+Config}} $>$ $>$ {\bfseries synchronizers}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a7ca9c4b4d737dfe951b039e3560e1f03}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a7ca9c4b4d737dfe951b039e3560e1f03}} 
+std\+::optional$<$ std\+::variant$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{FDv1\+Streaming\+Config}}, \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1PollingConfig}{FDv1\+Polling\+Config}} $>$ $>$ {\bfseries fdv1\+\_\+fallback}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_afa165fee3d91a0540aa69972e33ffe74}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_afa165fee3d91a0540aa69972e33ffe74}} 
+std\+::chrono\+::milliseconds {\bfseries fallback\+\_\+timeout}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a38bef959abd541e2fef65851bf080b95}\label{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1FDv2Config_a38bef959abd541e2fef65851bf080b95}} 
+std\+::chrono\+::milliseconds {\bfseries recovery\+\_\+timeout}
+\end{DoxyCompactItemize}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/config/built/data\+\_\+system/fdv2\+\_\+config.\+hpp\end{DoxyCompactItemize}
