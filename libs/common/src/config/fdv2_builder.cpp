@@ -5,109 +5,126 @@
 
 namespace launchdarkly::config::shared::builders {
 
-FDv2Builder::Config::CacheConfig FDv2Builder::Cache::Build() const {
+FDv2Builder<ClientSDK>::Config::CacheConfig
+FDv2Builder<ClientSDK>::Cache::Build() const {
     return {};
 }
 
-FDv2Builder::Streaming& FDv2Builder::Streaming::InitialReconnectDelay(
+FDv2Builder<ClientSDK>::Streaming&
+FDv2Builder<ClientSDK>::Streaming::InitialReconnectDelay(
     std::chrono::milliseconds delay) {
     initial_reconnect_delay_ = delay;
     return *this;
 }
 
-FDv2Builder::Streaming& FDv2Builder::Streaming::BaseUrl(std::string base_url) {
-    base_url_override_ = std::move(base_url);
-    return *this;
-}
-
-FDv2Builder::Config::StreamingConfig FDv2Builder::Streaming::Build() const {
-    return {initial_reconnect_delay_, base_url_override_};
-}
-
-FDv2Builder::Polling& FDv2Builder::Polling::PollInterval(
-    std::chrono::seconds interval) {
-    poll_interval_ = interval;
-    return *this;
-}
-
-FDv2Builder::Polling& FDv2Builder::Polling::BaseUrl(std::string base_url) {
-    base_url_override_ = std::move(base_url);
-    return *this;
-}
-
-FDv2Builder::Config::PollingConfig FDv2Builder::Polling::Build() const {
-    return {poll_interval_, base_url_override_};
-}
-
-FDv2Builder::FDv1Polling& FDv2Builder::FDv1Polling::PollInterval(
-    std::chrono::seconds interval) {
-    poll_interval_ = interval;
-    return *this;
-}
-
-FDv2Builder::FDv1Polling& FDv2Builder::FDv1Polling::BaseUrl(
+FDv2Builder<ClientSDK>::Streaming& FDv2Builder<ClientSDK>::Streaming::BaseUrl(
     std::string base_url) {
     base_url_override_ = std::move(base_url);
     return *this;
 }
 
-FDv2Builder::Config::FDv1FallbackConfig FDv2Builder::FDv1Polling::Build()
-    const {
+FDv2Builder<ClientSDK>::Config::StreamingConfig
+FDv2Builder<ClientSDK>::Streaming::Build() const {
+    return {initial_reconnect_delay_, base_url_override_};
+}
+
+FDv2Builder<ClientSDK>::Polling& FDv2Builder<ClientSDK>::Polling::PollInterval(
+    std::chrono::seconds interval) {
+    poll_interval_ = interval;
+    return *this;
+}
+
+FDv2Builder<ClientSDK>::Polling& FDv2Builder<ClientSDK>::Polling::BaseUrl(
+    std::string base_url) {
+    base_url_override_ = std::move(base_url);
+    return *this;
+}
+
+FDv2Builder<ClientSDK>::Config::PollingConfig
+FDv2Builder<ClientSDK>::Polling::Build() const {
     return {poll_interval_, base_url_override_};
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::Initializer(Cache source) {
+FDv2Builder<ClientSDK>::FDv1Polling& FDv2Builder<
+    ClientSDK>::FDv1Polling::PollInterval(std::chrono::seconds interval) {
+    poll_interval_ = interval;
+    return *this;
+}
+
+FDv2Builder<ClientSDK>::FDv1Polling&
+FDv2Builder<ClientSDK>::FDv1Polling::BaseUrl(std::string base_url) {
+    base_url_override_ = std::move(base_url);
+    return *this;
+}
+
+FDv2Builder<ClientSDK>::Config::FDv1FallbackConfig
+FDv2Builder<ClientSDK>::FDv1Polling::Build() const {
+    return {poll_interval_, base_url_override_};
+}
+
+FDv2Builder<ClientSDK>::Mode& FDv2Builder<ClientSDK>::Mode::Initializer(
+    Cache source) {
     definition_.initializers.emplace_back(source.Build());
     return *this;
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::Initializer(Polling source) {
+FDv2Builder<ClientSDK>::Mode& FDv2Builder<ClientSDK>::Mode::Initializer(
+    Polling source) {
     definition_.initializers.emplace_back(source.Build());
     return *this;
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::Synchronizer(Streaming source) {
+FDv2Builder<ClientSDK>::Mode& FDv2Builder<ClientSDK>::Mode::Synchronizer(
+    Streaming source) {
     definition_.synchronizers.emplace_back(source.Build());
     return *this;
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::Synchronizer(Polling source) {
+FDv2Builder<ClientSDK>::Mode& FDv2Builder<ClientSDK>::Mode::Synchronizer(
+    Polling source) {
     definition_.synchronizers.emplace_back(source.Build());
     return *this;
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::FDv1Fallback(FDv1Polling source) {
+FDv2Builder<ClientSDK>::Mode& FDv2Builder<ClientSDK>::Mode::FDv1Fallback(
+    FDv1Polling source) {
     definition_.fdv1_fallback = source.Build();
     return *this;
 }
 
-FDv2Builder::Mode& FDv2Builder::Mode::DisableFDv1Fallback() {
+FDv2Builder<ClientSDK>::Mode&
+FDv2Builder<ClientSDK>::Mode::DisableFDv1Fallback() {
     definition_.fdv1_fallback = Config::NoFDv1Fallback{};
     return *this;
 }
 
-FDv2Builder::Config::ModeDefinition FDv2Builder::Mode::Build() const {
+FDv2Builder<ClientSDK>::Config::ModeDefinition
+FDv2Builder<ClientSDK>::Mode::Build() const {
     return definition_;
 }
 
-FDv2Builder::FDv2Builder() : config_(Defaults<ClientSDK>::FDv2Config()) {}
+FDv2Builder<ClientSDK>::FDv2Builder()
+    : config_(Defaults<ClientSDK>::FDv2Config()) {}
 
-FDv2Builder& FDv2Builder::InitialMode(ConnectionMode mode) {
+FDv2Builder<ClientSDK>& FDv2Builder<ClientSDK>::InitialMode(
+    ConnectionMode mode) {
     config_.initial_mode = mode;
     return *this;
 }
 
-FDv2Builder& FDv2Builder::CustomizeMode(ConnectionMode mode, Mode definition) {
+FDv2Builder<ClientSDK>& FDv2Builder<ClientSDK>::CustomizeMode(
+    ConnectionMode mode,
+    Mode definition) {
     config_.modes[mode] = definition.Build();
     return *this;
 }
 
-FDv2Builder& FDv2Builder::UsePost(bool use_post) {
+FDv2Builder<ClientSDK>& FDv2Builder<ClientSDK>::UsePost(bool use_post) {
     config_.use_post = use_post;
     return *this;
 }
 
-FDv2Builder::Config FDv2Builder::Build() const {
+FDv2Builder<ClientSDK>::Config FDv2Builder<ClientSDK>::Build() const {
     return config_;
 }
 

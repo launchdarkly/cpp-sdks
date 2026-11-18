@@ -20,7 +20,9 @@ struct MethodVisitor<ClientSDK> {
         return polling.Build();
     }
 
-    Result operator()(FDv2Builder const& fdv2) const { return fdv2.Build(); }
+    Result operator()(FDv2Builder<SDK> const& fdv2) const {
+        return fdv2.Build();
+    }
 };
 
 template <typename SDK>
@@ -83,7 +85,7 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
 }
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
-    FDv2Builder builder) {
+    FDv2Builder<ClientSDK> builder) {
     method_ = std::move(builder);
     return *this;
 }

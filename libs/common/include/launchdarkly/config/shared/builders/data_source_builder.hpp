@@ -135,7 +135,7 @@ class DataSourceBuilder<ClientSDK> {
    public:
     using Streaming = StreamingBuilder<ClientSDK>;
     using Polling = PollingBuilder<ClientSDK>;
-    using FDv2 = FDv2Builder;
+    using FDv2 = FDv2Builder<ClientSDK>;
 
     DataSourceBuilder();
 

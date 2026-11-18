@@ -22,7 +22,7 @@ using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
 using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
-using FDv2Builder = config::shared::builders::FDv2Builder;
+using FDv2Builder = config::shared::builders::FDv2Builder<SDK>;
 using ConnectionMode = config::shared::ConnectionMode;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
 using PersistenceBuilder = config::shared::builders::PersistenceBuilder<SDK>;

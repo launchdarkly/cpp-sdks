@@ -10,6 +10,9 @@
 
 namespace launchdarkly::config::shared::builders {
 
+template <typename SDK>
+class FDv2Builder;
+
 /**
  * Contains methods for configuring the FDv2 data system, which determines how
  * the SDK obtains flag data and how it keeps that data current.
@@ -18,7 +21,8 @@ namespace launchdarkly::config::shared::builders {
  * application customizes nothing. It starts in streaming mode, and provides
  * streaming, polling, and offline modes.
  */
-class FDv2Builder {
+template <>
+class FDv2Builder<ClientSDK> {
    public:
     using Config = built::FDv2Config<ClientSDK>;
 
