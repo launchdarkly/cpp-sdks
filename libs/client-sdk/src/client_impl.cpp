@@ -75,8 +75,14 @@ static std::shared_ptr<data_sources::IDataSource> MakeFDv2DataSource(
         config.DataSourceConfig().with_reasons,
         &flag_manager.Cache()};
 
-    auto sources =
-        data_sources::BuildModeSources(fdv2, fdv2.initial_mode, params);
+    auto const mode = config.Offline()
+                          ? config::shared::ConnectionMode::kOffline
+                          : fdv2.initial_mode;
+    auto const ready_state =
+        config.Offline() ? DataSourceStatus::DataSourceState::kSetOffline
+                         : DataSourceStatus::DataSourceState::kValid;
+
+    auto sources = data_sources::BuildModeSources(fdv2, mode, params);
 
     return std::make_shared<data_sources::FDv2DataSource>(
         std::move(sources.initializers), std::move(sources.synchronizers),
@@ -85,7 +91,7 @@ static std::shared_ptr<data_sources::IDataSource> MakeFDv2DataSource(
         std::make_unique<data_sources::RecoveryConditionFactory>(
             executor, fdv2.recovery_timeout),
         executor, context, &flag_manager.Updater(), &flag_manager.Store(),
-        &status_manager, logger);
+        &status_manager, ready_state, logger);
 }
 
 static std::shared_ptr<data_sources::IDataSource> MakeDataSource(
@@ -96,7 +102,8 @@ static std::shared_ptr<data_sources::IDataSource> MakeDataSource(
     flag_manager::FlagManager& flag_manager,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
-    if (config.Offline()) {
+    // FDv2 has its own offline mode, which still reads the cache.
+    if (config.Offline() && !UsesFDv2(config)) {
         return std::make_shared<data_sources::NullDataSource>(executor,
                                                               status_manager);
     }

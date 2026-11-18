@@ -118,6 +118,32 @@ TEST(FDv2ClientTest, OfflineModeEvaluatesAgainstTheCache) {
     EXPECT_EQ("fish", client.StringVariation("treat", "chicken"));
 }
 
+TEST(FDv2ClientTest, OfflineConfigEvaluatesAgainstTheCache) {
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType{
+            {kEnvironment,
+             {{kContextId, R"({"treat":{"version":1,"value":"fish"}})"}}}});
+
+    auto builder = ConfigBuilder("the-key");
+    builder.Offline(true);
+    builder.DataSource().Method(DataSourceBuilder::FDv2());
+    builder.Persistence().Custom(persistence);
+
+    Client client(builder.Build().value(),
+                  ContextBuilder().Kind("user", "user-key").Build());
+
+    // Start the SDK, which the application configured offline.
+    auto started = client.StartAsync();
+
+    ASSERT_EQ(std::future_status::ready, started.wait_for(5s));
+    EXPECT_TRUE(started.get());
+    // The SDK evaluates against the cache.
+    EXPECT_EQ("fish", client.StringVariation("treat", "chicken"));
+    // The SDK reports that the application set it offline.
+    EXPECT_EQ(data_sources::DataSourceStatus::DataSourceState::kSetOffline,
+              client.DataSourceStatus().Status().State());
+}
+
 // During identify, the old stream can deliver one more update. The first
 // request for the new context must not contain the selector from that update.
 TEST(FDv2ClientTest, IdentifyDoesNotSendThePreviousContextsBasis) {
