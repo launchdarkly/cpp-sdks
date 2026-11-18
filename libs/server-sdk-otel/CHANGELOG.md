@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.10](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-otel-v0.1.9...launchdarkly-cpp-server-otel-v0.1.10) (2026-11-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-server bumped from 3.15.2 to 3.15.3
+
 ## [0.1.9](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-otel-v0.1.8...launchdarkly-cpp-server-otel-v0.1.9) (2026-11-18)
 
 
