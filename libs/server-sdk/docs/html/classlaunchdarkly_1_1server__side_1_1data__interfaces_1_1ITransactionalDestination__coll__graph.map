@@ -1,0 +1,4 @@
+<map id="launchdarkly::server_side::data_interfaces::ITransactionalDestination" name="launchdarkly::server_side::data_interfaces::ITransactionalDestination">
+<area shape="rect" id="node1" title=" " alt="" coords="5,109,200,165"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination.html" title="IDestination represents a sink for data received by the SDK. A destination may be a database,..." alt="" coords="20,5,185,61"/>
+</map>
