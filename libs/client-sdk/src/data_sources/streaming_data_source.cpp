@@ -179,40 +179,6 @@ void StreamingDataSource::Start() {
     client_->async_connect();
 }
 
-void StreamingDataSource::PollAfterPing() {
-    LD_LOG(logger_, LogLevel::kDebug)
-        << "Received ping, polling for flag updates";
-    auto weak_self = weak_from_this();
-    requester_.Request(ping_request_,
-                       [weak_self](network::HttpResult const& res) {
-                           if (auto self = weak_self.lock()) {
-                               self->HandlePingPollResult(res);
-                           }
-                       });
-}
-
-void StreamingDataSource::HandlePingPollResult(network::HttpResult const& res) {
-    if (res.IsError()) {
-        auto const error_message = res.ErrorMessage().value_or("unknown error");
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "Polling after a ping failed: " << error_message;
-        status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kInterrupted,
-            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
-            error_message);
-        return;
-    }
-    if (res.Status() == 200) {
-        data_source_handler_.HandleMessage("put", res.Body().value_or(""));
-        return;
-    }
-    auto const error_message = network::ErrorForStatusCode(
-        res.Status(), "polling request after a ping", std::nullopt);
-    LD_LOG(logger_, LogLevel::kWarn) << error_message;
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kInterrupted,
-                             res.Status(), error_message);
-}
-
 template <class>
 inline constexpr bool always_false_v = false;
 
@@ -259,7 +225,64 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
         std::move(error));
 }
 
+void StreamingDataSource::PollAfterPing() {
+    if (stopped_) {
+        return;
+    }
+    if (ping_poll_in_flight_) {
+        // The poll in flight can be older than the change that caused this
+        // ping. Poll one more time when it completes.
+        LD_LOG(logger_, LogLevel::kDebug)
+            << "Received ping during a poll, polling again when it completes";
+        ping_poll_pending_ = true;
+        return;
+    }
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "Received ping, polling for flag updates";
+    ping_poll_in_flight_ = true;
+    auto weak_self = weak_from_this();
+    requester_.Request(ping_request_,
+                       [weak_self](network::HttpResult const& res) {
+                           if (auto self = weak_self.lock()) {
+                               self->HandlePingPollResult(res);
+                           }
+                       });
+}
+
+void StreamingDataSource::HandlePingPollResult(network::HttpResult const& res) {
+    ping_poll_in_flight_ = false;
+    if (stopped_) {
+        LD_LOG(logger_, LogLevel::kDebug)
+            << "Discarding the result of a poll that completed after shutdown";
+        return;
+    }
+    if (res.IsError()) {
+        auto const error_message = res.ErrorMessage().value_or("unknown error");
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Polling after a ping failed: " << error_message;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            error_message);
+    } else if (res.Status() == 200) {
+        data_source_handler_.HandleMessage("put", res.Body().value_or(""));
+    } else {
+        auto const error_message = network::ErrorForStatusCode(
+            res.Status(), "polling request after a ping",
+            "will poll again on the next ping");
+        LD_LOG(logger_, LogLevel::kWarn) << error_message;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted, res.Status(),
+            error_message);
+    }
+    if (ping_poll_pending_) {
+        ping_poll_pending_ = false;
+        PollAfterPing();
+    }
+}
+
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
+    stopped_ = true;
     if (client_) {
         status_manager_.SetState(
             DataSourceStatus::DataSourceState::kInitializing);

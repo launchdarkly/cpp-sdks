@@ -17,10 +17,20 @@
 #include <launchdarkly/network/requester.hpp>
 #include <launchdarkly/sse/client.hpp>
 
+#include <atomic>
 #include <chrono>
 
 namespace launchdarkly::client_side::data_sources {
 
+/**
+ * Streams the flags of one context. When the stream sends a "ping" event, the
+ * data source polls for the flags of the context and applies the result.
+ *
+ * Thread safety: Start and ShutdownAsync are safe from any thread, but not at
+ * the same time. The stream, poll and error callbacks run on the executor
+ * given to the constructor. That executor must run on one thread, because the
+ * data source relies on it to run those callbacks one at a time.
+ */
 class StreamingDataSource final
     : public IDataSource,
       public std::enable_shared_from_this<StreamingDataSource> {
@@ -60,5 +70,12 @@ class StreamingDataSource final
     std::shared_ptr<launchdarkly::sse::Client> client_;
     network::Requester requester_;
     network::HttpRequest ping_request_;
+
+    // Used only on the executor thread.
+    bool ping_poll_in_flight_ = false;
+    bool ping_poll_pending_ = false;
+
+    // ShutdownAsync sets this, and it can run on a different thread.
+    std::atomic<bool> stopped_{false};
 };
 }  // namespace launchdarkly::client_side::data_sources
