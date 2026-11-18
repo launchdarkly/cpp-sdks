@@ -186,6 +186,11 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
                                                  std::string error_string) {
     auto const state = sse::IsRecoverable(error) ? DataSourceState::kInterrupted
                                                  : DataSourceState::kShutdown;
+    if (state == DataSourceState::kShutdown) {
+        // The stream does not reconnect after this error. Stop the ping polls
+        // too, so that a poll in flight does not change the state.
+        stopped_ = true;
+    }
     std::visit(
         [this, state, error_string = std::move(error_string)](auto error) {
             using T = std::decay_t<decltype(error)>;
@@ -238,7 +243,7 @@ void StreamingDataSource::PollAfterPing() {
         return;
     }
     LD_LOG(logger_, LogLevel::kDebug)
-        << "Received ping, polling for flag updates";
+        << "Polling for flag updates after a ping";
     ping_poll_in_flight_ = true;
     auto weak_self = weak_from_this();
     requester_.Request(ping_request_,

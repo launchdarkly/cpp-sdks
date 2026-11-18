@@ -55,6 +55,13 @@ using Request = http::request<http::string_body>;
 
 char const* const kPingEvent = "event: ping\ndata: \n\n";
 
+// A patch for "flagB". A test sends it after other events, and waits for it to
+// know that the data source has handled those events.
+char const* const kPatchEvent =
+    "event: patch\n"
+    R"(data: {"key": "flagB", "version": 1, "value": true})"
+    "\n\n";
+
 // Returns a poll response body with one flag, "flagA".
 std::string FlagsJson(int version, std::string const& value) {
     return R"({"flagA":{"version":)" + std::to_string(version) +
@@ -98,6 +105,18 @@ class RecordingLogBackend final : public ILogBackend {
             }
             return false;
         });
+    }
+
+    // Returns the number of messages that contain the text.
+    std::size_t Count(std::string const& text) {
+        std::lock_guard lock(mutex_);
+        std::size_t count = 0;
+        for (auto const& message : messages_) {
+            if (message.find(text) != std::string::npos) {
+                ++count;
+            }
+        }
+        return count;
     }
 
    private:
@@ -216,18 +235,7 @@ class PingService {
                        std::string body) {
         boost::asio::post(
             ioc_, [this, index, status, body = std::move(body)]() mutable {
-                auto session = polls_.at(index);
-                session->response.result(status);
-                session->response.set(http::field::content_type,
-                                      "application/json");
-                session->response.body() = std::move(body);
-                session->response.keep_alive(false);
-                session->response.prepare_payload();
-                http::async_write(session->socket, session->response,
-                                  [session](beast::error_code ec, std::size_t) {
-                                      session->socket.shutdown(
-                                          tcp::socket::shutdown_send, ec);
-                                  });
+                Respond(polls_.at(index), status, std::move(body));
             });
     }
 
@@ -237,6 +245,16 @@ class PingService {
         boost::asio::post(ioc_, [this, index] {
             beast::error_code ec;
             polls_.at(index)->socket.close(ec);
+        });
+    }
+
+    // Closes the stream, and answers each later stream request with the
+    // status. The stream must be open.
+    void FailStream(http::status status) {
+        boost::asio::post(ioc_, [this, status] {
+            stream_failure_ = status;
+            beast::error_code ec;
+            stream_->socket.close(ec);
         });
     }
 
@@ -273,6 +291,10 @@ class PingService {
                 }
                 if (std::string(session->request.target()).rfind("/meval", 0) ==
                     0) {
+                    if (stream_failure_) {
+                        Respond(session, *stream_failure_, "");
+                        return;
+                    }
                     stream_ = session;
                     Write(session,
                           std::string("HTTP/1.1 200 OK\r\n"
@@ -286,6 +308,22 @@ class PingService {
                 poll_requests_.push_back(session->request);
                 cv_.notify_all();
             });
+    }
+
+    // Sends one response, and then closes the connection.
+    static void Respond(std::shared_ptr<Session> const& session,
+                        http::status status,
+                        std::string body) {
+        session->response.result(status);
+        session->response.set(http::field::content_type, "application/json");
+        session->response.body() = std::move(body);
+        session->response.keep_alive(false);
+        session->response.prepare_payload();
+        http::async_write(session->socket, session->response,
+                          [session](beast::error_code ec, std::size_t) {
+                              session->socket.shutdown(
+                                  tcp::socket::shutdown_send, ec);
+                          });
     }
 
     // Writes the text after any earlier writes on the same connection.
@@ -320,6 +358,7 @@ class PingService {
     std::vector<std::shared_ptr<Session>> sessions_;
     std::vector<std::shared_ptr<Session>> polls_;
     std::shared_ptr<Session> stream_;
+    std::optional<http::status> stream_failure_;
 
     // Protected by mutex_.
     std::mutex mutex_;
@@ -359,9 +398,12 @@ class StreamingDataSourcePingTest : public ::testing::Test {
             config::shared::builders::EndpointsBuilder<ClientSDK>()
                 .RelayProxyBaseURL(service_.Url())
                 .Build();
+        // A short reconnect delay keeps the tests that close the stream fast.
+        config::shared::built::StreamingConfig<ClientSDK> const
+            streaming_config{
+                10ms, Defaults<ClientSDK>::StreamingConfig().streaming_path};
         config::shared::built::DataSourceConfig<ClientSDK> const
-            data_source_config{Defaults<ClientSDK>::StreamingConfig(),
-                               with_reasons, use_report};
+            data_source_config{streaming_config, with_reasons, use_report};
         auto const http_properties =
             config::shared::builders::HttpPropertiesBuilder<ClientSDK>()
                 .Build();
@@ -480,10 +522,7 @@ TEST_F(StreamingDataSourcePingTest, PingsDuringAPollCauseOneMorePoll) {
     service_.Send(kPingEvent);
     service_.Send(kPingEvent);
     service_.Send(kPingEvent);
-    service_.Send(
-        "event: patch\n"
-        R"(data: {"key": "flagB", "version": 1, "value": true})"
-        "\n\n");
+    service_.Send(kPatchEvent);
     ASSERT_EQ(1u, sink_.WaitForUpserts(1, 5s).size());
 
     // The data source applies the first poll, then polls one more time and
@@ -494,25 +533,33 @@ TEST_F(StreamingDataSourcePingTest, PingsDuringAPollCauseOneMorePoll) {
     EXPECT_EQ((std::vector<std::string>{"old", "new"}),
               FlagAValues(sink_.WaitForInits(2, 5s)));
 
-    // The next ping polls again. The three pings caused only one poll.
+    // No poll is in flight now, so the next ping polls at once. The patch
+    // after it shows that the data source has handled it.
     service_.Send(kPingEvent);
+    service_.Send(kPatchEvent);
+    ASSERT_EQ(2u, sink_.WaitForUpserts(2, 5s).size());
+    EXPECT_EQ(3u, log_->Count("Received ping during a poll"));
     ASSERT_TRUE(service_.WaitForPoll(2, 5s));
     EXPECT_EQ(3u, service_.PollCount());
 }
 
 TEST_F(StreamingDataSourcePingTest,
-       ErrorStatusInterruptsAndNextPingPollsAgain) {
+       ErrorStatusInterruptsAndLaterPingsPollAgain) {
     Start(/* use_report= */ false, /* with_reasons= */ false);
     ASSERT_TRUE(service_.WaitForPoll(0, 5s));
     service_.RespondToPoll(0, http::status::ok, FlagsJson(1, "old"));
     ASSERT_TRUE(WaitForState(DataSourceState::kValid));
 
-    // The poll after the next ping gets a server error.
+    // The poll after the next ping gets a server error. Another ping arrives
+    // while that poll is in flight.
     service_.Send(kPingEvent);
     ASSERT_TRUE(service_.WaitForPoll(1, 5s));
+    service_.Send(kPingEvent);
+    service_.Send(kPatchEvent);
+    ASSERT_EQ(1u, sink_.WaitForUpserts(1, 5s).size());
     service_.RespondToPoll(1, http::status::service_unavailable, "");
 
-    // The data source reports the error and stays connected.
+    // The data source reports the error.
     auto const interrupted = WaitForState(DataSourceState::kInterrupted);
     ASSERT_TRUE(interrupted);
     ASSERT_TRUE(interrupted->LastError());
@@ -523,36 +570,54 @@ TEST_F(StreamingDataSourcePingTest,
         "the next ping",
         interrupted->LastError()->Message());
 
-    // The next ping polls again and applies the result.
-    service_.Send(kPingEvent);
+    // Then it polls for the ping that arrived during the failed poll, and
+    // applies the result.
     ASSERT_TRUE(service_.WaitForPoll(2, 5s));
     service_.RespondToPoll(2, http::status::ok, FlagsJson(2, "new"));
     EXPECT_TRUE(WaitForState(DataSourceState::kValid));
     EXPECT_EQ((std::vector<std::string>{"old", "new"}),
               FlagAValues(sink_.WaitForInits(2, 5s)));
+
+    // The stream stays open, so the next ping polls again.
+    service_.Send(kPingEvent);
+    EXPECT_TRUE(service_.WaitForPoll(3, 5s));
 }
 
-TEST_F(StreamingDataSourcePingTest, NetworkErrorOnPollInterrupts) {
+TEST_F(StreamingDataSourcePingTest,
+       NetworkErrorInterruptsAndLaterPingsPollAgain) {
     Start(/* use_report= */ false, /* with_reasons= */ false);
     ASSERT_TRUE(service_.WaitForPoll(0, 5s));
     service_.RespondToPoll(0, http::status::ok, FlagsJson(1, "old"));
     ASSERT_TRUE(WaitForState(DataSourceState::kValid));
 
     // The connection of the poll after the next ping closes with no response.
+    // Another ping arrives while that poll is in flight.
     service_.Send(kPingEvent);
     ASSERT_TRUE(service_.WaitForPoll(1, 5s));
+    service_.Send(kPingEvent);
+    service_.Send(kPatchEvent);
+    ASSERT_EQ(1u, sink_.WaitForUpserts(1, 5s).size());
     service_.ClosePoll(1);
 
+    // The data source reports the error, and then polls for the ping that
+    // arrived during the failed poll.
     auto const interrupted = WaitForState(DataSourceState::kInterrupted);
     ASSERT_TRUE(interrupted);
     ASSERT_TRUE(interrupted->LastError());
     EXPECT_EQ(ErrorKind::kNetworkError, interrupted->LastError()->Kind());
+    EXPECT_TRUE(service_.WaitForPoll(2, 5s));
 }
 
 TEST_F(StreamingDataSourcePingTest, PollThatCompletesAfterShutdownIsDiscarded) {
     Start(/* use_report= */ false, /* with_reasons= */ false);
     ASSERT_TRUE(service_.WaitForPoll(0, 5s));
-    Shutdown();
+
+    // The test thread shuts the data source down, as the client does from the
+    // application thread.
+    auto done = std::make_shared<std::promise<void>>();
+    source_->ShutdownAsync([done] { done->set_value(); });
+    shut_down_ = true;
+    ASSERT_EQ(std::future_status::ready, done->get_future().wait_for(5s));
 
     // The poll completes after the data source shuts down.
     service_.RespondToPoll(0, http::status::ok, FlagsJson(1, "stale"));
@@ -562,4 +627,26 @@ TEST_F(StreamingDataSourcePingTest, PollThatCompletesAfterShutdownIsDiscarded) {
         "Discarding the result of a poll that completed after shutdown", 5s));
     EXPECT_TRUE(sink_.WaitForInits(0, 0ms).empty());
     EXPECT_EQ(DataSourceState::kInitializing, status_manager_.Status().State());
+}
+
+TEST_F(StreamingDataSourcePingTest,
+       PollThatCompletesAfterTheStreamShutsDownIsDiscarded) {
+    Start(/* use_report= */ false, /* with_reasons= */ false);
+    ASSERT_TRUE(service_.WaitForPoll(0, 5s));
+
+    // The stream closes, and the service rejects the reconnect with an error
+    // that the data source cannot recover from. The poll is still in flight.
+    service_.FailStream(http::status::unauthorized);
+    auto const shut_down = WaitForState(DataSourceState::kShutdown);
+    ASSERT_TRUE(shut_down);
+    ASSERT_TRUE(shut_down->LastError());
+    EXPECT_EQ(401, shut_down->LastError()->StatusCode());
+
+    // The poll completes after that. The data source discards the result and
+    // stays shut down.
+    service_.RespondToPoll(0, http::status::ok, FlagsJson(1, "stale"));
+    ASSERT_TRUE(log_->WaitForMessage(
+        "Discarding the result of a poll that completed after shutdown", 5s));
+    EXPECT_TRUE(sink_.WaitForInits(0, 0ms).empty());
+    EXPECT_EQ(DataSourceState::kShutdown, status_manager_.Status().State());
 }

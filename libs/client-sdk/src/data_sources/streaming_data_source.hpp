@@ -25,6 +25,8 @@ namespace launchdarkly::client_side::data_sources {
 /**
  * Streams the flags of one context. When the stream sends a "ping" event, the
  * data source polls for the flags of the context and applies the result.
+ * Call Start at most once. After ShutdownAsync, the data source does not
+ * start again.
  *
  * Thread safety: Start and ShutdownAsync are safe from any thread, but not at
  * the same time. The stream, poll and error callbacks run on the executor
@@ -75,7 +77,8 @@ class StreamingDataSource final
     bool ping_poll_in_flight_ = false;
     bool ping_poll_pending_ = false;
 
-    // ShutdownAsync sets this, and it can run on a different thread.
+    // ShutdownAsync and an unrecoverable stream error set this. ShutdownAsync
+    // can run on a different thread.
     std::atomic<bool> stopped_{false};
 };
 }  // namespace launchdarkly::client_side::data_sources
