@@ -141,6 +141,28 @@ TEST(FDv2ProtocolHandlerTest, FullIntentAccumulatesMultipleObjects) {
     EXPECT_EQ(cs->changes.size(), 3u);
 }
 
+TEST(FDv2ProtocolHandlerTest, SelectorlessFullTransferHasNoSelector) {
+    for (bool with_object : {false, true}) {
+        FDv2ProtocolHandler handler;
+        auto intent = boost::json::parse(
+            R"({"payloads":[{"id":"","target":0,"intentCode":"xfer-full"}]})");
+        auto result = handler.HandleEvent("server-intent", intent);
+        ASSERT_TRUE(std::holds_alternative<std::monostate>(result));
+        if (with_object) {
+            handler.HandleEvent("put-object",
+                                MakePutObject("flag", "my-flag", kFlagJson));
+        }
+
+        result = handler.HandleEvent("payload-transferred",
+                                     MakePayloadTransferred("", 0));
+        auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
+        ASSERT_NE(cs, nullptr);
+        EXPECT_EQ(cs->type, data_model::ChangeSetType::kFull);
+        EXPECT_FALSE(cs->selector.value.has_value());
+        EXPECT_EQ(cs->changes.size(), with_object ? 1u : 0u);
+    }
+}
+
 TEST(FDv2ProtocolHandlerTest,
      SecondServerIntentMidTransferDiscardsAccumulatedChanges) {
     FDv2ProtocolHandler handler;

@@ -152,10 +152,13 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePayloadTransferred(
     auto type = (state_ == State::kPartial)
                     ? data_model::ChangeSetType::kPartial
                     : data_model::ChangeSetType::kFull;
-    data_model::FDv2ChangeSet changeset{
-        type, std::move(changes_),
-        data_model::Selector{data_model::Selector::State{transferred.version,
-                                                         transferred.state}}};
+    data_model::Selector selector;
+    if (!transferred.state.empty()) {
+        selector.value =
+            data_model::Selector::State{transferred.version, transferred.state};
+    }
+    data_model::FDv2ChangeSet changeset{type, std::move(changes_),
+                                        std::move(selector)};
     // Transition to kPartial so subsequent put-object/payload-transferred
     // cycles work without requiring a new server-intent.
     changes_.clear();

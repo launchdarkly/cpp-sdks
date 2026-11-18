@@ -87,6 +87,28 @@ TEST(ClientMakeFDv2PollRequestTest, EncodesANonEmptySelectorAsTheBasis) {
     EXPECT_EQ("http://example.com/sdk/poll/eval?basis=state-3", req.Url());
 }
 
+TEST(ClientHandleFDv2PollResponseTest,
+     SelectorlessFullTransferOmitsBasisOnNextPoll) {
+    auto result = HandleResponse(
+        200,
+        R"({"events":[)"
+        R"({"event":"server-intent","data":{"payloads":[)"
+        R"({"id":"","target":0,"intentCode":"xfer-full"}]}},)"
+        R"({"event":"payload-transferred","data":{"state":"","version":0}})"
+        R"(]})",
+        {});
+    auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result.value);
+    ASSERT_NE(nullptr, change_set);
+    EXPECT_EQ(data_model::ChangeSetType::kFull, change_set->change_set.type);
+    EXPECT_FALSE(change_set->change_set.selector.value.has_value());
+
+    auto req = MakeFDv2PollRequest(
+        MakeConfig("http://example.com", FDv2ContextTransport::kPostBody,
+                   /* with_reasons= */ false),
+        change_set->change_set.selector);
+    EXPECT_EQ("http://example.com/sdk/poll/eval", req.Url());
+}
+
 TEST(ClientMakeFDv2PollRequestTest, RequestsReasonsWhenConfigured) {
     auto req = MakeFDv2PollRequest(
         MakeConfig("http://example.com", FDv2ContextTransport::kPostBody, true),

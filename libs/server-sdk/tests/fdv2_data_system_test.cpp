@@ -616,6 +616,41 @@ TEST(FDv2DataSystemTest, SynchronizerInterrupted_RetriesSameSynchronizer) {
               DataSourceStatus::DataSourceState::kValid);
 }
 
+TEST(FDv2DataSystemTest, SelectorlessFullClearsHeldSelectorAndNonePreservesIt) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+    std::vector<FDv2SourceResult> results;
+    results.push_back(
+        MakeFullChangeSetResult(ChangeSetData{}, MakeSelector(1, "initial")));
+    results.push_back(FDv2SourceResult{
+        FDv2SourceResult::ChangeSet{data_model::ChangeSet<ChangeSetData>{
+            data_model::ChangeSetType::kNone, {}, data_model::Selector{}}}});
+    results.push_back(
+        MakeFullChangeSetResult(ChangeSetData{}, data_model::Selector{}));
+    std::vector<data_model::Selector> next_calls;
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::make_unique<MockSynchronizer>(
+            std::move(results), /* closed_flag= */ nullptr, &next_calls)));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /* fallback_condition_factory= */ nullptr,
+                      /* recovery_condition_factory= */ nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    EXPECT_TRUE(ds.Initialized());
+    ASSERT_EQ(4u, next_calls.size());
+    EXPECT_FALSE(next_calls[0].value.has_value());
+    ASSERT_TRUE(next_calls[1].value.has_value());
+    EXPECT_EQ("initial", next_calls[1].value->state);
+    ASSERT_TRUE(next_calls[2].value.has_value());
+    EXPECT_EQ("initial", next_calls[2].value->state);
+    EXPECT_FALSE(next_calls[3].value.has_value());
+}
+
 TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
