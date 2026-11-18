@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.16.1...launchdarkly-cpp-internal-v0.16.2) (2026-11-18)
+
+
+### Bug Fixes
+
+* Clear selectorless FDv2 state in client and server SDKs ([#640](https://github.com/launchdarkly/cpp-sdks/issues/640)) ([6d755d9](https://github.com/launchdarkly/cpp-sdks/commit/6d755d9160bfe2d3a299cf8c442d6516758fed54))
+
 ## [0.16.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.16.0...launchdarkly-cpp-internal-v0.16.1) (2026-11-18)
 
 
