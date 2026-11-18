@@ -1,0 +1,119 @@
+\hypertarget{dynamodb__big__segment__store_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/integrations/dynamodb/dynamodb\+\_\+big\+\_\+segment\+\_\+store.h File Reference}
+\label{dynamodb__big__segment__store_8h}\index{include/launchdarkly/server\_side/bindings/c/integrations/dynamodb/dynamodb\_big\_segment\_store.h@{include/launchdarkly/server\_side/bindings/c/integrations/dynamodb/dynamodb\_big\_segment\_store.h}}
+
+
+Launch\+Darkly Server-\/side Dynamo\+DB Big Segments Store C Binding.  
+
+
+{\ttfamily \#include $<$launchdarkly/server\+\_\+side/bindings/c/integrations/dynamodb/dynamodb\+\_\+client\+\_\+options.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+Include dependency graph for dynamodb\+\_\+big\+\_\+segment\+\_\+store.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{dynamodb__big__segment__store_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDServerBigSegmentsDynamoDBResult}{LDServer\+Big\+Segments\+Dynamo\+DBResult}}
+\begin{DoxyCompactList}\small\item\em Stores the result of calling \mbox{\hyperlink{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+New}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{dynamodb__big__segment__store_8h_afc1e361832c603fcc5887fedcfd3cf24}\label{dynamodb__big__segment__store_8h_afc1e361832c603fcc5887fedcfd3cf24}} 
+\#define {\bfseries LDSERVER\+\_\+\+BIGSEGMENTS\+\_\+\+DYNAMODBSTORE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE}~256
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \+\_\+\+LDServer\+Big\+Segments\+Dynamo\+DBStore $\ast$ \mbox{\hyperlink{dynamodb__big__segment__store_8h_ad2d88b021ad6c9d8b1335b732c980371}{LDServer\+Big\+Segments\+Dynamo\+DBStore}}
+\begin{DoxyCompactList}\small\item\em LDServer\+Big\+Segments\+Dynamo\+DBStore is a Big Segments persistent store for the Server-\/\+Side SDK backed by Amazon Dynamo\+DB. It is meant to be passed to the SDK via the Big Segments config builder. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+New}} (char const $\ast$table\+\_\+name, char const $\ast$prefix, \mbox{\hyperlink{dynamodb__client__options_8h_aae524f5445fa7d9333648a09b9bbfd00}{LDServer\+Dynamo\+DBClient\+Options\+Builder}} options, struct \mbox{\hyperlink{structLDServerBigSegmentsDynamoDBResult}{LDServer\+Big\+Segments\+Dynamo\+DBResult}} $\ast$out\+\_\+result)
+\begin{DoxyCompactList}\small\item\em Creates a new Dynamo\+DB Big Segment store suitable for usage in the SDK\textquotesingle{}s Big Segments configuration. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{dynamodb__big__segment__store_8h_a4d862ec3ba62b079985ae598c295b683}\label{dynamodb__big__segment__store_8h_a4d862ec3ba62b079985ae598c295b683}} 
+\mbox{\hyperlink{dynamodb__big__segment__store_8h_a4d862ec3ba62b079985ae598c295b683}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+Free}} (\mbox{\hyperlink{dynamodb__big__segment__store_8h_ad2d88b021ad6c9d8b1335b732c980371}{LDServer\+Big\+Segments\+Dynamo\+DBStore}} store)
+\begin{DoxyCompactList}\small\item\em Frees a Dynamo\+DB Big Segment store pointer. Only necessary to call if not passing ownership to the SDK\textquotesingle{}s Big Segments configuration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Launch\+Darkly Server-\/side Dynamo\+DB Big Segments Store C Binding. 
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{dynamodb__big__segment__store_8h_ad2d88b021ad6c9d8b1335b732c980371}\label{dynamodb__big__segment__store_8h_ad2d88b021ad6c9d8b1335b732c980371}} 
+\index{dynamodb\_big\_segment\_store.h@{dynamodb\_big\_segment\_store.h}!LDServerBigSegmentsDynamoDBStore@{LDServerBigSegmentsDynamoDBStore}}
+\index{LDServerBigSegmentsDynamoDBStore@{LDServerBigSegmentsDynamoDBStore}!dynamodb\_big\_segment\_store.h@{dynamodb\_big\_segment\_store.h}}
+\doxysubsubsection{\texorpdfstring{LDServerBigSegmentsDynamoDBStore}{LDServerBigSegmentsDynamoDBStore}}
+{\footnotesize\ttfamily typedef struct \+\_\+\+LDServer\+Big\+Segments\+Dynamo\+DBStore$\ast$ \mbox{\hyperlink{dynamodb__big__segment__store_8h_ad2d88b021ad6c9d8b1335b732c980371}{LDServer\+Big\+Segments\+Dynamo\+DBStore}}}
+
+
+
+LDServer\+Big\+Segments\+Dynamo\+DBStore is a Big Segments persistent store for the Server-\/\+Side SDK backed by Amazon Dynamo\+DB. It is meant to be passed to the SDK via the Big Segments config builder. 
+
+Call \mbox{\hyperlink{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+New}} to obtain a new instance. This instance is passed into the SDK\textquotesingle{}s Big Segments configuration.
+
+The Dynamo\+DB table must already exist and follow the Launch\+Darkly schema\+: a String partition key named {\ttfamily namespace} and a String sort key named {\ttfamily key}. The same table can be shared with \mbox{\hyperlink{dynamodb__source_8h_a6dee03c0b698272127b92379bbbdaec1}{LDServer\+Lazy\+Load\+Dynamo\+DBSource}} -- Big Segments rows occupy their own partition-\/key values and do not conflict with flag/segment rows. The Launch\+Darkly Relay Proxy populates Big Segments data in the table; this store only reads from it.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{// Optional: configure the AWS DynamoDB client. Pass NULL for defaults.}}
+\DoxyCodeLine{\mbox{\hyperlink{dynamodb__client__options_8h_aae524f5445fa7d9333648a09b9bbfd00}{LDServerDynamoDBClientOptionsBuilder}} options =}
+\DoxyCodeLine{    \mbox{\hyperlink{dynamodb__client__options_8h_a3866205022e2efa307d1f70205edb553}{LDServerDynamoDBClientOptionsBuilder\_New}}();}
+\DoxyCodeLine{\mbox{\hyperlink{dynamodb__client__options_8h_aebc5b3f23914151d9022617359533d46}{LDServerDynamoDBClientOptionsBuilder\_Region}}(options, \textcolor{stringliteral}{"{}us-\/east-\/1"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Stack allocate the result struct, which will hold the result pointer or}}
+\DoxyCodeLine{\textcolor{comment}{// an error message.}}
+\DoxyCodeLine{\textcolor{keyword}{struct }\mbox{\hyperlink{structLDServerBigSegmentsDynamoDBResult}{LDServerBigSegmentsDynamoDBResult}} result;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (!\mbox{\hyperlink{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}{LDServerBigSegmentsDynamoDBStore\_New}}(\textcolor{stringliteral}{"{}my-\/table"{}}, \textcolor{stringliteral}{"{}testprefix"{}}, options,}
+\DoxyCodeLine{                                          \&result)) \{}
+\DoxyCodeLine{    \textcolor{comment}{// On failure, you may print the error message (result.error\_message),}}
+\DoxyCodeLine{    \textcolor{comment}{// then exit or return.}}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Create the Big Segments builder, taking ownership of the store pointer.}}
+\DoxyCodeLine{LDServerBigSegmentsBuilder bs\_builder = LDServerBigSegmentsBuilder\_New(}
+\DoxyCodeLine{    (LDServerBigSegmentStorePtr)result.store);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Attach the Big Segments builder to the SDK config.}}
+\DoxyCodeLine{LDServerConfigBuilder cfg\_builder = LDServerConfigBuilder\_New(\textcolor{stringliteral}{"{}sdk-\/123"{}});}
+\DoxyCodeLine{LDServerConfigBuilder\_BigSegments(cfg\_builder, bs\_builder);}
+
+\end{DoxyCode}
+
+
+This implementation is backed by the AWS SDK for C++. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}\label{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}} 
+\index{dynamodb\_big\_segment\_store.h@{dynamodb\_big\_segment\_store.h}!LDServerBigSegmentsDynamoDBStore\_New@{LDServerBigSegmentsDynamoDBStore\_New}}
+\index{LDServerBigSegmentsDynamoDBStore\_New@{LDServerBigSegmentsDynamoDBStore\_New}!dynamodb\_big\_segment\_store.h@{dynamodb\_big\_segment\_store.h}}
+\doxysubsubsection{\texorpdfstring{LDServerBigSegmentsDynamoDBStore\_New()}{LDServerBigSegmentsDynamoDBStore\_New()}}
+{\footnotesize\ttfamily LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+New (\begin{DoxyParamCaption}\item[{char const $\ast$}]{table\+\_\+name,  }\item[{char const $\ast$}]{prefix,  }\item[{\mbox{\hyperlink{dynamodb__client__options_8h_aae524f5445fa7d9333648a09b9bbfd00}{LDServer\+Dynamo\+DBClient\+Options\+Builder}}}]{options,  }\item[{struct \mbox{\hyperlink{structLDServerBigSegmentsDynamoDBResult}{LDServer\+Big\+Segments\+Dynamo\+DBResult}} $\ast$}]{out\+\_\+result }\end{DoxyParamCaption})}
+
+
+
+Creates a new Dynamo\+DB Big Segment store suitable for usage in the SDK\textquotesingle{}s Big Segments configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em table\+\_\+name} & Name of the Dynamo\+DB table to read from. The table must already exist; this function does not create it. Must not be NULL.\\
+\hline
+{\em prefix} & Prefix to use when reading Big Segments data from Dynamo\+DB. This allows multiple SDK environments to coexist in the same table. Must not be NULL.\\
+\hline
+{\em options} & Optional AWS Dynamo\+DB client configuration. When non-\/\+NULL, the builder is consumed and freed by this function; do not call \mbox{\hyperlink{dynamodb__client__options_8h_ad01433c5bb604ccdfe6952a7b3f0cb94}{LDServer\+Dynamo\+DBClient\+Options\+Builder\+\_\+\+Free}} on it afterward. When NULL, the AWS SDK\textquotesingle{}s default provider chain is used for region, endpoint, and credentials.\\
+\hline
+{\em out\+\_\+result} & Pointer to struct where the store pointer or an error message should be stored. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the store was created successfully; out\+\_\+result-\/$>$store will contain the pointer. The caller must either free the pointer with \mbox{\hyperlink{dynamodb__big__segment__store_8h_a4d862ec3ba62b079985ae598c295b683}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+Free}}, OR pass it into the SDK\textquotesingle{}s Big Segments configuration which will take ownership (in which case do not call \mbox{\hyperlink{dynamodb__big__segment__store_8h_a4d862ec3ba62b079985ae598c295b683}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+Free}}.) 
+\end{DoxyReturn}

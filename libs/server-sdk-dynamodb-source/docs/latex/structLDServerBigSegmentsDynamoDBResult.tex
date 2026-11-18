@@ -1,0 +1,36 @@
+\hypertarget{structLDServerBigSegmentsDynamoDBResult}{}\doxysection{LDServer\+Big\+Segments\+Dynamo\+DBResult Struct Reference}
+\label{structLDServerBigSegmentsDynamoDBResult}\index{LDServerBigSegmentsDynamoDBResult@{LDServerBigSegmentsDynamoDBResult}}
+
+
+Stores the result of calling \mbox{\hyperlink{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+New}}.  
+
+
+
+
+{\ttfamily \#include $<$dynamodb\+\_\+big\+\_\+segment\+\_\+store.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structLDServerBigSegmentsDynamoDBResult_af68560a1ec8f97a3f11c3c4953626c83}\label{structLDServerBigSegmentsDynamoDBResult_af68560a1ec8f97a3f11c3c4953626c83}} 
+\mbox{\hyperlink{dynamodb__big__segment__store_8h_ad2d88b021ad6c9d8b1335b732c980371}{LDServer\+Big\+Segments\+Dynamo\+DBStore}} {\bfseries store}
+\item 
+\mbox{\Hypertarget{structLDServerBigSegmentsDynamoDBResult_a0dd2195485aaba1076c54da98bf3907d}\label{structLDServerBigSegmentsDynamoDBResult_a0dd2195485aaba1076c54da98bf3907d}} 
+char {\bfseries error\+\_\+message} \mbox{[}LDSERVER\+\_\+\+BIGSEGMENTS\+\_\+\+DYNAMODBSTORE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Stores the result of calling \mbox{\hyperlink{dynamodb__big__segment__store_8h_ad88d25d71da5206d53f3d1d002d8ab26}{LDServer\+Big\+Segments\+Dynamo\+DBStore\+\_\+\+New}}. 
+
+On successful creation, store will contain a pointer which may be passed into the Launch\+Darkly SDK\textquotesingle{}s Big Segments configuration.
+
+On failure, error\+\_\+message contains a NULL-\/terminated string describing the error.
+
+The message may be truncated if it was originally longer than error\+\_\+message\textquotesingle{}s buffer size.
+
+The message originates from the underlying AWS SDK and may echo back portions of the client configuration, including endpoint and region. Callers that surface this message (logs, telemetry, user-\/facing errors) may want to sanitize it accordingly. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/bindings/c/integrations/dynamodb/\mbox{\hyperlink{dynamodb__big__segment__store_8h}{dynamodb\+\_\+big\+\_\+segment\+\_\+store.\+h}}\end{DoxyCompactItemize}
