@@ -29,10 +29,32 @@ TEST(SummarizerTests, DefaultConstructionUsesZeroStartTime) {
     ASSERT_EQ(summarizer.StartTime(), TimeZero());
 }
 
-TEST(SummarizerTests, ExplicitStartTimeIsCorrect) {
-    auto start = std::chrono::system_clock::from_time_t(12345);
-    Summarizer summarizer(start);
-    ASSERT_EQ(summarizer.StartTime(), start);
+TEST(SummarizerTests, StartAndEndTimesAreTheFirstAndLastEvaluationTimes) {
+    using namespace launchdarkly;
+    Summarizer summarizer;
+    auto const context = ContextBuilder().Kind("cat", "shadow").Build();
+
+    // Record evaluations whose times are not in order.
+    for (auto const seconds : {20, 10, 30}) {
+        summarizer.Update(FeatureEventParams{
+            Date{std::chrono::system_clock::from_time_t(seconds)},
+            "flag",
+            context,
+            Value(true),
+            Value(false),
+            Version(1),
+            VariationIndex(0),
+            std::nullopt,
+            false,
+            std::nullopt,
+            std::nullopt,
+        });
+    }
+
+    // The summary covers the time from the first to the last evaluation.
+    EXPECT_EQ(summarizer.StartTime(),
+              std::chrono::system_clock::from_time_t(10));
+    EXPECT_EQ(summarizer.EndTime(), std::chrono::system_clock::from_time_t(30));
 }
 
 TEST(SummarizerTests, VariationKeyOrdering) {
@@ -408,11 +430,17 @@ TEST(SummarizerTests, JsonSerialization) {
         }
     };
 
-    evaluate("cat-food-amount", 1);
     evaluate("cat-water-amount", 10);
     evaluate("cat-toy-amount", 10000);
 
-    auto json = boost::json::value_from(summarizer.Finish(Time1000()));
+    // The time of the last evaluation is the end date of the summary.
+    auto last_event = FeatureEventFromParams(
+        EvaluationParams{"cat-food-amount", 1, 0, Value(3), Value(1)},
+        ContextBuilder().Kind("cat", "shadow").Build());
+    last_event.creation_date = Date{Time1000()};
+    summarizer.Update(last_event);
+
+    auto json = boost::json::value_from(summarizer);
     auto expected = boost::json::parse(
         R"({"kind":"summary","startDate":0,"endDate":1000,"features":{"cat-toy-amount":{"default":1E0,"contextKinds":["cat"],"counters":[{"version":1,"variation":0,"value":3E0,"count":10000}]},"cat-water-amount":{"default":1E0,"contextKinds":["cat"],"counters":[{"version":1,"variation":0,"value":3E0,"count":10}]},"cat-food-amount":{"default":1E0,"contextKinds":["cat"],"counters":[{"version":1,"variation":0,"value":3E0,"count":1}]}}}
 )");

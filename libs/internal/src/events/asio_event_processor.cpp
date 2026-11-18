@@ -38,7 +38,7 @@ AsioEventProcessor<SDK>::AsioEventProcessor(
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
       outbox_(events_config.Capacity()),
-      summarizer_(std::chrono::system_clock::now()),
+      summarizer_(),
       flush_interval_(events_config.FlushInterval()),
       timer_(io_),
       url_(endpoints.EventsBaseUrl() + events_config.Path()),
@@ -135,7 +135,7 @@ void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
                    detail::RequestWorker::DeliveryResult result) {
                 OnEventDeliveryResult(count, result);
             });
-        summarizer_ = detail::Summarizer(Clock::now());
+        summarizer_ = detail::Summarizer();
     });
 
     if (flush_type == FlushTrigger::Automatic) {
@@ -194,8 +194,7 @@ template <typename SDK>
 std::optional<detail::EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     auto events = boost::json::value_from(outbox_.Consume()).as_array();
 
-    bool has_summary =
-        !summarizer_.Finish(std::chrono::system_clock::now()).Empty();
+    bool has_summary = !summarizer_.Empty();
 
     if (has_summary) {
         events.push_back(boost::json::value_from(summarizer_));
