@@ -35,13 +35,8 @@ struct ModeSources {
 struct ModeSourceParams {
     boost::asio::any_io_executor executor;
     Logger logger;
-    std::string polling_base_url;
-    std::string streaming_base_url;
     config::shared::built::HttpProperties http_properties;
-    /**
-     * Where the FDv1 fallback source sends its requests. FDv2 sources use
-     * the resolved base URLs above instead.
-     */
+    /** Where sources send requests unless they override the base URL. */
     config::shared::built::ServiceEndpoints endpoints;
     Context context;
     /** Whether the application asked for evaluation reasons. */

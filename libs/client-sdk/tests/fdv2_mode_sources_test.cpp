@@ -32,8 +32,6 @@ class ModeSourcesFixture : public ::testing::Test {
         return ModeSourceParams{
             ioc_.get_executor(),
             logger_,
-            "https://polling.example.com",
-            "https://streaming.example.com",
             launchdarkly::config::shared::Defaults<
                 launchdarkly::config::shared::ClientSDK>::HttpProperties(),
             launchdarkly::config::shared::Defaults<

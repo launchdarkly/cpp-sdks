@@ -71,11 +71,6 @@ struct FDv2Config<ClientSDK> {
     /** The mode the SDK starts in. */
     ConnectionMode initial_mode;
 
-    /** Base URL for polling sources that do not override it. */
-    std::string polling_base_url;
-    /** Base URL for streaming sources that do not override it. */
-    std::string streaming_base_url;
-
     /** What each mode does. Modes absent from the map are unavailable. */
     std::map<ConnectionMode, ModeDefinition> modes;
 

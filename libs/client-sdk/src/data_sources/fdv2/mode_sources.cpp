@@ -108,7 +108,7 @@ ModeSources BuildModeSources(FDv2Config const& config,
                             params.executor, params.logger,
                             MakeRequestConfig(
                                 polling.base_url_override.value_or(
-                                    params.polling_base_url),
+                                    params.endpoints.PollingBaseUrl()),
                                 params, serialized_context, config.use_post)));
                 },
             },
@@ -132,7 +132,7 @@ ModeSources BuildModeSources(FDv2Config const& config,
                             params.executor, params.logger,
                             MakeRequestConfig(
                                 polling.base_url_override.value_or(
-                                    params.polling_base_url),
+                                    params.endpoints.PollingBaseUrl()),
                                 params, serialized_context, config.use_post),
                             polling.poll_interval, last_poll));
                 },
@@ -142,10 +142,10 @@ ModeSources BuildModeSources(FDv2Config const& config,
                             params.executor, params.logger,
                             MakeRequestConfig(
                                 streaming.base_url_override.value_or(
-                                    params.streaming_base_url),
+                                    params.endpoints.StreamingBaseUrl()),
                                 params, serialized_context, config.use_post),
-                            MakeRequestConfig(params.polling_base_url, params,
-                                              serialized_context,
+                            MakeRequestConfig(params.endpoints.PollingBaseUrl(),
+                                              params, serialized_context,
                                               config.use_post),
                             streaming.initial_reconnect_delay));
                 },

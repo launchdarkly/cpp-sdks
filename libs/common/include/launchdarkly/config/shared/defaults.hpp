@@ -95,8 +95,6 @@ struct Defaults<ClientSDK> {
 
         return {
             shared::ConnectionMode::kStreaming,
-            "https://sdk.launchdarkly.com",
-            "https://clientstream.launchdarkly.com",
             {
                 // Streaming initializes from the cache, then polls for a
                 // basis so that the stream can deliver only what changed,
