@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.16.0...launchdarkly-cpp-internal-v0.16.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* Use the first and last evaluation times as the summary event start and end dates ([#652](https://github.com/launchdarkly/cpp-sdks/issues/652)) ([cbb6bfa](https://github.com/launchdarkly/cpp-sdks/commit/cbb6bfae4bb39d657323d6d82f3fb93d150d647f))
+
 ## [0.16.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.15.0...launchdarkly-cpp-internal-v0.16.0) (2026-11-04)
 
 
