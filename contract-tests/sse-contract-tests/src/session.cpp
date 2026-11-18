@@ -101,6 +101,33 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
         }
     }
 
+    if (req.method() == http::verb::post &&
+        req.target().starts_with(kEntityPath)) {
+        std::string entity_id = req.target();
+        boost::erase_first(entity_id, kEntityPath);
+
+        std::string command;
+        try {
+            auto json = nlohmann::json::parse(req.body());
+            command = json.at("command").get<std::string>();
+        } catch (nlohmann::json::exception& e) {
+            return bad_request("unable to parse command JSON");
+        }
+
+        auto handled = manager_.command(entity_id, command);
+        if (!handled) {
+            return not_found(req.target());
+        }
+        if (!*handled) {
+            return bad_request("unrecognized command");
+        }
+
+        Response res{http::status::ok, req.version()};
+        res.keep_alive(req.keep_alive());
+        res.prepare_payload();
+        return res;
+    }
+
     if (req.method() == http::verb::delete_ &&
         req.target().starts_with(kEntityPath)) {
         std::string entity_id = req.target();
