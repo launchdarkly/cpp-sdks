@@ -1,6 +1,3 @@
-# The SDK still retries streaming after HTTP 500 with an FDv1 directive and no fallback.
-streaming/fdv2/FDv1 fallback directive/directive without FDv1 fallback configured halts the data system
-
 # FDv2 public payload filter API is not exposed by the C++ SDK.
 streaming/requests/URL path is computed correctly/environment_filter_key="encoding_not_necessary"/base URI has no trailing slash/GET
 streaming/requests/URL path is computed correctly/environment_filter_key="encoding_not_necessary"/base URI has a trailing slash/GET

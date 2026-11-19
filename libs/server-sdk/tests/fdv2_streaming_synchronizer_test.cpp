@@ -825,6 +825,56 @@ TEST(FDv2StreamingSynchronizerTest, ErrorAfterDirectiveCarriesFlag) {
     EXPECT_TRUE(result->fdv1_fallback);
 }
 
+TEST(FDv2StreamingSynchronizerTest,
+     ServerErrorWithDirectiveReturnsInterrupted) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    // The server sends an error response with the directive. The SSE client
+    // retries the request and does not report an error.
+    boost::beast::http::response_header<> headers;
+    headers.result(503);
+    headers.set("X-LD-FD-Fallback", "true");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    // The response gives a result that has the directive.
+    ASSERT_TRUE(result.has_value());
+    auto* interrupted =
+        std::get_if<FDv2SourceResult::Interrupted>(&result->value);
+    ASSERT_NE(interrupted, nullptr);
+    EXPECT_EQ(interrupted->error.Kind(),
+              FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse);
+    EXPECT_EQ(interrupted->error.StatusCode(), 503u);
+    EXPECT_TRUE(result->fdv1_fallback);
+}
+
+TEST(FDv2StreamingSynchronizerTest, ServerErrorWithoutDirectiveGivesNoResult) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    // The server sends an error response without the directive.
+    boost::beast::http::response_header<> headers;
+    headers.result(503);
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    auto future = synchronizer.Next(data_model::Selector{});
+
+    // The SSE client retries the request, so the synchronizer has no result.
+    EXPECT_FALSE(future.IsFinished());
+}
+
 TEST(FDv2StreamingSynchronizerTest, DirectiveWithTtlHeaderParsesValue) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;
