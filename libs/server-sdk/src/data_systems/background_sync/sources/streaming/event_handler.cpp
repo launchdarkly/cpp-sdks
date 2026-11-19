@@ -101,10 +101,11 @@ tag_invoke(boost::json::value_to_tag<
     return std::nullopt;
 }
 
-static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<DataSourceEventHandler::Delete, JsonError>> const& unused,
-    boost::json::value const& json_value) {
+static tl::expected<std::optional<DataSourceEventHandler::Delete>, JsonError>
+tag_invoke(boost::json::value_to_tag<
+               tl::expected<std::optional<DataSourceEventHandler::Delete>,
+                            JsonError>> const& unused,
+           boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
     if (!json_value.is_object()) {
@@ -119,9 +120,13 @@ static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
     PARSE_REQUIRED_FIELD(path, obj, "path");
 
     auto kind = StreamingDataKinds::Kind(path);
+    if (!kind.has_value()) {
+        // The SDK ignores a delete for an unknown kind of item.
+        return std::nullopt;
+    }
     auto key = StreamingDataKinds::Key(path);
 
-    if (kind.has_value() && key.has_value()) {
+    if (key.has_value()) {
         del.kind = *kind;
         del.key = *key;
         return del;
@@ -211,21 +216,26 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return MessageStatus::kInvalidMessage;
         }
 
-        auto res =
-            boost::json::value_to<tl::expected<Delete, JsonError>>(parsed);
+        auto res = boost::json::value_to<
+            tl::expected<std::optional<Delete>, JsonError>>(parsed);
 
         if (res.has_value()) {
-            switch (res->kind) {
+            // The kind of the item is unknown, so ignore the delete.
+            if (!res->has_value()) {
+                return MessageStatus::kMessageHandled;
+            }
+            auto const& del = **res;
+            switch (del.kind) {
                 case data_components::DataKind::kFlag: {
-                    handler_.Upsert(res->key,
+                    handler_.Upsert(del.key,
                                     data_model::FlagDescriptor(
-                                        data_model::Tombstone(res->version)));
+                                        data_model::Tombstone(del.version)));
                     return MessageStatus::kMessageHandled;
                 }
                 case data_components::DataKind::kSegment: {
-                    handler_.Upsert(res->key,
+                    handler_.Upsert(del.key,
                                     data_model::SegmentDescriptor(
-                                        data_model::Tombstone(res->version)));
+                                        data_model::Tombstone(del.version)));
                     return MessageStatus::kMessageHandled;
                 }
                 default: {
