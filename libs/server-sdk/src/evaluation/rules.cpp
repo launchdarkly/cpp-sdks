@@ -118,7 +118,7 @@ tl::expected<bool, Error> Match(Segment::Rule const& rule,
                                 data_interfaces::IStore const& store,
                                 EvaluationStack& stack,
                                 std::string const& key,
-                                std::string const& salt) {
+                                std::optional<std::string> const& salt) {
     for (Clause const& clause : rule.clauses) {
         auto maybe_match = Match(clause, context, store, stack);
         if (!maybe_match) {
@@ -130,7 +130,11 @@ tl::expected<bool, Error> Match(Segment::Rule const& rule,
     }
 
     if (rule.weight && rule.weight >= 0.0) {
-        BucketPrefix prefix(key, salt);
+        // Only a rule with a weight uses the salt.
+        if (!salt) {
+            return tl::make_unexpected(Error::MissingSalt(key));
+        }
+        BucketPrefix prefix(key, *salt);
         auto maybe_bucket = Bucket(context, rule.bucketBy, prefix, false,
                                    rule.rolloutContextKind);
         if (!maybe_bucket) {
@@ -261,11 +265,8 @@ tl::expected<bool, Error> Contains(Segment const& segment,
     }
 
     for (auto const& rule : segment.rules) {
-        if (!segment.salt) {
-            return tl::make_unexpected(Error::MissingSalt(segment.key));
-        }
         tl::expected<bool, Error> maybe_match =
-            Match(rule, context, store, stack, segment.key, *segment.salt);
+            Match(rule, context, store, stack, segment.key, segment.salt);
         if (!maybe_match) {
             return tl::make_unexpected(maybe_match.error());
         }

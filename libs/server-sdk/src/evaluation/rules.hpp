@@ -10,6 +10,7 @@
 
 #include <tl/expected.hpp>
 
+#include <optional>
 #include <string>
 
 namespace launchdarkly::server_side::evaluation {
@@ -31,7 +32,7 @@ namespace launchdarkly::server_side::evaluation {
     data_interfaces::IStore const& store,
     EvaluationStack& stack,
     std::string const& key,
-    std::string const& salt);
+    std::optional<std::string> const& salt);
 
 [[nodiscard]] tl::expected<bool, Error> MatchSegment(
     data_model::Clause const&,
