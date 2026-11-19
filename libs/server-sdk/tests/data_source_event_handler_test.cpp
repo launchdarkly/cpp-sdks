@@ -15,8 +15,8 @@ using namespace server_side::data_systems;
 TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
     auto logger = logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     auto res = event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
 
@@ -25,14 +25,14 @@ TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
     EXPECT_EQ(0, store->AllFlags().size());
     EXPECT_EQ(0, store->AllSegments().size());
     EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesInvalidPut) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     auto res = event_handler.HandleMessage("put", "{sorry");
 
@@ -41,14 +41,14 @@ TEST(DataSourceEventHandlerTests, HandlesInvalidPut) {
     EXPECT_EQ(0, store->AllFlags().size());
     EXPECT_EQ(0, store->AllSegments().size());
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesInvalidPatch) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     auto res = event_handler.HandleMessage("put", "{sorry");
 
@@ -57,42 +57,42 @@ TEST(DataSourceEventHandlerTests, HandlesInvalidPatch) {
     EXPECT_EQ(0, store->AllFlags().size());
     EXPECT_EQ(0, store->AllSegments().size());
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesPatchForUnknownPath) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     auto res = event_handler.HandleMessage(
         "patch", R"({"path":"potato", "data": "SPUD"})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesPutForUnknownPath) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     auto res = event_handler.HandleMessage(
         "put", R"({"path":"potato", "data": "SPUD"})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesInvalidDelete) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     auto res = event_handler.HandleMessage("put", "{sorry");
 
@@ -101,14 +101,14 @@ TEST(DataSourceEventHandlerTests, HandlesInvalidDelete) {
     EXPECT_EQ(0, store->AllFlags().size());
     EXPECT_EQ(0, store->AllSegments().size());
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
     auto payload =
         R"({"path":"/","data":{"segments":{"special":{"key":"special","included":["bob"],
         "version":2}},"flags":{"HasBob":{"key":"HasBob","on":true,"fallthrough":
@@ -122,14 +122,14 @@ TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
     EXPECT_TRUE(store->GetFlag("HasBob"));
     EXPECT_TRUE(store->GetSegment("special"));
     EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
-              manager.Status().State());
+              manager->Status().State());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesValidFlagPatch) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     event_handler.HandleMessage("put", "{}");
 
@@ -146,8 +146,8 @@ TEST(DataSourceEventHandlerTests, HandlesValidFlagPatch) {
 TEST(DataSourceEventHandlerTests, HandlesValidSegmentPatch) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     event_handler.HandleMessage("put", "{}");
 
@@ -164,8 +164,8 @@ TEST(DataSourceEventHandlerTests, HandlesValidSegmentPatch) {
 TEST(DataSourceEventHandlerTests, HandlesDeleteFlag) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     event_handler.HandleMessage(
         "put", R"({"path":"/","data":{"segments":{})"
@@ -185,8 +185,8 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteFlag) {
 TEST(DataSourceEventHandlerTests, HandlesDeleteSegment) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     event_handler.HandleMessage(
         "put",
@@ -207,8 +207,8 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteSegment) {
 TEST(DataSourceEventHandlerTests, HandlesPatchWithNullDataForFlag) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -218,19 +218,20 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithNullDataForFlag) {
         "patch", R"({"path": "/flags/flagA", "data": null})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    // The error should be recorded, but we stay in Valid state after a previous successful PUT
+    // The error should be recorded, but we stay in Valid state after a previous
+    // successful PUT
     EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
-              manager.Status().State());
-    ASSERT_TRUE(manager.Status().LastError().has_value());
+              manager->Status().State());
+    ASSERT_TRUE(manager->Status().LastError().has_value());
     EXPECT_EQ(DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
-              manager.Status().LastError()->Kind());
+              manager->Status().LastError()->Kind());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesPatchWithNullDataForSegment) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -240,26 +241,27 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithNullDataForSegment) {
         "patch", R"({"path": "/segments/segmentA", "data": null})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    // The error should be recorded, but we stay in Valid state after a previous successful PUT
+    // The error should be recorded, but we stay in Valid state after a previous
+    // successful PUT
     EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
-              manager.Status().State());
-    ASSERT_TRUE(manager.Status().LastError().has_value());
+              manager->Status().State());
+    ASSERT_TRUE(manager->Status().LastError().has_value());
     EXPECT_EQ(DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
-              manager.Status().LastError()->Kind());
+              manager->Status().LastError()->Kind());
 }
 
 TEST(DataSourceEventHandlerTests, HandlesPatchWithMissingDataField) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
 
     // Missing data field should also be treated as invalid
-    auto res = event_handler.HandleMessage(
-        "patch", R"({"path": "/flags/flagA"})");
+    auto res =
+        event_handler.HandleMessage("patch", R"({"path": "/flags/flagA"})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
 }
@@ -267,12 +269,12 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithMissingDataField) {
 TEST(DataSourceEventHandlerTests, HandlesPutWithNullData) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // PUT with null data should also be handled safely
-    auto res = event_handler.HandleMessage(
-        "put", R"({"path":"/", "data": null})");
+    auto res =
+        event_handler.HandleMessage("put", R"({"path":"/", "data": null})");
 
     // PUT handles this differently - it may succeed with empty data
     // The important thing is it doesn't crash
@@ -285,8 +287,8 @@ TEST(DataSourceEventHandlerTests, HandlesPutWithNullData) {
 TEST(DataSourceEventHandlerTests, HandlesPatchWithBooleanData) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -301,8 +303,8 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithBooleanData) {
 TEST(DataSourceEventHandlerTests, HandlesPatchWithStringData) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -317,8 +319,8 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithStringData) {
 TEST(DataSourceEventHandlerTests, HandlesPatchWithArrayData) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -333,8 +335,8 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithArrayData) {
 TEST(DataSourceEventHandlerTests, HandlesPatchWithNumberData) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -349,8 +351,8 @@ TEST(DataSourceEventHandlerTests, HandlesPatchWithNumberData) {
 TEST(DataSourceEventHandlerTests, HandlesDeleteWithStringVersion) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
@@ -365,8 +367,8 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteWithStringVersion) {
 TEST(DataSourceEventHandlerTests, HandlesPutWithInvalidFlagsType) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Flags should be an object, not a boolean
     auto res = event_handler.HandleMessage(
@@ -378,8 +380,8 @@ TEST(DataSourceEventHandlerTests, HandlesPutWithInvalidFlagsType) {
 TEST(DataSourceEventHandlerTests, HandlesPutWithInvalidSegmentsType) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Segments should be an object, not an array
     auto res = event_handler.HandleMessage(
@@ -393,8 +395,8 @@ TEST(DataSourceEventHandlerTests, HandlesPutWithInvalidSegmentsType) {
 TEST(DataSourceEventHandlerTests, HandlesUnterminatedString) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Unterminated string should be treated as malformed JSON
     auto res = event_handler.HandleMessage(
@@ -406,8 +408,8 @@ TEST(DataSourceEventHandlerTests, HandlesUnterminatedString) {
 TEST(DataSourceEventHandlerTests, HandlesTrailingComma) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Trailing comma should be treated as malformed JSON
     auto res = event_handler.HandleMessage(
@@ -421,15 +423,14 @@ TEST(DataSourceEventHandlerTests, HandlesTrailingComma) {
 TEST(DataSourceEventHandlerTests, HandlesDeleteWithMissingPath) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
 
     // Missing path field should be treated as invalid
-    auto res = event_handler.HandleMessage(
-        "delete", R"({"version": 1})");
+    auto res = event_handler.HandleMessage("delete", R"({"version": 1})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
 }
@@ -437,15 +438,15 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteWithMissingPath) {
 TEST(DataSourceEventHandlerTests, HandlesDeleteWithMissingVersion) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Initialize the store
     event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
 
     // Missing version field should be treated as invalid
-    auto res = event_handler.HandleMessage(
-        "delete", R"({"path": "/flags/flagA"})");
+    auto res =
+        event_handler.HandleMessage("delete", R"({"path": "/flags/flagA"})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
 }
@@ -453,13 +454,12 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteWithMissingVersion) {
 TEST(DataSourceEventHandlerTests, HandlesPutWithMissingPath) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
     // Missing/empty path is treated as unrecognized (safely ignored)
     // This provides forward compatibility
-    auto res = event_handler.HandleMessage(
-        "put", R"({"data": {}})");
+    auto res = event_handler.HandleMessage("put", R"({"data": {}})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
 }
@@ -467,11 +467,11 @@ TEST(DataSourceEventHandlerTests, HandlesPutWithMissingPath) {
 TEST(DataSourceEventHandlerTests, HandlesEmptyJsonObject) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
-    DataSourceStatusManager manager;
-    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto manager = std::make_shared<DataSourceStatusManager>();
+    DataSourceEventHandler event_handler(store, logger, manager);
 
-    // Empty JSON object with missing path is treated as unrecognized (safely ignored)
-    // This provides forward compatibility with future event types
+    // Empty JSON object with missing path is treated as unrecognized (safely
+    // ignored) This provides forward compatibility with future event types
     auto res = event_handler.HandleMessage("patch", "{}");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);

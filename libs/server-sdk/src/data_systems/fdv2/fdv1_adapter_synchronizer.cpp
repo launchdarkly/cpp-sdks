@@ -123,9 +123,9 @@ std::string const& FDv1AdapterSynchronizer::ConvertingDestination::Identity()
 
 FDv1AdapterSynchronizer::FDv1AdapterSynchronizer(SourceBuilder source_builder)
     : state_(std::make_shared<State>(close_promise_.GetFuture())),
-      destination_(std::make_unique<ConvertingDestination>(state_)),
+      destination_(std::make_shared<ConvertingDestination>(state_)),
       status_manager_(
-          std::make_unique<data_components::DataSourceStatusManager>()),
+          std::make_shared<data_components::DataSourceStatusManager>()),
       status_subscription_(status_manager_->OnDataSourceStatusChange(
           [state = state_](DataSourceStatus status) {
               auto error = status.LastError();
@@ -149,7 +149,7 @@ FDv1AdapterSynchronizer::FDv1AdapterSynchronizer(SourceBuilder source_builder)
                       break;
               }
           })),
-      fdv1_source_(source_builder(*status_manager_)) {}
+      fdv1_source_(source_builder(status_manager_)) {}
 
 FDv1AdapterSynchronizer::~FDv1AdapterSynchronizer() {
     Close();
@@ -166,7 +166,7 @@ async::Future<FDv2SourceResult> FDv1AdapterSynchronizer::Next(
         std::lock_guard lock(lifecycle_mutex_);
         if (!started_) {
             started_ = true;
-            fdv1_source_->StartAsync(destination_.get(),
+            fdv1_source_->StartAsync(destination_,
                                      /*bootstrap_data=*/nullptr);
         }
     }
