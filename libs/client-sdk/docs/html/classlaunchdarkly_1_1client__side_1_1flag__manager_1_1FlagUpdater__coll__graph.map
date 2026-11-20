@@ -1,0 +1,5 @@
+<map id="launchdarkly::client_side::flag_manager::FlagUpdater" name="launchdarkly::client_side::flag_manager::FlagUpdater">
+<area shape="rect" id="node1" title=" " alt="" coords="272,35,433,91"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink.html" title=" " alt="" coords="5,5,224,47"/>
+<area shape="rect" id="node3" href="$classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier.html" title=" " alt="" coords="34,71,195,127"/>
+</map>

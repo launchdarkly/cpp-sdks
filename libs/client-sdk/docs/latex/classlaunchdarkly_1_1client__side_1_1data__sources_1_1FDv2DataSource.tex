@@ -1,0 +1,135 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Data\+Source Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource}\index{launchdarkly::client\_side::data\_sources::FDv2DataSource@{launchdarkly::client\_side::data\_sources::FDv2DataSource}}
+
+
+{\ttfamily \#include $<$fdv2\+\_\+data\+\_\+source.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::FDv2\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_af0c64888ed6aac128e0c585d00c295a3}{FDv2\+Data\+Source}} (std\+::vector$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} $>$$>$ initializer\+\_\+factories, std\+::vector$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} $>$$>$ synchronizer\+\_\+factories, std\+::unique\+\_\+ptr$<$ IFDv2\+Condition\+Factory $>$ fallback\+\_\+condition\+\_\+factory, std\+::unique\+\_\+ptr$<$ IFDv2\+Condition\+Factory $>$ recovery\+\_\+condition\+\_\+factory, boost\+::asio\+::any\+\_\+io\+\_\+executor executor, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} context, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} $\ast$sink, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{flag\+\_\+manager\+::\+Flag\+Store}} const $\ast$store, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{Data\+Source\+Status\+Manager}} $\ast$status\+\_\+manager, Logger const \&logger)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_ab6b44ee9b760248f041ab8f90e6b7dc5}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_ab6b44ee9b760248f041ab8f90e6b7dc5}} 
+void {\bfseries Start} () override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_aa50705855895bda4e4f018bf992f9e8b}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_aa50705855895bda4e4f018bf992f9e8b}} 
+void {\bfseries Shutdown\+Async} (std\+::function$<$ void()$>$ completion) override
+\item 
+std\+::optional$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_aadacfce9a404328fa5146260bace6f2b}{Environment\+Id}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The FDv2 data source. It runs a sequence of initializers to load flag data for one evaluation context, then hands off to a synchronizer to keep that data current, rotating synchronizers as they fail and recover.
+
+The data source is built for a single evaluation context. Changing context means shutting this one down and starting another.
+
+Lifecycle\+:
+\begin{DoxyEnumerate}
+\item Construct.
+\item Call Start() exactly once. It returns immediately, and orchestration runs on the executor.
+\item Call Shutdown\+Async() to stop. The completion runs on the executor once the source has stopped touching the store.
+\end{DoxyEnumerate}
+
+Thread safety\+: Start, Shutdown\+Async, and Environment\+Id may be called from any thread.
+
+Orchestration\+: \begin{DoxyVerb}      Start()
+          |
+          v
++-------------------+   no sources configured
+|  Anything to do?  |---------> [Done, status = kValid]
++-------------------+
+          |
+          v
++-------------------+    initializer #N returns:
+|  Initializer phase|      ChangeSet(no selector) -> stay, N += 1
+|  N = 0, 1, 2, ... |      ChangeSet(selector)    -> go to Sync
+|                   |      Interrupted/Terminal   -> stay, N += 1
+|                   |      Goodbye                -> stay, N += 1
+|                   |      Shutdown               -> [Closed]
++-------------------+
+          |
+          | (N exhausted, or basis received)
+          v
++-------------------+    active synchronizer's Next returns:
+|  Synchronizer     |      ChangeSet      -> apply, loop
+|  phase            |      Interrupted    -> loop (source self-retries)
+|  (cyclic;         |      Goodbye        -> loop (source self-restarts)
+|   blocked sources |      TerminalError  -> block, advance
+|   are skipped)    |      Shutdown       -> [Closed]
++-------------------+
+              ^   |     fallback condition  -> advance (with wrap)
+              |   |     recovery condition  -> reset to first available
+              +---+
+          |
+          | (all synchronizers blocked)
+          v
+[Done; final status preserved]
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_af0c64888ed6aac128e0c585d00c295a3}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_af0c64888ed6aac128e0c585d00c295a3}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2DataSource@{launchdarkly::client\_side::data\_sources::FDv2DataSource}!FDv2DataSource@{FDv2DataSource}}
+\index{FDv2DataSource@{FDv2DataSource}!launchdarkly::client\_side::data\_sources::FDv2DataSource@{launchdarkly::client\_side::data\_sources::FDv2DataSource}}
+\doxysubsubsection{\texorpdfstring{FDv2DataSource()}{FDv2DataSource()}}
+{\footnotesize\ttfamily launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Data\+Source\+::\+FDv2\+Data\+Source (\begin{DoxyParamCaption}\item[{std\+::vector$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2InitializerFactory}{IFDv2\+Initializer\+Factory}} $>$$>$}]{initializer\+\_\+factories,  }\item[{std\+::vector$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IFDv2SynchronizerFactory}{IFDv2\+Synchronizer\+Factory}} $>$$>$}]{synchronizer\+\_\+factories,  }\item[{std\+::unique\+\_\+ptr$<$ IFDv2\+Condition\+Factory $>$}]{fallback\+\_\+condition\+\_\+factory,  }\item[{std\+::unique\+\_\+ptr$<$ IFDv2\+Condition\+Factory $>$}]{recovery\+\_\+condition\+\_\+factory,  }\item[{boost\+::asio\+::any\+\_\+io\+\_\+executor}]{executor,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}}]{context,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} $\ast$}]{sink,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{flag\+\_\+manager\+::\+Flag\+Store}} const $\ast$}]{store,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{Data\+Source\+Status\+Manager}} $\ast$}]{status\+\_\+manager,  }\item[{Logger const \&}]{logger }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em initializer\+\_\+factories} & Build the initializers, run in order to load a basis. \\
+\hline
+{\em synchronizer\+\_\+factories} & Build the synchronizers, used in order to keep data current once initialization is done. \\
+\hline
+{\em fallback\+\_\+condition\+\_\+factory} & Builds the per-\/synchronizer fallback condition. May be null, in which case synchronizers rotate only on terminal errors. \\
+\hline
+{\em recovery\+\_\+condition\+\_\+factory} & Builds the per-\/synchronizer recovery condition. May be null, in which case the source never returns to a more-\/preferred synchronizer once it has fallen back. \\
+\hline
+{\em executor} & Runs the orchestration. \\
+\hline
+{\em context} & The evaluation context this source loads data for. \\
+\hline
+{\em sink} & Receives the changesets. Non-\/owning. Must outlive this object. \\
+\hline
+{\em store} & Supplies the selector to request incremental updates against. Non-\/owning. Must outlive this object. \\
+\hline
+{\em status\+\_\+manager} & Publishes data source status transitions. Non-\/owning. Must outlive this object. \\
+\hline
+{\em logger} & Receives diagnostic logging. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_aadacfce9a404328fa5146260bace6f2b}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1FDv2DataSource_aadacfce9a404328fa5146260bace6f2b}} 
+\index{launchdarkly::client\_side::data\_sources::FDv2DataSource@{launchdarkly::client\_side::data\_sources::FDv2DataSource}!EnvironmentId@{EnvironmentId}}
+\index{EnvironmentId@{EnvironmentId}!launchdarkly::client\_side::data\_sources::FDv2DataSource@{launchdarkly::client\_side::data\_sources::FDv2DataSource}}
+\doxysubsubsection{\texorpdfstring{EnvironmentId()}{EnvironmentId()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::string $>$ launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+FDv2\+Data\+Source\+::\+Environment\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The environment the service reported the most recent payload was evaluated in, or nullopt if no response has reported one. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/fdv2/fdv2\+\_\+data\+\_\+source.\+hpp\item 
+src/data\+\_\+sources/fdv2/fdv2\+\_\+data\+\_\+source.\+cpp\end{DoxyCompactItemize}

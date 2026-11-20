@@ -1,0 +1,59 @@
+\hypertarget{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging}{}\doxysection{launchdarkly\+::config\+::shared\+::built\+::Logging Struct Reference}
+\label{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging}\index{launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}}
+
+
+{\ttfamily \#include $<$logging.\+hpp$>$}
+
+
+
+Collaboration diagram for launchdarkly\+::config\+::shared\+::built\+::Logging\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=347pt]{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a2b356f0de20b5129ec63c890b170c8b0}\label{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a2b356f0de20b5129ec63c890b170c8b0}} 
+bool {\bfseries disable\+\_\+logging}
+\item 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend}{ILog\+Backend}} $>$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_adabc8bfdaa5e6c4dff319f45604a8901}{backend}}
+\item 
+std\+::string \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a7e9f71ea66f040f93243ae2a85f80d92}{tag}}
+\item 
+Log\+Level \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a1c50961d51ac81bd596bc7d51dae95ae}{level}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging}{Logging}} configuration. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_adabc8bfdaa5e6c4dff319f45604a8901}\label{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_adabc8bfdaa5e6c4dff319f45604a8901}} 
+\index{launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}!backend@{backend}}
+\index{backend@{backend}!launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}}
+\doxysubsubsection{\texorpdfstring{backend}{backend}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$\mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend}{ILog\+Backend}}$>$ launchdarkly\+::config\+::shared\+::built\+::\+Logging\+::backend}
+
+Set to use a custom back-\/end.
+
+If set then name and level will not be used. \mbox{\Hypertarget{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a1c50961d51ac81bd596bc7d51dae95ae}\label{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a1c50961d51ac81bd596bc7d51dae95ae}} 
+\index{launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}!level@{level}}
+\index{level@{level}!launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}}
+\doxysubsubsection{\texorpdfstring{level}{level}}
+{\footnotesize\ttfamily Log\+Level launchdarkly\+::config\+::shared\+::built\+::\+Logging\+::level}
+
+When logging is enabled, and a custom backend is not in use, this will be the minimum log level. \mbox{\Hypertarget{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a7e9f71ea66f040f93243ae2a85f80d92}\label{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging_a7e9f71ea66f040f93243ae2a85f80d92}} 
+\index{launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}!tag@{tag}}
+\index{tag@{tag}!launchdarkly::config::shared::built::Logging@{launchdarkly::config::shared::built::Logging}}
+\doxysubsubsection{\texorpdfstring{tag}{tag}}
+{\footnotesize\ttfamily std\+::string launchdarkly\+::config\+::shared\+::built\+::\+Logging\+::tag}
+
+When logging is enabled, and a custom backend is not in use, this will be the tag used for the logger. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/built/logging.\+hpp\end{DoxyCompactItemize}
