@@ -5,6 +5,7 @@
 #include <launchdarkly/async/timer.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/beast/http/status.hpp>
 #include <boost/json.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
@@ -202,8 +203,25 @@ void FDv2StreamingSynchronizer::State::OnResponse(
             directive.ttl = *ttl;
         }
     }
-    std::lock_guard lock(mutex_);
-    latest_fdv1_fallback_ = directive;
+    {
+        std::lock_guard lock(mutex_);
+        latest_fdv1_fallback_ = directive;
+    }
+
+    // The SSE client retries a server error response and does not report it.
+    // Report a server error response that has the directive now, so that the
+    // data system can engage the FDv1 fallback.
+    if (boost::beast::http::to_status_class(headers.result()) ==
+        boost::beast::http::status_class::server_error) {
+        std::string msg = "HTTP status " +
+                          std::to_string(headers.result_int()) +
+                          " with an FDv1 fallback directive";
+        LD_LOG(logger_, LogLevel::kWarn) << kIdentity << ": " << msg;
+        Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{MakeError(
+            ErrorKind::kErrorResponse,
+            static_cast<ErrorInfo::StatusCodeType>(headers.result_int()),
+            std::move(msg))}});
+    }
 }
 
 void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
