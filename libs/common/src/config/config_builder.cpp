@@ -58,6 +58,11 @@ ConfigBuilder<SDK>::Build() const {
     if (sdk_key.empty()) {
         return tl::make_unexpected(Error::kConfig_SDKKey_Empty);
     }
+    // A line break in the key can end the header that carries it and add
+    // other headers to the request. Do not send such a key.
+    if (sdk_key.find_first_of("\r\n") != std::string::npos) {
+        return tl::make_unexpected(Error::kConfig_SDKKey_InvalidCharacters);
+    }
     auto offline = offline_.value_or(Defaults<SDK>::Offline());
     auto endpoints_config = service_endpoints_builder_.Build();
     if (!endpoints_config) {

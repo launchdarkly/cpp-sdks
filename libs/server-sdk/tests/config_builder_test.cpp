@@ -351,6 +351,16 @@ TEST_F(ConfigBuilderTest, BigSegmentsWithNullStoreFailsBuild) {
     EXPECT_EQ(cfg.error(), Error::kConfig_BigSegments_NullStore);
 }
 
+TEST_F(ConfigBuilderTest, SdkKeyWithLineBreakFailsBuild) {
+    for (auto const* sdk_key :
+         {"sdk-123\n", "sdk-123\r", "sdk-123\r\nX-Injected: injected"}) {
+        auto cfg = ConfigBuilder(sdk_key).Build();
+
+        ASSERT_FALSE(cfg);
+        EXPECT_EQ(cfg.error(), Error::kConfig_SDKKey_InvalidCharacters);
+    }
+}
+
 TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
     ConfigBuilder builder("sdk-123");
 
