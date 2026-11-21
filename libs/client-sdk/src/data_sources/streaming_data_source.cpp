@@ -1,8 +1,11 @@
 #include "streaming_data_source.hpp"
+#include "polling_data_source.hpp"
 
+#include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/encoding/base_64.hpp>
+#include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
@@ -37,7 +40,14 @@ StreamingDataSource::StreamingDataSource(
           DataSourceEventHandler(context_, handler, logger, status_manager_)),
       http_config_(http_properties),
       data_source_config_(data_source_config),
-      streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
+      streaming_endpoint_(endpoints.StreamingBaseUrl()),
+      requester_(ioc, http_properties.Tls()),
+      ping_request_(MakePollRequest(
+          endpoints,
+          {config::shared::Defaults<config::shared::ClientSDK>::PollingConfig(),
+           data_source_config.with_reasons, data_source_config.use_report},
+          http_properties,
+          context_)) {}
 
 void StreamingDataSource::Start() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
@@ -129,6 +139,10 @@ void StreamingDataSource::Start() {
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
+            if (event.type() == "ping") {
+                self->PollAfterPing();
+                return;
+            }
             self->data_source_handler_.HandleMessage(event.type(),
                                                      event.data());
             // TODO: Use the result of handle message to restart the
@@ -172,6 +186,11 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
                                                  std::string error_string) {
     auto const state = sse::IsRecoverable(error) ? DataSourceState::kInterrupted
                                                  : DataSourceState::kShutdown;
+    if (state == DataSourceState::kShutdown) {
+        // The stream does not reconnect after this error. Stop the ping polls
+        // too, so that a poll in flight does not change the state.
+        stopped_ = true;
+    }
     std::visit(
         [this, state, error_string = std::move(error_string)](auto error) {
             using T = std::decay_t<decltype(error)>;
@@ -211,7 +230,64 @@ void StreamingDataSource::HandleErrorStateChange(sse::Error error,
         std::move(error));
 }
 
+void StreamingDataSource::PollAfterPing() {
+    if (stopped_) {
+        return;
+    }
+    if (ping_poll_in_flight_) {
+        // The poll in flight can be older than the change that caused this
+        // ping. Poll one more time when it completes.
+        LD_LOG(logger_, LogLevel::kDebug)
+            << "Received ping during a poll, polling again when it completes";
+        ping_poll_pending_ = true;
+        return;
+    }
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "Polling for flag updates after a ping";
+    ping_poll_in_flight_ = true;
+    auto weak_self = weak_from_this();
+    requester_.Request(ping_request_,
+                       [weak_self](network::HttpResult const& res) {
+                           if (auto self = weak_self.lock()) {
+                               self->HandlePingPollResult(res);
+                           }
+                       });
+}
+
+void StreamingDataSource::HandlePingPollResult(network::HttpResult const& res) {
+    ping_poll_in_flight_ = false;
+    if (stopped_) {
+        LD_LOG(logger_, LogLevel::kDebug)
+            << "Discarding the result of a poll that completed after shutdown";
+        return;
+    }
+    if (res.IsError()) {
+        auto const error_message = res.ErrorMessage().value_or("unknown error");
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Polling after a ping failed: " << error_message;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            error_message);
+    } else if (res.Status() == 200) {
+        data_source_handler_.HandleMessage("put", res.Body().value_or(""));
+    } else {
+        auto const error_message = network::ErrorForStatusCode(
+            res.Status(), "polling request after a ping",
+            "will poll again on the next ping");
+        LD_LOG(logger_, LogLevel::kWarn) << error_message;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted, res.Status(),
+            error_message);
+    }
+    if (ping_poll_pending_) {
+        ping_poll_pending_ = false;
+        PollAfterPing();
+    }
+}
+
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
+    stopped_ = true;
     if (client_) {
         status_manager_.SetState(
             DataSourceStatus::DataSourceState::kInitializing);
