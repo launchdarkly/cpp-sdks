@@ -2,9 +2,38 @@
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <map>
+#include <memory>
+#include <optional>
+#include <string>
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
+
+namespace {
+
+/* Returns the same flag data for every context. */
+class FlagDataPersistence : public IPersistence {
+   public:
+    explicit FlagDataPersistence(std::string flag_data)
+        : flag_data_(std::move(flag_data)) {}
+
+    void Set(std::string, std::string, std::string) noexcept override {}
+
+    void Remove(std::string, std::string) noexcept override {}
+
+    std::optional<std::string> Read(std::string,
+                                    std::string key) noexcept override {
+        if (key == "ContextIndex") {
+            return std::nullopt;
+        }
+        return flag_data_;
+    }
+
+   private:
+    std::string flag_data_;
+};
+
+}  // namespace
 
 TEST(ClientTest, ClientConstructedWithMinimalConfigAndContext) {
     tl::expected<Config, Error> config = ConfigBuilder("sdk-123").Build();
@@ -82,6 +111,28 @@ TEST(ClientTest, JsonVariationDefaultPassesThrough) {
     for (auto const& v : values) {
         ASSERT_EQ(client.JsonVariation(flag, v), v);
         ASSERT_EQ(*client.JsonVariationDetail(flag, v), v);
+    }
+}
+
+TEST(ClientTest, JsonVariationReturnsDefaultWhenFlagHasNoValue) {
+    // The cached data has a flag with a null value and a flag without a
+    // value. Each flag has no variation.
+    auto builder = ConfigBuilder("sdk-123");
+    builder.Offline(true);
+    builder.Persistence().Custom(std::make_shared<FlagDataPersistence>(
+        R"({"null-value":{"version":1,"value":null,"variation":null,)"
+        R"("reason":{"kind":"OFF"}},)"
+        R"("omitted-value":{"version":1,"reason":{"kind":"OFF"}}})"));
+    Client client(builder.Build().value(),
+                  ContextBuilder().Kind("cat", "shadow").Build());
+
+    // The JSON variation calls return the default value for each flag.
+    for (auto const& flag : {"null-value", "omitted-value"}) {
+        EXPECT_EQ(client.JsonVariation(flag, "default"), Value("default"))
+            << flag;
+        auto const detail = client.JsonVariationDetail(flag, "default");
+        EXPECT_EQ(detail.Value(), Value("default")) << flag;
+        EXPECT_EQ(detail.Reason(), EvaluationReason::Off()) << flag;
     }
 }
 

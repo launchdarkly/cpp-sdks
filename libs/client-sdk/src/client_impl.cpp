@@ -368,6 +368,12 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
 
     event_processor_->SendAsync(std::move(event));
 
+    // If the flag has no value, the result is the default value.
+    if (detail.Value().IsNull()) {
+        return EvaluationDetail<T>(default_value, detail.VariationIndex(),
+                                   detail.Reason());
+    }
+
     return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
                                detail.Reason());
 }
