@@ -8,6 +8,9 @@
 #include "parser.hpp"
 
 #include <curl/curl.h>
+#ifndef _WIN32
+#include <sys/socket.h>
+#endif
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/beast/http/string_body.hpp>
@@ -199,10 +202,13 @@ class CurlClient final : public Client,
                 return;
             }
             if (curl_socket_ != CURL_SOCKET_BAD) {
+                // Shut down the socket, but do not close it. CURL then reads
+                // the end of the stream and ends the transfer. CURL does not
+                // get a notification when other code closes its socket.
 #ifdef _WIN32
-                closesocket(curl_socket_);
+                ::shutdown(curl_socket_, SD_BOTH);
 #else
-                close(curl_socket_);
+                ::shutdown(curl_socket_, SHUT_RDWR);
 #endif
                 curl_socket_ = CURL_SOCKET_BAD;
             }
