@@ -1,3 +1,4 @@
+#include "data_components/memory_store/memory_store.hpp"
 #include "evaluation/evaluator.hpp"
 #include "test_store.hpp"
 
@@ -276,3 +277,127 @@ TEST_F(EvaluatorTests, ThreadSafeEvaluation) {
         t.join();
     }
 }
+
+// Evaluates flags and segments that have no salt. The parameter is the salt
+// property of each flag and segment: omitted, or null.
+class EvaluatorWithoutSaltTests : public ::testing::TestWithParam<char const*> {
+   public:
+    EvaluatorWithoutSaltTests()
+        : logger_(logging::NullLogger()), eval_(logger_, store_) {
+        store_.Init({});
+    }
+
+   protected:
+    // Returns the flag or segment JSON with the salt property of the test
+    // parameter after the key.
+    static std::string WithSalt(std::string const& key,
+                                std::string const& rest) {
+        return R"({"key":")" + key + R"(",)" + GetParam() + rest;
+    }
+
+    data_components::MemoryStore store_;
+
+   private:
+    Logger logger_;
+
+   protected:
+    evaluation::Evaluator eval_;
+};
+
+TEST_P(EvaluatorWithoutSaltTests, FixedFallthroughIsNotAnError) {
+    auto const flag = test_store::Flag(
+        WithSalt("flag", R"("version":1,"on":true,"variations":["a","b"],
+            "fallthrough":{"variation":1}})")
+            .c_str());
+
+    // Evaluate a flag that serves a fixed variation from its fallthrough.
+    auto const detail =
+        eval_.Evaluate(*flag.item, ContextBuilder().Kind("user", "u").Build());
+
+    // The flag serves the variation without a MALFORMED_FLAG error.
+    ASSERT_FALSE(detail.IsError());
+    EXPECT_EQ(*detail, Value("b"));
+    EXPECT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
+}
+
+TEST_P(EvaluatorWithoutSaltTests, FixedRuleIsNotAnError) {
+    auto const flag = test_store::Flag(
+        WithSalt("flag", R"("version":1,"on":true,"variations":["a","b"],
+            "fallthrough":{"variation":0},
+            "rules":[{"id":"rule","variation":1,"clauses":[
+                {"attribute":"key","op":"in","values":["u"]}]}]})")
+            .c_str());
+
+    // Evaluate a flag whose matching rule serves a fixed variation.
+    auto const detail =
+        eval_.Evaluate(*flag.item, ContextBuilder().Kind("user", "u").Build());
+
+    // The rule serves the variation without a MALFORMED_FLAG error.
+    ASSERT_FALSE(detail.IsError());
+    EXPECT_EQ(*detail, Value("b"));
+    EXPECT_EQ(detail.Reason(), EvaluationReason::RuleMatch(0, "rule", false));
+}
+
+TEST_P(EvaluatorWithoutSaltTests, RolloutWithSeedIsNotAnError) {
+    auto const flag = test_store::Flag(
+        WithSalt("flag", R"("version":1,"on":true,"variations":["a","b"],
+            "fallthrough":{"rollout":{"seed":61,"variations":[
+                {"variation":1,"weight":100000}]}}})")
+            .c_str());
+
+    // Evaluate a flag whose fallthrough is a rollout with a seed. The seed
+    // replaces the salt when the SDK buckets the context.
+    auto const detail =
+        eval_.Evaluate(*flag.item, ContextBuilder().Kind("user", "u").Build());
+
+    // The rollout serves its variation without a MALFORMED_FLAG error.
+    ASSERT_FALSE(detail.IsError());
+    EXPECT_EQ(*detail, Value("b"));
+}
+
+TEST_P(EvaluatorWithoutSaltTests, RolloutWithoutSeedIsMalformed) {
+    auto const flag = test_store::Flag(
+        WithSalt("flag", R"("version":1,"on":true,"variations":["a","b"],
+            "fallthrough":{"rollout":{"variations":[
+                {"variation":1,"weight":100000}]}}})")
+            .c_str());
+
+    // Evaluate a flag whose fallthrough is a rollout without a seed. The SDK
+    // has no salt to bucket the context with.
+    auto const detail =
+        eval_.Evaluate(*flag.item, ContextBuilder().Kind("user", "u").Build());
+
+    // The flag is malformed.
+    EXPECT_EQ(detail.Reason(), EvaluationReason::MalformedFlag());
+}
+
+TEST_P(EvaluatorWithoutSaltTests, SegmentRuleIsNotAnError) {
+    store_.Upsert("segment",
+                  test_store::Segment(
+                      WithSalt("segment", R"("version":1,"rules":[{"clauses":[
+                {"attribute":"key","op":"in","values":["u"]}]}]})")
+                          .c_str()));
+    auto const flag = test_store::Flag(R"({"key":"flag","salt":"salt",
+        "version":1,"on":true,"variations":["a","b"],
+        "fallthrough":{"variation":0},
+        "rules":[{"id":"rule","variation":1,"clauses":[
+            {"attribute":"","op":"segmentMatch","values":["segment"]}]}]})");
+
+    // Evaluate a flag whose rule matches a segment by the segment's rule. The
+    // segment rule has no weight.
+    auto const detail =
+        eval_.Evaluate(*flag.item, ContextBuilder().Kind("user", "u").Build());
+
+    // The segment rule matches without a MALFORMED_FLAG error.
+    ASSERT_FALSE(detail.IsError());
+    EXPECT_EQ(*detail, Value("b"));
+    EXPECT_EQ(detail.Reason(), EvaluationReason::RuleMatch(0, "rule", false));
+}
+
+INSTANTIATE_TEST_SUITE_P(SaltProperty,
+                         EvaluatorWithoutSaltTests,
+                         ::testing::Values("", R"("salt":null,)"),
+                         [](::testing::TestParamInfo<char const*> const& info) {
+                             return std::string(
+                                 info.param[0] == '\0' ? "Omitted" : "Null");
+                         });
