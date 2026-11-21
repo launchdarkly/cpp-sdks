@@ -1,0 +1,153 @@
+#include <gtest/gtest.h>
+
+#include <launchdarkly/config/client.hpp>
+
+#include <chrono>
+#include <variant>
+
+using launchdarkly::client_side::ConfigBuilder;
+using launchdarkly::client_side::ConnectionMode;
+using launchdarkly::client_side::DataSourceBuilder;
+using launchdarkly::client_side::Defaults;
+using launchdarkly::client_side::FDv2Builder;
+using launchdarkly::config::shared::ClientSDK;
+
+using FDv2Config = launchdarkly::config::shared::built::FDv2Config<ClientSDK>;
+using PollingConfig =
+    launchdarkly::config::shared::built::PollingConfig<ClientSDK>;
+using StreamingConfig =
+    launchdarkly::config::shared::built::StreamingConfig<ClientSDK>;
+
+using namespace std::chrono_literals;
+
+namespace {
+
+FDv2Config BuildFDv2(FDv2Builder fdv2) {
+    auto config =
+        ConfigBuilder("sdk-key").DataSource().Method(std::move(fdv2)).Build();
+    return std::get<FDv2Config>(config.method);
+}
+
+}  // namespace
+
+// The streaming and polling methods speak FDv1. FDv2 replaces them.
+TEST(FDv2ConfigBuilderTest, TheDefaultDataSourceIsStillFDv1Streaming) {
+    auto config = ConfigBuilder("sdk-key").Build();
+
+    ASSERT_TRUE(config.has_value());
+    EXPECT_TRUE(std::holds_alternative<StreamingConfig>(
+        config->DataSourceConfig().method));
+}
+
+TEST(FDv2ConfigBuilderTest, SelectingFDv2ReplacesTheFDv1Method) {
+    auto builder = ConfigBuilder("sdk-key");
+    builder.DataSource().Method(DataSourceBuilder::FDv2());
+
+    auto config = builder.Build();
+
+    ASSERT_TRUE(config.has_value());
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2Config>(config->DataSourceConfig().method));
+}
+
+// The builder starts from the SDK's defaults, whatever they are.
+TEST(FDv2ConfigBuilderTest, AnUncustomizedBuilderYieldsTheSDKDefaults) {
+    auto const config = BuildFDv2(FDv2Builder());
+    auto const defaults = Defaults::FDv2Config();
+
+    EXPECT_EQ(defaults.initial_mode, config.initial_mode);
+    EXPECT_EQ(defaults.modes.size(), config.modes.size());
+    EXPECT_EQ(defaults.fallback_timeout, config.fallback_timeout);
+    EXPECT_EQ(defaults.recovery_timeout, config.recovery_timeout);
+}
+
+TEST(FDv2ConfigBuilderTest, DefaultsSendTheContextInTheRequestPath) {
+    auto const config = BuildFDv2(FDv2Builder());
+
+    EXPECT_FALSE(config.use_post);
+}
+
+TEST(FDv2ConfigBuilderTest, InitialModeIsSelectable) {
+    auto const config =
+        BuildFDv2(FDv2Builder().InitialMode(ConnectionMode::kPolling));
+
+    EXPECT_EQ(ConnectionMode::kPolling, config.initial_mode);
+}
+
+TEST(FDv2ConfigBuilderTest, UsePostIsSettable) {
+    auto const config = BuildFDv2(FDv2Builder().UsePost(true));
+
+    EXPECT_TRUE(config.use_post);
+}
+
+TEST(FDv2ConfigBuilderTest, CustomizingAModeReplacesItsPipeline) {
+    FDv2Builder builder;
+    builder.CustomizeMode(
+        ConnectionMode::kStreaming,
+        FDv2Builder::Mode()
+            .Initializer(FDv2Builder::Cache())
+            .Synchronizer(FDv2Builder::Streaming().InitialReconnectDelay(2s))
+            .DisableFDv1Fallback());
+
+    auto const config = BuildFDv2(std::move(builder));
+    auto const& mode = config.modes.at(ConnectionMode::kStreaming);
+
+    ASSERT_EQ(1u, mode.initializers.size());
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2Config::CacheConfig>(mode.initializers[0]));
+    ASSERT_EQ(1u, mode.synchronizers.size());
+    auto const* streaming =
+        std::get_if<FDv2Config::StreamingConfig>(&mode.synchronizers[0]);
+    ASSERT_NE(nullptr, streaming);
+    EXPECT_EQ(2s, streaming->initial_reconnect_delay);
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2Config::NoFDv1Fallback>(mode.fdv1_fallback));
+}
+
+TEST(FDv2ConfigBuilderTest, CustomizingOneModeLeavesTheOthersAlone) {
+    FDv2Builder builder;
+    builder.CustomizeMode(ConnectionMode::kPolling,
+                          FDv2Builder::Mode().Synchronizer(
+                              FDv2Builder::Polling().PollInterval(60s)));
+
+    auto const config = BuildFDv2(std::move(builder));
+
+    EXPECT_EQ(3u, config.modes.size());
+    EXPECT_EQ(2u,
+              config.modes.at(ConnectionMode::kStreaming).initializers.size());
+}
+
+TEST(FDv2ConfigBuilderTest, SourcesCanOverrideTheirOwnBaseUrl) {
+    FDv2Builder builder;
+    builder.CustomizeMode(
+        ConnectionMode::kStreaming,
+        FDv2Builder::Mode().Synchronizer(
+            FDv2Builder::Polling().BaseUrl("https://relay.example.com")));
+
+    auto const config = BuildFDv2(std::move(builder));
+    auto const* polling = std::get_if<FDv2Config::PollingConfig>(
+        &config.modes.at(ConnectionMode::kStreaming).synchronizers[0]);
+
+    ASSERT_NE(nullptr, polling);
+    ASSERT_TRUE(polling->base_url_override.has_value());
+    EXPECT_EQ("https://relay.example.com", *polling->base_url_override);
+}
+
+TEST(FDv2ConfigBuilderTest, TheFDv1FallbackIsConfigurable) {
+    FDv2Builder builder;
+    builder.CustomizeMode(
+        ConnectionMode::kStreaming,
+        FDv2Builder::Mode()
+            .Synchronizer(FDv2Builder::Streaming())
+            .FDv1Fallback(FDv2Builder::FDv1Polling().PollInterval(600s).BaseUrl(
+                "https://relay.example.com")));
+
+    auto const config = BuildFDv2(std::move(builder));
+    auto const* fallback = std::get_if<FDv2Config::FDv1FallbackConfig>(
+        &config.modes.at(ConnectionMode::kStreaming).fdv1_fallback);
+
+    ASSERT_NE(nullptr, fallback);
+    EXPECT_EQ(600s, fallback->poll_interval);
+    ASSERT_TRUE(fallback->base_url_override.has_value());
+    EXPECT_EQ("https://relay.example.com", *fallback->base_url_override);
+}

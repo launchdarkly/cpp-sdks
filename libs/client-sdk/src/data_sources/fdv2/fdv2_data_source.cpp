@@ -57,6 +57,7 @@ FDv2DataSource::FDv2DataSource(
     IDataSourceUpdateSink* sink,
     flag_manager::FlagStore const* store,
     DataSourceStatusManager* status_manager,
+    DataSourceStatus::DataSourceState ready_state,
     Logger const& logger)
     : logger_(logger),
       executor_(std::move(executor)),
@@ -67,6 +68,7 @@ FDv2DataSource::FDv2DataSource(
       cache_only_(!initializer_factories_.empty() &&
                   synchronizer_factories.empty() &&
                   AllFromCache(initializer_factories_)),
+      ready_state_(ready_state),
       sink_(sink),
       store_(store),
       status_manager_(status_manager),
@@ -141,7 +143,7 @@ void FDv2DataSource::Start() {
         source_manager_.SynchronizerCount() == 0) {
         // Nothing is configured to supply data, so an empty store is the
         // canonical state.
-        PublishState(DataSourceStatus::DataSourceState::kValid);
+        PublishState(ready_state_);
     } else {
         // Evaluation can use cached flags as soon as Start() returns, the way
         // it could when the client loaded the cache in its constructor.
@@ -253,7 +255,7 @@ void FDv2DataSource::RunNextInitializer() {
     if (exhausted) {
         if (received_data) {
             // No initializer produced a selector, so this data completes init.
-            PublishState(DataSourceStatus::DataSourceState::kValid);
+            PublishState(ready_state_);
         }
         StartSynchronizers();
     }
@@ -274,7 +276,7 @@ void FDv2DataSource::OnInitializerResult(FDv2SourceResult result,
                 if (has_selector) {
                     LD_LOG(logger_, LogLevel::kInfo)
                         << "fdv2: initializer succeeded";
-                    PublishState(DataSourceStatus::DataSourceState::kValid);
+                    PublishState(ready_state_);
                     got_basis = true;
                 }
             },
@@ -366,7 +368,7 @@ void FDv2DataSource::ReportExhausted(bool any_synchronizers_configured) {
         // The cache is the only thing that could ever have supplied data, so
         // a miss is not a failure to initialize. It just means there are no
         // flags.
-        PublishState(DataSourceStatus::DataSourceState::kValid);
+        PublishState(ready_state_);
         return;
     }
 
@@ -479,7 +481,7 @@ void FDv2DataSource::OnSynchronizerResult(FDv2SourceResult result) {
                 ApplyResult(std::move(cs), std::move(result.environment_id),
                             /* from_cache= */ false);
                 // A synchronizer completes init with or without a selector.
-                PublishState(DataSourceStatus::DataSourceState::kValid);
+                PublishState(ready_state_);
             },
             [&](FDv2SourceResult::Shutdown&) { got_shutdown = true; },
             [&](FDv2SourceResult::Interrupted const& iv) {

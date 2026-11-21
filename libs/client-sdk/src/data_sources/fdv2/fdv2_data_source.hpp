@@ -62,7 +62,7 @@ using SourceManager =
  *               |
  *               v
  *     +-------------------+   no sources configured
- *     |  Anything to do?  |---------> [Done, status = kValid]
+ *     |  Anything to do?  |---------> [Done, status = ready_state]
  *     +-------------------+
  *               |
  *               v
@@ -114,6 +114,7 @@ class FDv2DataSource final
      *     against. Non-owning. Must outlive this object.
      * @param status_manager Publishes data source status transitions.
      *     Non-owning. Must outlive this object.
+     * @param ready_state Reported whenever the source has data ready to serve.
      * @param logger Receives diagnostic logging.
      */
     FDv2DataSource(
@@ -128,6 +129,7 @@ class FDv2DataSource final
         IDataSourceUpdateSink* sink,
         flag_manager::FlagStore const* store,
         DataSourceStatusManager* status_manager,
+        DataSourceStatus::DataSourceState ready_state,
         Logger const& logger);
 
     ~FDv2DataSource() override;
@@ -216,6 +218,8 @@ class FDv2DataSource final
     // True when the cache is the only source that could ever supply data, in
     // which case a cache miss still completes initialization successfully.
     bool const cache_only_;
+    // Reported whenever the source has data ready to serve.
+    DataSourceStatus::DataSourceState const ready_state_;
 
     // Non-owning. Lifetimes guaranteed by the caller (see constructor doc).
     IDataSourceUpdateSink* const sink_;

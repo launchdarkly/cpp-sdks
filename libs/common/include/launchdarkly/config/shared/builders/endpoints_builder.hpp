@@ -27,8 +27,8 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
 template <typename SDK>
 class EndpointsBuilder {
    public:
-    friend bool operator==<SDK>(EndpointsBuilder<SDK> const& lhs,
-                                EndpointsBuilder<SDK> const& rhs);
+    friend bool operator== <SDK>(EndpointsBuilder<SDK> const& lhs,
+                                 EndpointsBuilder<SDK> const& rhs);
     /**
      * Constructs an EndpointsBuilder.
      */

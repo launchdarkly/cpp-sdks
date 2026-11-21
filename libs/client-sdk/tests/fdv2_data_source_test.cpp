@@ -285,7 +285,8 @@ class Harness {
             std::move(initializers), std::move(synchronizers),
             std::move(fallback), std::move(recovery), ioc_.get_executor(),
             ContextBuilder().Kind("user", "user-key").Build(), &sink_,
-            &flag_manager_.Store(), &status_manager_, logger_);
+            &flag_manager_.Store(), &status_manager_,
+            DataSourceStatus::DataSourceState::kValid, logger_);
     }
 
     boost::asio::io_context& Context() { return ioc_; }
