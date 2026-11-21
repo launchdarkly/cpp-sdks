@@ -83,6 +83,9 @@ class FDv1AdapterSynchronizer final
         std::optional<async::Promise<data_interfaces::FDv2SourceResult>>
             pending_promise_;
         std::deque<data_interfaces::FDv2SourceResult> result_queue_;
+        // Environment ID from the most recent FDv1 payload which carried one,
+        // stamped onto change sets which don't carry their own.
+        std::optional<std::string> environment_id_;
     };
 
     /**
