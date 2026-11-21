@@ -1,68 +1,109 @@
 version: 2
 updates:
-  - package-ecosystem: "docker"
-    directory: "/examples/proxy-validation-test"
+  - package-ecosystem: 'docker'
+    directory: '/examples/proxy-validation-test'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "github-actions"
-    directory: "/"
+
+  - package-ecosystem: 'github-actions'
+    directories:
+      - '/'
+      - '/.github/actions/*'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/client-sdk"
+      exclude:
+        - 'launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/client-sdk'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/common"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/common'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/internal"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/internal'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/networking"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/networking'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/server-sdk"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/server-sdk'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/server-sdk-dynamodb-source"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/server-sdk-dynamodb-source'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/server-sdk-otel"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/server-sdk-otel'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/server-sdk-redis-source"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/server-sdk-redis-source'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
-  - package-ecosystem: "npm"
-    directory: "/libs/server-sent-events"
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
+
+  - package-ecosystem: 'npm'
+    directory: '/libs/server-sent-events'
     schedule:
-      interval: "weekly"
+      interval: 'monthly'
     cooldown:
       default-days: 7
+      exclude:
+        - 'launchdarkly*'
+        - '@launchdarkly/*'
