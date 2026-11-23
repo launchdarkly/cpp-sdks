@@ -28,7 +28,7 @@ jobs:
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests/v1
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
@@ -48,7 +48,7 @@ jobs:
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests/v1
         with:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
           use_curl: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests/v1
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
@@ -93,7 +93,7 @@ jobs:
           use_curl: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests/v1
         with:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
