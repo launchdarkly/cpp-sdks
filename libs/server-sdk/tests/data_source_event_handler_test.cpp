@@ -88,6 +88,23 @@ TEST(DataSourceEventHandlerTests, HandlesPutForUnknownPath) {
               manager.Status().State());
 }
 
+TEST(DataSourceEventHandlerTests, HandlesDeleteForUnknownPath) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    // Delete an item whose kind the SDK does not know.
+    auto res = event_handler.HandleMessage(
+        "delete", R"({"path": "/cats/Jack", "version": 1})");
+
+    // The SDK ignores the message and does not record an error.
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              manager.Status().State());
+    EXPECT_FALSE(manager.Status().LastError());
+}
+
 TEST(DataSourceEventHandlerTests, HandlesInvalidDelete) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
