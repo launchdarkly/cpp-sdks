@@ -144,6 +144,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 status_manager_.SetError(
                     DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                     kErrorParsingPut);
+                StartPollingTimer();
                 return;
             }
             auto poll_result = boost::json::value_to<
@@ -153,12 +154,14 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 sink_->Init(std::move(*poll_result));
                 status_manager_.SetState(
                     DataSourceStatus::DataSourceState::kValid);
+                StartPollingTimer();
                 return;
             }
             LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorPutInvalid);
+            StartPollingTimer();
             return;
         }
         status_manager_.SetState(
