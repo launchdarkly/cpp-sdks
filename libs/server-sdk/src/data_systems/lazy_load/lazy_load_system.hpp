@@ -58,6 +58,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     bool Initialized() const override;
 
+    std::optional<std::string> EnvironmentId() const override;
+
     // Public for usage in tests.
     struct Kinds {
         static integrations::FlagKind const Flag;
