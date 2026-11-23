@@ -115,6 +115,80 @@ TEST(FlagPersistenceTests, CanLoadCache) {
     EXPECT_EQ("test", store.Get("flagA")->item->Detail().Value().AsString());
 }
 
+TEST(FlagPersistenceTests, LoadingACacheMissRetainsTheExistingData) {
+    auto first = ContextBuilder().Kind("user", "first").Build();
+    auto second = ContextBuilder().Kind("user", "second").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
+
+    FlagPersistence flag_persistence("the-key", updater, store, persistence,
+                                     logger, 5);
+
+    // Put the first context's flag data in the store.
+    flag_persistence.Apply(
+        first,
+        FlagChangeSet{
+            ChangeSetType::kFull,
+            {FlagChange{
+                "flagA",
+                ItemDescriptor{EvaluationResult{
+                    1, std::nullopt, false, false, std::nullopt,
+                    EvaluationDetailInternal{Value("first-value"), std::nullopt,
+                                             std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ false);
+
+    // Load a context that has nothing cached.
+    flag_persistence.LoadCached(second);
+
+    // The flag data already in the store stays there.
+    ASSERT_TRUE(store.Get("flagA"));
+    EXPECT_EQ(Value("first-value"), store.Get("flagA")->item->Detail().Value());
+}
+
+TEST(FlagPersistenceTests, LoadingACacheHitReplacesTheExistingData) {
+    auto first = ContextBuilder().Kind("user", "first").Build();
+    auto second = ContextBuilder().Kind("user", "second").Build();
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto logger = launchdarkly::logging::NullLogger();
+
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType{
+            {"LaunchDarkly_rUTcjlHPv6Vegd27YmtGYkEGkEUGaEbn5M0JYTFQUpA=",
+             {{PersistenceEncodeKey(second.CanonicalKey()),
+               R"({"flagB":{"version":1,"value":"second-value"}})"}}}});
+
+    FlagPersistence flag_persistence("the-key", updater, store, persistence,
+                                     logger, 5);
+
+    // Put the first context's flag data in the store.
+    flag_persistence.Apply(
+        first,
+        FlagChangeSet{
+            ChangeSetType::kFull,
+            {FlagChange{
+                "flagA",
+                ItemDescriptor{EvaluationResult{
+                    1, std::nullopt, false, false, std::nullopt,
+                    EvaluationDetailInternal{Value("first-value"), std::nullopt,
+                                             std::nullopt}}}}},
+            Selector{}},
+        /* from_cache= */ false);
+
+    // Load a context that has cached data.
+    flag_persistence.LoadCached(second);
+
+    // The cached data takes the place of what the store held.
+    EXPECT_FALSE(store.Get("flagA"));
+    ASSERT_TRUE(store.Get("flagB"));
+    EXPECT_EQ(Value("second-value"),
+              store.Get("flagB")->item->Detail().Value());
+}
+
 TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     auto store = FlagStore();
     auto updater = FlagUpdater(store);

@@ -92,11 +92,12 @@ class ClientImpl : public IClient {
 
    private:
     template <typename T>
-    [[nodiscard]] EvaluationDetail<T> VariationInternal(FlagKey const& key,
-                                                        Value default_value,
-                                                        bool check_type,
-                                                        bool detailed,
-                                                        std::unordered_set<std::string>* visited = nullptr);
+    [[nodiscard]] EvaluationDetail<T> VariationInternal(
+        FlagKey const& key,
+        Value default_value,
+        bool check_type,
+        bool detailed,
+        std::unordered_set<std::string>* visited = nullptr);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);
@@ -110,9 +111,9 @@ class ClientImpl : public IClient {
 
     void UpdateContextSynchronized(Context context);
 
-    void RestartDataSource();
+    void RestartDataSource(bool clear_selector);
 
-    std::future<bool> StartAsyncInternal();
+    std::future<bool> StartAsyncInternal(bool clear_selector);
     Config config_;
     Logger logger_;
 

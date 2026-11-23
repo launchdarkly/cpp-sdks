@@ -164,11 +164,15 @@ std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
-    return StartAsyncInternal();
+    return StartAsyncInternal(/* clear_selector= */ true);
 }
 
-void ClientImpl::RestartDataSource() {
-    auto start_op = [this]() {
+void ClientImpl::RestartDataSource(bool clear_selector) {
+    auto start_op = [this, clear_selector]() {
+        // The old data source has stopped, so it can't write its selector back.
+        if (clear_selector) {
+            flag_manager_.ClearSelector();
+        }
         data_source_ = data_source_factory_();
         data_source_->Start();
     };
@@ -178,7 +182,7 @@ void ClientImpl::RestartDataSource() {
     data_source_->ShutdownAsync(start_op);
 }
 
-std::future<bool> ClientImpl::StartAsyncInternal() {
+std::future<bool> ClientImpl::StartAsyncInternal(bool clear_selector) {
     auto init_promise = std::make_shared<std::promise<bool>>();
     auto init_future = init_promise->get_future();
 
@@ -194,13 +198,13 @@ std::future<bool> ClientImpl::StartAsyncInternal() {
             return false; /* keep the change listener */
         });
 
-    RestartDataSource();
+    RestartDataSource(clear_selector);
 
     return init_future;
 }
 
 std::future<bool> ClientImpl::StartAsync() {
-    return StartAsyncInternal();
+    return StartAsyncInternal(/* clear_selector= */ false);
 }
 
 bool ClientImpl::Initialized() const {
@@ -244,11 +248,12 @@ void ClientImpl::FlushAsync() {
 }
 
 template <typename T>
-EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
-                                                  Value default_value,
-                                                  bool check_type,
-                                                  bool detailed,
-                                                  std::unordered_set<std::string>* visited) {
+EvaluationDetail<T> ClientImpl::VariationInternal(
+    FlagKey const& key,
+    Value default_value,
+    bool check_type,
+    bool detailed,
+    std::unordered_set<std::string>* visited) {
     auto desc = flag_manager_.Store().Get(key);
 
     events::FeatureEventParams event = {
