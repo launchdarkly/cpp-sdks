@@ -154,9 +154,6 @@ tl::expected<BucketResult, Error> Variation(
     std::string const& flag_key,
     Context const& context,
     std::optional<std::string> const& salt) {
-    if (!salt) {
-        return tl::make_unexpected(Error::MissingSalt(flag_key));
-    }
     return std::visit(
         [&](auto&& arg) -> tl::expected<BucketResult, Error> {
             using T = std::decay_t<decltype(arg)>;
@@ -174,6 +171,11 @@ tl::expected<BucketResult, Error> Variation(
 
                 bool is_experiment =
                     arg.kind == Flag::Rollout::Kind::kExperiment;
+
+                // Only a rollout without a seed uses the salt.
+                if (!arg.seed && !salt) {
+                    return tl::make_unexpected(Error::MissingSalt(flag_key));
+                }
 
                 std::optional<BucketPrefix> prefix =
                     arg.seed ? BucketPrefix(*arg.seed)
