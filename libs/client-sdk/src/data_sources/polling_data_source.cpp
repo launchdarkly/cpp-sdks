@@ -17,7 +17,7 @@ namespace launchdarkly::client_side::data_sources {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
-static network::HttpRequest MakeRequest(
+network::HttpRequest MakePollRequest(
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK>
         data_source_config,
@@ -83,10 +83,10 @@ PollingDataSource::PollingDataSource(
               config::shared::built::PollingConfig<config::shared::ClientSDK>>(
               data_source_config.method)
               .poll_interval),
-      request_(MakeRequest(endpoints,
-                           data_source_config,
-                           http_properties,
-                           context)) {
+      request_(MakePollRequest(endpoints,
+                               data_source_config,
+                               http_properties,
+                               context)) {
     auto const& polling_config = std::get<
         config::shared::built::PollingConfig<config::shared::ClientSDK>>(
         data_source_config.method);

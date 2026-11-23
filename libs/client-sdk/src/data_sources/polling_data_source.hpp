@@ -18,6 +18,17 @@
 
 namespace launchdarkly::client_side::data_sources {
 
+/**
+ * Makes the request that polls for the flags of a context. The method of
+ * data_source_config must be a PollingConfig.
+ */
+network::HttpRequest MakePollRequest(
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK>
+        data_source_config,
+    config::shared::built::HttpProperties const& http_properties,
+    Context const& context);
+
 class PollingDataSource
     : public IDataSource,
       public std::enable_shared_from_this<PollingDataSource> {
