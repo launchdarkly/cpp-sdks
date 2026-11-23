@@ -91,17 +91,20 @@ HttpRequest::HttpRequest(std::string const& url,
     }
 
     boost::urls::url boost_url = uri_components.value();
-    // Make paths absolute and slashes consistent.
-    boost_url.normalize();
+    // Resolve dot segments in the path. The query is not normalized, so its
+    // percent-encoding stays as written.
+    boost_url.normalize_path();
 
     host_ = uri_components->host();
-    // The c_str here is to remove extra nulls from normalizing the path.
-    // Clang calls this redundant, but it is very much required.
-    path_ =
-        boost_url.path().c_str();  // NOLINT(readability-redundant-string-cstr)
-    if (!boost_url.query().empty()) {
-        // For a boost beast request we need the query string in the path.
-        path_ = path_ + "?" + uri_components->query();
+    // The target is the percent-encoded path and query. The Beast backend
+    // sends it as the request target without changes. The path and query are
+    // joined here because encoded_target() asserts on older Boost releases
+    // after the path was normalized.
+    path_ = std::string(boost_url.encoded_path());
+    auto const encoded_query = uri_components->encoded_query();
+    if (!encoded_query.empty()) {
+        path_ += "?";
+        path_ += std::string(encoded_query);
     }
 
     is_https_ = uri_components->scheme_id() == boost::urls::scheme::https;
@@ -150,44 +153,59 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
     }
 
     auto uri_components = boost::urls::parse_uri(*url_in);
-
     if (!uri_components) {
         return std::nullopt;
     }
 
     boost::urls::url url = uri_components.value();
-    url.normalize();
-    // The c_str here is to remove extra nulls from normalizing the path.
-    // Clang calls this redundant, but it is very much required.
-    std::string path =
-        url.path().c_str();  // NOLINT(readability-redundant-string-cstr)
-
-    // This sizing may not be perfect, but should be close enough on average.
-    // The extra to is to account for a '/' and possible a '?'.
-    path.reserve(url.path().size() + to_append.size() + url.query().length() +
-                 2);
-
-    // We want a single '/' between things.
-    bool path_has_trailing_slash =
-        !path.empty() && path[path.length() - 1] == '/';
-    bool append_has_leading_slash = to_append[0] == '/';
-
-    // One other the other already has a '/', so we can just append them.
-    if ((path_has_trailing_slash && !append_has_leading_slash) ||
-        (!path_has_trailing_slash && append_has_leading_slash)) {
-        path.append(to_append);
-    } else if (!path_has_trailing_slash && !append_has_leading_slash) {
-        // Neither had a '/', so we need to add one.
-        path.append("/");
-        path.append(to_append);
-    } else {
-        // Both have a '/' so append the second starting after the '/'.
-        path.append(to_append, 1, to_append.length() - 1);
+    auto segments = url.segments();
+    // A trailing '/' on the URL is an empty last segment. Remove it so that a
+    // single '/' separates the URL from the appended path.
+    if (!segments.empty() && segments.back().empty()) {
+        segments.pop_back();
     }
 
-    url.set_path(path);
-    url.normalize();
-    return url.c_str();
+    // Each part between '/' characters is one segment. The URL library
+    // percent-encodes the characters that are not allowed in a segment.
+    std::size_t start = 0;
+    while (start <= to_append.size()) {
+        std::size_t end = to_append.find('/', start);
+        if (end == std::string::npos) {
+            end = to_append.size();
+        }
+        if (end > start) {
+            segments.push_back(to_append.substr(start, end - start));
+        }
+        start = end + 1;
+    }
+
+    // Resolve dot segments such as "..".
+    url.normalize_path();
+    return std::string(url.buffer());
+}
+
+std::optional<std::string> AppendQueryParam(std::optional<std::string> url_in,
+                                            std::string const& key,
+                                            std::string const& value) {
+    if (!url_in) {
+        return std::nullopt;
+    }
+
+    auto uri_components = boost::urls::parse_uri(*url_in);
+    if (!uri_components) {
+        return std::nullopt;
+    }
+
+    boost::urls::url url = uri_components.value();
+    // Percent-encode every character outside the unreserved set. The URL
+    // library's own parameter encoding differs between releases, so the
+    // result must not depend on it.
+    auto const encoded_key =
+        boost::urls::encode(key, boost::urls::unreserved_chars);
+    auto const encoded_value =
+        boost::urls::encode(value, boost::urls::unreserved_chars);
+    url.encoded_params().append({encoded_key, encoded_value});
+    return std::string(url.buffer());
 }
 
 }  // namespace launchdarkly::network
