@@ -1,7 +1,11 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/logging/log_backend.hpp>
+#include <limits>
 #include <map>
+#include <memory>
+#include <mutex>
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
@@ -109,4 +113,47 @@ TEST(ClientTest, DataSourceStatus) {
         ds_status.StateSince();
 
     ASSERT_NE(date, client_side::data_sources::DataSourceStatus::DateTime{});
+}
+
+class WarningRecorder : public ILogBackend {
+   public:
+    bool Enabled(LogLevel level) noexcept override { return true; }
+
+    void Write(LogLevel level, std::string message) noexcept override {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (level == LogLevel::kWarn &&
+            message.find("non-finite metric value") != std::string::npos) {
+            count_++;
+        }
+    }
+
+    int Count() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return count_;
+    }
+
+   private:
+    std::mutex mutex_;
+    int count_ = 0;
+};
+
+TEST(ClientTest, TrackWithNonFiniteMetricValueLogsWarning) {
+    auto backend = std::make_shared<WarningRecorder>();
+    auto builder = ConfigBuilder("sdk-123");
+    builder.Logging().Logging(
+        config::shared::builders::LoggingBuilder::CustomLogging().Backend(
+            backend));
+    Client client(builder.Build().value(),
+                  ContextBuilder().Kind("cat", "shadow").Build());
+
+    client.Track("finite", Value::Null(), 1.0);
+    ASSERT_EQ(backend->Count(), 0);
+
+    client.Track("nan", Value::Null(),
+                 std::numeric_limits<double>::quiet_NaN());
+    client.Track("inf", Value::Null(),
+                 std::numeric_limits<double>::infinity());
+    client.Track("negative-inf", Value::Null(),
+                 -std::numeric_limits<double>::infinity());
+    ASSERT_EQ(backend->Count(), 3);
 }

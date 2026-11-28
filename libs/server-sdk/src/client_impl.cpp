@@ -24,6 +24,7 @@
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <chrono>
+#include <cmath>
 #include <optional>
 #include <utility>
 
@@ -368,6 +369,12 @@ void ClientImpl::TrackInternal(Context const& ctx,
     if (!ctx.Valid()) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Track method called with an invalid context";
+        return;
+    }
+    if (metric_value && !std::isfinite(*metric_value)) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Track method called with a non-finite metric value for event \""
+            << event_name << "\"; event was not recorded";
         return;
     }
     // Execute afterTrack hooks before moving the data
