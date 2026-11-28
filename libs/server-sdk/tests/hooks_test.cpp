@@ -10,6 +10,7 @@
 #include <launchdarkly/server_side/config/config_builder.hpp>
 #include <launchdarkly/server_side/hooks/hook.hpp>
 
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
@@ -1018,4 +1019,23 @@ TEST_F(HooksTest, HookContextChaining) {
     auto retrieved2 = ctx.Get("key2");
     ASSERT_TRUE(retrieved2.has_value());
     EXPECT_EQ(std::any_cast<int>(*(*retrieved2)), 2);
+}
+
+TEST_F(HooksTest, TrackWithNonFiniteMetricValueIsNotRecorded) {
+    auto hook = std::make_shared<RecordingHook>("test-hook");
+
+    auto config = ConfigBuilder("sdk-key").Offline(true).Hooks(hook).Build();
+    ASSERT_TRUE(config);
+
+    Client client(std::move(*config));
+
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+
+    for (double metric : {std::numeric_limits<double>::quiet_NaN(),
+                          std::numeric_limits<double>::infinity(),
+                          -std::numeric_limits<double>::infinity()}) {
+        client.Track(context, "test-event", Value::Null(), metric);
+    }
+
+    EXPECT_TRUE(hook->GetTrackCalls().empty());
 }

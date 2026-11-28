@@ -12,6 +12,7 @@
 #include <launchdarkly/logging/null_logger.hpp>
 
 #include <chrono>
+#include <cmath>
 #include <optional>
 #include <utility>
 
@@ -220,6 +221,12 @@ std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
 void ClientImpl::TrackInternal(std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
+    if (metric_value && !std::isfinite(*metric_value)) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Track method called with a non-finite metric value for event \""
+            << event_name << "\"; event was not recorded";
+        return;
+    }
     event_processor_->SendAsync(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name), context_,
         std::move(data), metric_value});
